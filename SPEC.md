@@ -148,7 +148,7 @@ El niño se registra por código, sin nombre, para proteger los datos de menores
 
 ## Pantallas
 
-1. **Configuración:** calibración con tarjeta; parámetros de la caja (P, e, distancia de cada ranura, posición del lente); umbral de corte; verificación de qué niveles se pueden dibujar en cada ranura; aviso claro si el celular no puede dibujar el 6/9 en R0 (no sirve para la prueba).
+1. **Configuración:** calibración con tarjeta; parámetros de la caja (P, e, distancia de cada ranura, posición del lente); umbral de corte; verificación de qué niveles se pueden dibujar en cada ranura; aviso claro si el celular no puede dibujar el 6/9 en R0 (no sirve para la prueba); ancho y alto de la línea de cada nivel en R0 y si cabe en la mitad de pantalla de cada ojo (con la pantalla en el foco del lente, el límite es esa mitad, no el ancho del lente); lado y ancho de la franja de botones. Si el navegador no tiene pantalla completa, bloqueo horizontal o Wake Lock, la prueba sigue y se muestra un aviso.
 2. **Mi salón:** lista por código con estado pendiente o evaluado; carga desde CSV.
 3. **Preparar al niño:** instrucciones con dibujos y el texto que dice el docente.
 4. **Prueba:** el flujo por ojo, con los avisos de cambio de ranura. Mantener la pantalla encendida (Wake Lock API) y pedir brillo al máximo.
