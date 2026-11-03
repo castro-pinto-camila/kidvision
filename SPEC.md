@@ -33,7 +33,7 @@ V_ojo = V / (1 − e·V)
 | R2 | −1,0 | 250,0 | −0,99 | Punto remoto |
 | R3 | −1,5 | 222,2 | −1,47 | Punto remoto |
 | R4 | −2,0 | 200,0 | −1,94 | Punto remoto |
-| R5 | −2,5 | 181,8 | −2,41 | Punto remoto y agudeza cercana (equivale a 40 cm) |
+| R5 | −2,5 | 181,8 | −2,41 | Punto remoto |
 | R6 | −3,0 | 166,7 | −2,87 | Punto remoto |
 | R7 | −3,5 | 153,8 | −3,33 | Punto remoto |
 | R8 | −4,0 | 142,9 | −3,77 | Punto remoto |
@@ -56,6 +56,10 @@ h_px            = h_mm · pxPorMm
 
 En R0 el paréntesis vale `d`, así que el tamaño no depende de `e`. En las demás ranuras la corrección es de hasta un 8 %.
 
+θ se calcula desde la fracción Snellen (θ = 5 × denominador / 6, por ejemplo 6/36 → 30′), que coincide con la columna θ de la tabla; el logMAR de la tabla está redondeado.
+
+**Prueba de cerca (fuera de la caja):** se usa la misma fórmula con `d` = 400 mm, `P` = 0 y `e` = 0, es decir `h = θ_rad · 0,4 m` (el 6/9 mide 0,87 mm).
+
 `pxPorMm` sale de la calibración: el docente ajusta un rectángulo en pantalla al ancho de una tarjeta de 85,6 mm (DNI o tarjeta bancaria). Ese valor está en **píxeles CSS**; para la regla de resolución se usan **píxeles físicos** = pxPorMm × devicePixelRatio.
 
 | Nivel | logMAR | θ (min de arco) | Altura en R0 (mm) | Píxeles en R0 (0,06 mm/px) |
@@ -68,7 +72,11 @@ En R0 el paréntesis vale `d`, así que el tamaño no depende de `e`. En las dem
 | 6/9 | 0,18 | 7,5 | 0,73 | 12 |
 | 6/6 | 0,00 | 5 | 0,48 | 8 |
 
-**Regla de resolución:** si el trazo (h_px físicos / 5) mide menos de 2 píxeles, ese nivel no se puede dibujar en esa ranura. El objetivo de la búsqueda del punto remoto es el **mayor entre 6/12 y el nivel más pequeño dibujable** en esa ranura (con 0,06 mm por píxel, desde R4 el 6/12 ya no se puede dibujar).
+La columna de píxeles y los ejemplos de resolución usan 0,06 mm por **píxel físico**.
+
+**Regla de resolución:** si el trazo (h_px físicos / 5) mide menos de 2 píxeles, ese nivel no se puede dibujar en esa ranura. El objetivo de la búsqueda del punto remoto es el **mayor entre 6/12 y el nivel más pequeño dibujable** en esa ranura (con 0,06 mm por píxel físico, desde R4 el 6/12 ya no se puede dibujar; en R4 el trazo mide 1,997 px, justo en el límite).
+
+**Celular no apto:** si el 6/9 no se puede dibujar en R0, la pantalla de configuración avisa que ese celular no sirve para la prueba. Si el 6/9 se dibuja en R0, también se dibuja en la prueba de cerca, porque 400 mm > 333 mm.
 
 ## Pruebas por ojo
 
@@ -79,7 +87,7 @@ El ojo evaluado se elige pintando en negro la mitad de pantalla del otro ojo. La
 3. **Si falló: búsqueda del punto remoto.** Avanzar R1, R2, … R10 mostrando cinco «E» del nivel objetivo. El punto remoto es la primera ranura con ≥ 4 de 5 aciertos **confirmada en la siguiente ranura** (o en la última). Siempre se avanza de borroso a nítido, para que el niño no compense enfocando.
 4. **Si no se encontró punto remoto: estenopeico (R0).** Repetir el umbral con el oclusor estenopeico; «mejora» = gana al menos 1 nivel.
 5. **Carta de abanico:** en R0, o en la ranura del punto remoto si se encontró. 12 rayos cada 30°; en la segunda vuelta la carta gira 15°. Consistente si las dos orientaciones elegidas difieren ≤ 15°. Botón «todas iguales». Rayos con suavizado y grosor mínimo de 3 px.
-6. **Agudeza cercana (R5):** línea 6/9 con ≥ 4 de 5.
+6. **Agudeza cercana (fuera de la caja, a 40 cm):** el celular se sostiene a 40 cm del ojo, medidos con un cordón, sin el lente de la caja; el otro ojo se tapa con el oclusor. Línea 6/9 con ≥ 4 de 5.
 
 **Respuesta:** el docente toca cuatro flechas y «no sé», ubicados en los bordes de la pantalla que la caja deja libres.
 
@@ -132,7 +140,7 @@ El niño se registra por código, sin nombre, para proteger los datos de menores
 
 ## Pantallas
 
-1. **Configuración:** calibración con tarjeta; parámetros de la caja (P, e, distancia de cada ranura, posición del lente); umbral de corte; verificación de qué niveles se pueden dibujar en cada ranura.
+1. **Configuración:** calibración con tarjeta; parámetros de la caja (P, e, distancia de cada ranura, posición del lente); umbral de corte; verificación de qué niveles se pueden dibujar en cada ranura; aviso claro si el celular no puede dibujar el 6/9 en R0 (no sirve para la prueba).
 2. **Mi salón:** lista por código con estado pendiente o evaluado; carga desde CSV.
 3. **Preparar al niño:** instrucciones con dibujos y el texto que dice el docente.
 4. **Prueba:** el flujo por ojo, con los avisos de cambio de ranura. Mantener la pantalla encendida (Wake Lock API) y pedir brillo al máximo.
@@ -156,6 +164,6 @@ El niño se registra por código, sin nombre, para proteger los datos de menores
 0. **Esqueleto:** proyecto Vite + TypeScript + Vitest, carpetas `src/core`, `src/logic`, `src/ui`, `src/data`.
 1. **Núcleo óptico (`src/core`):** ranuras, vergencias, tamaño de optotipos, regla de resolución y nivel objetivo por ranura.
 2. **Lógica (`src/logic`):** flujo por ojo como máquina de estados, búsqueda del punto remoto, control de calidad y clasificación.
-3. **Pantallas de prueba (`src/ui`):** calibración, configuración de la caja, media pantalla por ojo, avisos de ranura y botones en los bordes.
+3. **Pantallas de prueba (`src/ui`):** calibración, configuración de la caja (con el aviso de celular no apto), media pantalla por ojo, avisos de ranura, prueba de cerca a 40 cm y botones en los bordes.
 4. **Resultado y datos:** semáforo, constancia, lista del salón, IndexedDB, modo sin conexión y CSV.
 5. **Publicación:** despliegue en GitHub Pages con HTTPS (el service worker no funciona sin HTTPS fuera de localhost).
