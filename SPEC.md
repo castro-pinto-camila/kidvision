@@ -1,0 +1,161 @@
+# KidVision — Especificación del MVP
+
+El MVP es una aplicación web instalable (PWA) que funciona sin internet, la usa el docente y trabaja con una caja óptica de cartón con ranuras. Mide la agudeza visual, clasifica el tipo probable de error refractivo y estima las dioptrías de miopía. Es una herramienta de **tamizaje**: no diagnostica ni receta.
+
+## Decisiones fijadas
+
+- **Usuario:** el docente. Los padres son una fase posterior.
+- **Hardware:** caja de unos 35 cm con lentes de +3.00 D (lentes de lectura) en la mirilla y ranuras donde se inserta el celular. Cada ranura equivale a una distancia óptica distinta. La cartilla impresa a 3 m solo se usa para validar; no es parte del producto.
+- **Dioptrías:** se estima la miopía (0 a −5 D, pasos de 0,5 D). La hipermetropía se detecta con un clip de +2.00 D, pero no se cuantifica. El astigmatismo se detecta con la carta de abanico; su magnitud es de la versión 2.
+
+## Alcance del MVP
+
+- **Entra:** calibración de pantalla y de la caja, pruebas por ojo, búsqueda del punto remoto, control de calidad, clasificación, semáforo, constancia para la familia con enlace de WhatsApp, lista del salón y exportación a CSV.
+- **Versión 2 (NO implementar):** magnitud del cilindro, respuesta por voz o gestos, página de la familia con QR y seguimiento, sincronización con servidor, fotorrefracción con IA.
+- **Stack:** TypeScript + Vite (sin framework); service worker para funcionar sin conexión; IndexedDB; Vitest para pruebas; ninguna librería cargada desde internet en tiempo de uso.
+
+## Óptica de la caja
+
+- `P` = potencia del lente de la caja (+3.00 D).
+- `V` = vergencia que produce cada ranura (D).
+- `d` = distancia de la pantalla al lente (m).
+- `e` = distancia del lente al ojo (m), 0,015 por defecto.
+
+```
+d = 1 / (P − V)
+V_ojo = V / (1 − e·V)
+```
+
+| Ranura | V (D) | d (mm) | V en el ojo, e = 15 mm (D) | Uso |
+| --- | --- | --- | --- | --- |
+| R0 | 0,0 | 333,3 | 0,00 | Agudeza lejana, clip +2.00 D, abanico |
+| R1 | −0,5 | 285,7 | −0,50 | Punto remoto |
+| R2 | −1,0 | 250,0 | −0,99 | Punto remoto |
+| R3 | −1,5 | 222,2 | −1,47 | Punto remoto |
+| R4 | −2,0 | 200,0 | −1,94 | Punto remoto |
+| R5 | −2,5 | 181,8 | −2,41 | Punto remoto y agudeza cercana (equivale a 40 cm) |
+| R6 | −3,0 | 166,7 | −2,87 | Punto remoto |
+| R7 | −3,5 | 153,8 | −3,33 | Punto remoto |
+| R8 | −4,0 | 142,9 | −3,77 | Punto remoto |
+| R9 | −4,5 | 133,3 | −4,22 | Punto remoto |
+| R10 | −5,0 | 125,0 | −4,65 | Punto remoto |
+
+Con el clip de +2.00 D sobre el lente y el celular en R0, la potencia total es +5.00 D y la vergencia resultante es +2.00 D (la prueba de la IAPB).
+
+`P`, `e`, las distancias de las ranuras y la posición horizontal del centro del lente son **parámetros editables** en la configuración, porque la caja real tendrá tolerancias.
+
+## Tamaño de los optotipos
+
+La «E» ocupa una cuadrícula de 5 × 5 trazos.
+
+```
+θ (min de arco) = 5 · 10^logMAR
+h (m)           = θ_rad · (d + e·(1 − P·d))
+h_px            = h_mm · pxPorMm
+```
+
+En R0 el paréntesis vale `d`, así que el tamaño no depende de `e`. En las demás ranuras la corrección es de hasta un 8 %.
+
+`pxPorMm` sale de la calibración: el docente ajusta un rectángulo en pantalla al ancho de una tarjeta de 85,6 mm (DNI o tarjeta bancaria). Ese valor está en **píxeles CSS**; para la regla de resolución se usan **píxeles físicos** = pxPorMm × devicePixelRatio.
+
+| Nivel | logMAR | θ (min de arco) | Altura en R0 (mm) | Píxeles en R0 (0,06 mm/px) |
+| --- | --- | --- | --- | --- |
+| 6/60 | 1,00 | 50 | 4,85 | 81 |
+| 6/36 | 0,78 | 30 | 2,91 | 48 |
+| 6/24 | 0,60 | 20 | 1,94 | 32 |
+| 6/18 | 0,48 | 15 | 1,45 | 24 |
+| 6/12 | 0,30 | 10 | 0,97 | 16 |
+| 6/9 | 0,18 | 7,5 | 0,73 | 12 |
+| 6/6 | 0,00 | 5 | 0,48 | 8 |
+
+**Regla de resolución:** si el trazo (h_px físicos / 5) mide menos de 2 píxeles, ese nivel no se puede dibujar en esa ranura. El objetivo de la búsqueda del punto remoto es el **mayor entre 6/12 y el nivel más pequeño dibujable** en esa ranura (con 0,06 mm por píxel, desde R4 el 6/12 ya no se puede dibujar).
+
+## Pruebas por ojo
+
+El ojo evaluado se elige pintando en negro la mitad de pantalla del otro ojo. La «E» se centra frente al lente (31 mm desde el centro de la pantalla por defecto, editable). En cada cambio, la app indica «Coloca el celular en la ranura Rx» y espera a que el docente confirme. Orden: ojo derecho y luego izquierdo.
+
+1. **Agudeza lejana (R0):** cinco «E» de nivel 6/9 en orientaciones aleatorias, separadas un ancho de letra, con barras de apiñamiento. Pasa con ≥ 4 de 5 (IAPB). Si falla, se mide el umbral: desde 6/60 hacia abajo, la agudeza es el último nivel con ≥ 3 de 5 aciertos.
+2. **Si pasó: clip de +2.00 D (R0).** Temporizador de 60 s y relectura de la línea 6/9. «Sigue leyendo» = ≥ 4 de 5.
+3. **Si falló: búsqueda del punto remoto.** Avanzar R1, R2, … R10 mostrando cinco «E» del nivel objetivo. El punto remoto es la primera ranura con ≥ 4 de 5 aciertos **confirmada en la siguiente ranura** (o en la última). Siempre se avanza de borroso a nítido, para que el niño no compense enfocando.
+4. **Si no se encontró punto remoto: estenopeico (R0).** Repetir el umbral con el oclusor estenopeico; «mejora» = gana al menos 1 nivel.
+5. **Carta de abanico:** en R0, o en la ranura del punto remoto si se encontró. 12 rayos cada 30°; en la segunda vuelta la carta gira 15°. Consistente si las dos orientaciones elegidas difieren ≤ 15°. Botón «todas iguales». Rayos con suavizado y grosor mínimo de 3 px.
+6. **Agudeza cercana (R5):** línea 6/9 con ≥ 4 de 5.
+
+**Respuesta:** el docente toca cuatro flechas y «no sé», ubicados en los bordes de la pantalla que la caja deja libres.
+
+## Control de calidad
+
+Un ojo queda «dudoso» si ocurre cualquiera de estas cosas:
+
+- Respuestas en menos de 0,5 s.
+- Cinco respuestas iguales seguidas.
+- Falla un nivel grande y acierta uno menor.
+- El punto remoto no se confirma en la ranura siguiente.
+
+Un resultado dudoso se convierte en semáforo amarillo.
+
+## Clasificación por ojo
+
+```
+miopia          = fallaLejos && puntoRemoto != null        // miopiaEstimadaD = V_ojo de esa ranura
+hipermetropia   = (pasaLejos && pasaConMas2) || (pasaLejos && !pasaCerca)
+astigmatismo    = abanicoConsistente
+otraCausa       = fallaLejos && puntoRemoto == null && !mejoraEstenopeico
+indeterminado   = fallaLejos && puntoRemoto == null && mejoraEstenopeico && !hipermetropia && !astigmatismo
+                  // puede ser miopía mayor a −5 D, hipermetropía alta o astigmatismo
+normal          = pasaLejos && !pasaConMas2 && pasaCerca && !abanicoConsistente
+semaforo        = dudoso ? AMARILLO : (normal ? VERDE : ROJO)
+```
+
+A la familia se le muestra «derivar» o «no derivar» y la agudeza de cada ojo. La categoría probable y la miopía estimada van en la constancia, marcadas como «estimación de tamizaje, no es una receta».
+
+## Datos (guardados en el celular)
+
+```json
+{
+  "estudiante": { "codigo": "3B-07", "edad": 9, "grado": "3B", "colegio": "..." },
+  "dispositivo": { "pxPorMm": 16.7, "caja": { "P": 3.0, "e_mm": 15, "ranuras_mm": [333.3, 285.7, 250.0, 222.2, 200.0, 181.8, 166.7, 153.8, 142.9, 133.3, 125.0] } },
+  "sesion": {
+    "fecha": "2026-11-05T10:20:00", "umbralCorte": "6/9",
+    "ojos": {
+      "OD": { "pasaLejos": false, "umbral": "6/18", "puntoRemoto": "R4", "miopiaEstimadaD": -1.94,
+              "pasaConMas2": null, "mejoraEstenopeico": null, "abanico": [60, 75], "pasaCerca": true,
+              "dudoso": false, "categorias": ["miopia"] },
+      "OI": { "...": "..." }
+    },
+    "semaforo": "ROJO", "duracionSeg": 0
+  }
+}
+```
+
+El niño se registra por código, sin nombre, para proteger los datos de menores.
+
+## Pantallas
+
+1. **Configuración:** calibración con tarjeta; parámetros de la caja (P, e, distancia de cada ranura, posición del lente); umbral de corte; verificación de qué niveles se pueden dibujar en cada ranura.
+2. **Mi salón:** lista por código con estado pendiente o evaluado; carga desde CSV.
+3. **Preparar al niño:** instrucciones con dibujos y el texto que dice el docente.
+4. **Prueba:** el flujo por ojo, con los avisos de cambio de ranura. Mantener la pantalla encendida (Wake Lock API) y pedir brillo al máximo.
+5. **Resultado:** semáforo, agudeza de cada ojo, miopía estimada, categorías y si es confiable o dudoso.
+6. **Constancia:** texto simple, simulación aproximada de cómo ve el niño y enlace de WhatsApp (wa.me con el mensaje); versión imprimible.
+7. **Resumen del salón:** conteo por color, lista de derivados y exportación a CSV.
+
+## Criterios de aceptación
+
+- [ ] Las pruebas unitarias reproducen la tabla de ranuras (d ± 0,1 mm; V en el ojo ± 0,01 D).
+- [ ] En R0 la altura calculada no depende de `e`, y la tabla de tamaños se reproduce ± 0,05 mm.
+- [ ] La regla de resolución desactiva los niveles cuyo trazo mide menos de 2 px físicos.
+- [ ] Hay pruebas del punto remoto: encontrado y confirmado, no confirmado (dudoso) y no encontrado.
+- [ ] Hay pruebas para cada regla de clasificación y de control de calidad.
+- [ ] Tras calibrar, una línea de 100 mm en pantalla mide 100 ± 1 mm con regla.
+- [ ] Después de la primera carga, la app completa una evaluación en modo avión.
+- [ ] La app registra la duración de cada evaluación.
+
+## Plan de sesiones
+
+0. **Esqueleto:** proyecto Vite + TypeScript + Vitest, carpetas `src/core`, `src/logic`, `src/ui`, `src/data`.
+1. **Núcleo óptico (`src/core`):** ranuras, vergencias, tamaño de optotipos, regla de resolución y nivel objetivo por ranura.
+2. **Lógica (`src/logic`):** flujo por ojo como máquina de estados, búsqueda del punto remoto, control de calidad y clasificación.
+3. **Pantallas de prueba (`src/ui`):** calibración, configuración de la caja, media pantalla por ojo, avisos de ranura y botones en los bordes.
+4. **Resultado y datos:** semáforo, constancia, lista del salón, IndexedDB, modo sin conexión y CSV.
+5. **Publicación:** despliegue en GitHub Pages con HTTPS (el service worker no funciona sin HTTPS fuera de localhost).
