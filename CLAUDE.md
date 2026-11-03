@@ -14,8 +14,10 @@ App de tamizaje visual escolar para docentes de primaria en Perú (niños de 6 a
 - No agregues funciones marcadas como versión 2 en SPEC.md.
 
 ## Git
-- **No hagas `git commit` ni `git push`.** Yo hago los commits con GitHub Desktop.
-- Al terminar cada tarea, corre las pruebas y sugiéreme un mensaje de commit corto en español.
+- Haz un commit al terminar cada tarea, solo después de que las pruebas pasen.
+- Mensajes de commit cortos y en español, que digan qué cambió.
+- **No hagas `git push`;** yo subo los cambios con GitHub Desktop.
+- No borres ni reescribas commits anteriores.
 
 ## Técnico
 - TypeScript + Vite (sin framework). PWA que funciona sin conexión; datos en IndexedDB.
