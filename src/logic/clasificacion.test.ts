@@ -1,0 +1,93 @@
+import { describe, expect, it } from 'vitest';
+import { clasificar, semaforoNino, type Hallazgos } from './clasificacion';
+
+const NORMAL: Hallazgos = {
+  pasaLejos: true,
+  puntoRemoto: null,
+  pasaConMas2: false,
+  mejoraEstenopeico: null,
+  abanicoConsistente: false,
+  pasaCerca: true,
+  dudoso: false,
+};
+
+const FALLA_LEJOS: Hallazgos = { ...NORMAL, pasaLejos: false, pasaConMas2: null };
+
+describe('clasificación por ojo', () => {
+  it('normal: pasa lejos, se nubla con +2, pasa cerca, abanico sin diferencias → VERDE', () => {
+    expect(clasificar(NORMAL)).toEqual({ categorias: ['normal'], semaforo: 'VERDE' });
+  });
+
+  it('miopía: falla lejos y hay punto remoto', () => {
+    expect(clasificar({ ...FALLA_LEJOS, puntoRemoto: 'R4' })).toEqual({
+      categorias: ['miopia'],
+      semaforo: 'ROJO',
+    });
+  });
+
+  it('hipermetropía: sigue leyendo con +2', () => {
+    expect(clasificar({ ...NORMAL, pasaConMas2: true }).categorias).toEqual(['hipermetropia']);
+  });
+
+  it('hipermetropía: pasa lejos pero falla cerca', () => {
+    expect(clasificar({ ...NORMAL, pasaCerca: false }).categorias).toEqual(['hipermetropia']);
+  });
+
+  it('astigmatismo: abanico consistente', () => {
+    expect(clasificar({ ...NORMAL, abanicoConsistente: true })).toEqual({
+      categorias: ['astigmatismo'],
+      semaforo: 'ROJO',
+    });
+  });
+
+  it('astigmatismo y miopía pueden coexistir', () => {
+    expect(
+      clasificar({ ...FALLA_LEJOS, puntoRemoto: 'R2', abanicoConsistente: true }).categorias,
+    ).toEqual(['miopia', 'astigmatismo']);
+  });
+
+  it('otra causa: falla lejos, sin punto remoto y no mejora con estenopeico', () => {
+    expect(clasificar({ ...FALLA_LEJOS, mejoraEstenopeico: false }).categorias).toEqual([
+      'otraCausa',
+    ]);
+  });
+
+  it('indeterminado: falla lejos, sin punto remoto y mejora con estenopeico', () => {
+    expect(clasificar({ ...FALLA_LEJOS, mejoraEstenopeico: true }).categorias).toEqual([
+      'indeterminado',
+    ]);
+  });
+
+  it('no es indeterminado si hay astigmatismo', () => {
+    expect(
+      clasificar({ ...FALLA_LEJOS, mejoraEstenopeico: true, abanicoConsistente: true }).categorias,
+    ).toEqual(['astigmatismo']);
+  });
+
+  it('estenopeico no hecho (null) no cuenta como «no mejora»', () => {
+    expect(clasificar({ ...FALLA_LEJOS, mejoraEstenopeico: null, dudoso: true })).toEqual({
+      categorias: [],
+      semaforo: 'AMARILLO',
+    });
+  });
+
+  it('dudoso → AMARILLO aunque todo lo demás sea normal o rojo', () => {
+    expect(clasificar({ ...NORMAL, dudoso: true }).semaforo).toBe('AMARILLO');
+    expect(clasificar({ ...FALLA_LEJOS, puntoRemoto: 'R3', dudoso: true }).semaforo).toBe('AMARILLO');
+  });
+});
+
+describe('semáforo del niño', () => {
+  it('ROJO si algún ojo es ROJO, aunque el otro sea AMARILLO', () => {
+    expect(semaforoNino(['ROJO', 'AMARILLO'])).toBe('ROJO');
+    expect(semaforoNino(['VERDE', 'ROJO'])).toBe('ROJO');
+  });
+
+  it('AMARILLO si ninguno es ROJO y alguno es AMARILLO', () => {
+    expect(semaforoNino(['VERDE', 'AMARILLO'])).toBe('AMARILLO');
+  });
+
+  it('VERDE solo si los dos son VERDE', () => {
+    expect(semaforoNino(['VERDE', 'VERDE'])).toBe('VERDE');
+  });
+});

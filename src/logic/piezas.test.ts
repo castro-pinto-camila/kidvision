@@ -1,0 +1,127 @@
+import { describe, expect, it } from 'vitest';
+import { nivelPorNombre } from '../core/optotipos';
+import {
+  abanicoConsistente,
+  anguloFisico,
+  diferenciaAngular,
+  ROTACIONES_SEGUNDA_VUELTA,
+} from './abanico';
+import { hayRespuestasIguales } from './calidad';
+import { contarAciertos, type Respuesta } from './linea';
+import { DIRECCIONES, generarOrientaciones, type Direccion } from './orientaciones';
+import { azarConSemilla } from './ninoSimulado';
+import { indiceAgudeza, mejoraConEstenopeico, nombreAgudeza } from './umbral';
+
+describe('orientaciones', () => {
+  it('dos «E» seguidas nunca miran al mismo lado, tampoco entre líneas', () => {
+    let anterior: Direccion | null = null;
+    for (let i = 0; i < 2000; i++) {
+      const linea = generarOrientaciones(5, Math.random, anterior);
+      [anterior, ...linea].forEach((d, j, todas) => {
+        if (j > 0) expect(d).not.toBe(todas[j - 1]);
+      });
+      anterior = linea[4];
+    }
+  });
+
+  it('usa las cuatro direcciones', () => {
+    const vistas = new Set(generarOrientaciones(200, azarConSemilla(1)));
+    expect([...vistas].sort()).toEqual([...DIRECCIONES].sort());
+  });
+
+  it('con la misma semilla da lo mismo', () => {
+    expect(generarOrientaciones(5, azarConSemilla(3))).toEqual(
+      generarOrientaciones(5, azarConSemilla(3)),
+    );
+  });
+});
+
+describe('línea', () => {
+  it('cuenta aciertos y «no sé» es error', () => {
+    expect(
+      contarAciertos(
+        ['arriba', 'derecha', 'abajo', 'izquierda', 'arriba'],
+        ['arriba', 'nose', 'abajo', 'derecha', 'arriba'],
+      ),
+    ).toBe(3);
+  });
+});
+
+describe('control de calidad: cinco respuestas iguales seguidas', () => {
+  const r = (...xs: Respuesta[]) => xs;
+
+  it('cinco flechas iguales = dudoso', () => {
+    expect(hayRespuestasIguales(r('abajo', 'arriba', 'arriba', 'arriba', 'arriba', 'arriba'))).toBe(true);
+  });
+
+  it('cuatro iguales no', () => {
+    expect(hayRespuestasIguales(r('arriba', 'arriba', 'arriba', 'arriba', 'abajo'))).toBe(false);
+  });
+
+  it('«no sé» no cuenta ni corta la racha', () => {
+    expect(hayRespuestasIguales(r('arriba', 'arriba', 'nose', 'arriba', 'arriba', 'arriba'))).toBe(true);
+    expect(hayRespuestasIguales(r('nose', 'nose', 'nose', 'nose', 'nose'))).toBe(false);
+  });
+});
+
+describe('carta de abanico', () => {
+  it('convierte el botón a ángulo físico', () => {
+    expect(anguloFisico(0, 0)).toBe(90); // 12–6, vertical
+    expect(anguloFisico(3, 0)).toBe(0); // 3–9, horizontal
+    expect(anguloFisico(1, 0)).toBe(60); // 1–7
+    expect(anguloFisico(3, 90)).toBe(90);
+    expect(anguloFisico(0, 120)).toBe(30);
+  });
+
+  it('compara sobre 180°', () => {
+    expect(diferenciaAngular(0, 170)).toBe(10);
+    expect(diferenciaAngular(10, 170)).toBe(20);
+    expect(diferenciaAngular(0, 90)).toBe(90);
+  });
+
+  it('tolerancia ≤ 15°', () => {
+    expect(abanicoConsistente(0, 165)).toBe(true);
+    expect(abanicoConsistente(0, 15)).toBe(true);
+    expect(abanicoConsistente(0, 16)).toBe(false);
+  });
+
+  it.each(ROTACIONES_SEGUNDA_VUELTA)(
+    'repetir el mismo número con un giro de %i° NO es consistente',
+    (giro) => {
+      for (let boton = 0; boton < 6; boton++) {
+        expect(abanicoConsistente(anguloFisico(boton, 0), anguloFisico(boton, giro))).toBe(false);
+      }
+    },
+  );
+
+  it.each(ROTACIONES_SEGUNDA_VUELTA)(
+    'elegir la misma línea física con un giro de %i° sí es consistente',
+    (giro) => {
+      const primera = anguloFisico(2, 0);
+      const boton = [0, 1, 2, 3, 4, 5].find((b) => anguloFisico(b, giro) === primera)!;
+      expect(boton).not.toBe(2);
+      expect(abanicoConsistente(primera, anguloFisico(boton, giro))).toBe(true);
+    },
+  );
+
+  it('«todas iguales» en cualquier vuelta no es consistente', () => {
+    expect(abanicoConsistente(null, 30)).toBe(false);
+    expect(abanicoConsistente(30, null)).toBe(false);
+    expect(abanicoConsistente(null, null)).toBe(false);
+  });
+});
+
+describe('umbral y estenopeico', () => {
+  it('menor que 6/60 va antes que 6/60', () => {
+    expect(indiceAgudeza(null)).toBe(-1);
+    expect(indiceAgudeza(nivelPorNombre('6/60'))).toBe(0);
+    expect(nombreAgudeza(null)).toBe('<6/60');
+  });
+
+  it('«mejora» = gana al menos un nivel', () => {
+    expect(mejoraConEstenopeico(null, nivelPorNombre('6/60'))).toBe(true);
+    expect(mejoraConEstenopeico(nivelPorNombre('6/24'), nivelPorNombre('6/18'))).toBe(true);
+    expect(mejoraConEstenopeico(nivelPorNombre('6/24'), nivelPorNombre('6/24'))).toBe(false);
+    expect(mejoraConEstenopeico(nivelPorNombre('6/24'), nivelPorNombre('6/36'))).toBe(false);
+  });
+});

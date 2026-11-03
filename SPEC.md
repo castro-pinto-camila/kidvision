@@ -82,23 +82,25 @@ La columna de píxeles y los ejemplos de resolución usan 0,06 mm por **píxel f
 
 El ojo evaluado se elige pintando en negro la mitad de pantalla del otro ojo. La «E» se centra frente al lente (31 mm desde el centro de la pantalla por defecto, editable). En cada cambio, la app indica «Coloca el celular en la ranura Rx» y espera a que el docente confirme. Orden: ojo derecho y luego izquierdo.
 
-1. **Agudeza lejana (R0):** cinco «E» de nivel 6/9 en orientaciones aleatorias, separadas un ancho de letra, con barras de apiñamiento. Pasa con ≥ 4 de 5 (IAPB). Si falla, se mide el umbral: desde 6/60 hacia abajo, la agudeza es el último nivel con ≥ 3 de 5 aciertos.
+1. **Agudeza lejana (R0):** cinco «E» de nivel 6/9 en orientaciones aleatorias, separadas un ancho de letra, con barras de apiñamiento. Pasa con ≥ 4 de 5 (IAPB). Si falla, se mide el umbral: desde 6/60 hacia abajo, la agudeza es el último nivel con ≥ 3 de 5 aciertos. El umbral llega hasta el nivel de corte y se detiene en el primer nivel con < 3 de 5 (si falla el 6/60, la agudeza es «menor que 6/60»). Tras esa primera falla se muestra un nivel más pequeño, si se puede dibujar, como control de calidad. «No sé» cuenta como error. Dos «E» seguidas nunca tienen la misma orientación, tampoco entre una línea y la siguiente.
 2. **Si pasó: clip de +2.00 D (R0).** Temporizador de 60 s y relectura de la línea 6/9. «Sigue leyendo» = ≥ 4 de 5.
-3. **Si falló: búsqueda del punto remoto.** Avanzar R1, R2, … R10 mostrando cinco «E» del nivel objetivo. El punto remoto es la primera ranura con ≥ 4 de 5 aciertos **confirmada en la siguiente ranura** (o en la última). Siempre se avanza de borroso a nítido, para que el niño no compense enfocando.
+3. **Si falló: búsqueda del punto remoto.** Avanzar R1, R2, … R10 mostrando cinco «E» del nivel objetivo. El punto remoto es la primera ranura con ≥ 4 de 5 aciertos **confirmada en la siguiente ranura** (o en la última). Siempre se avanza de borroso a nítido, para que el niño no compense enfocando. Si la ranura de confirmación falla, se repite una vez: si en el reintento pasa, queda confirmado; si no, el punto remoto queda **tentativo** y el ojo dudoso. Si en una ranura no se puede dibujar ningún nivel, la búsqueda termina, el ojo queda dudoso por «límite del dispositivo» y no se hace el estenopeico.
 4. **Si no se encontró punto remoto: estenopeico (R0).** Repetir el umbral con el oclusor estenopeico; «mejora» = gana al menos 1 nivel.
-5. **Carta de abanico:** en R0, o en la ranura del punto remoto si se encontró. 12 rayos cada 30°; en la segunda vuelta la carta gira 15°. Consistente si las dos orientaciones elegidas difieren ≤ 15°. Botón «todas iguales». Rayos con suavizado y grosor mínimo de 3 px.
+5. **Carta de abanico:** en R0, o en la ranura del punto remoto si se encontró. 12 rayos cada 30°, numerados como un reloj. El niño dice el número del rayo que ve más negro y el docente toca uno de seis botones («12–6», «1–7», «2–8», «3–9», «4–10», «5–11») o «todas iguales». En la segunda vuelta la carta, con sus números, gira **60°, 90° o 120° al azar**. Cada elección se convierte a ángulo físico sumando la rotación de su vuelta; es consistente si los dos ángulos difieren ≤ 15° sobre 180°. (Con un giro de 15°, repetir el mismo número salía siempre consistente.) «Todas iguales» en cualquiera de las vueltas = no consistente. Rayos con suavizado y grosor mínimo de 3 px.
 6. **Agudeza cercana (fuera de la caja, a 40 cm):** el celular se sostiene a 40 cm del ojo, medidos con un cordón, sin el lente de la caja; el otro ojo se tapa con el oclusor. Línea 6/9 con ≥ 4 de 5.
 
-**Respuesta:** el docente toca cuatro flechas y «no sé», ubicados en los bordes de la pantalla que la caja deja libres.
+**Respuesta:** el docente toca cuatro flechas y «no sé», ubicados en una franja en el borde de la pantalla que la caja deja libre. El lado de la franja (arriba, abajo, izquierda o derecha) se elige en la configuración; por defecto, arriba.
 
 ## Control de calidad
 
 Un ojo queda «dudoso» si ocurre cualquiera de estas cosas:
 
-- Respuestas en menos de 0,5 s.
-- Cinco respuestas iguales seguidas.
-- Falla un nivel grande y acierta uno menor.
-- El punto remoto no se confirma en la ranura siguiente.
+- Cinco respuestas iguales seguidas (solo flechas; «no sé» no cuenta).
+- Falla un nivel grande y acierta uno menor: tras la primera falla del umbral se muestra un nivel más pequeño; si acierta ≥ 4 de 5, dudoso (con 3 de 5, el azar lo logra cerca del 10 % de las veces).
+- El punto remoto no se confirma en la ranura siguiente ni en su reintento.
+- Límite del dispositivo: en una ranura de la búsqueda no se puede dibujar ningún nivel.
+
+La regla «respuestas en menos de 0,5 s» está **desactivada en el MVP**, porque quien toca es el docente. Se guarda el tiempo de cada respuesta para analizarlo en el piloto.
 
 Un resultado dudoso se convierte en semáforo amarillo.
 
@@ -115,6 +117,10 @@ normal          = pasaLejos && !pasaConMas2 && pasaCerca && !abanicoConsistente
 semaforo        = dudoso ? AMARILLO : (normal ? VERDE : ROJO)
 ```
 
+`pasaConMas2` y `mejoraEstenopeico` valen `null` cuando esa prueba no se hizo; en las fórmulas, `!x` significa «x es falso», no «x es null».
+
+**Semáforo del niño:** ROJO si algún ojo es ROJO; si no, AMARILLO si algún ojo es AMARILLO; si no, VERDE.
+
 A la familia se le muestra «derivar» o «no derivar» y la agudeza de cada ojo. La categoría probable y la miopía estimada van en la constancia, marcadas como «estimación de tamizaje, no es una receta».
 
 ## Datos (guardados en el celular)
@@ -127,7 +133,7 @@ A la familia se le muestra «derivar» o «no derivar» y la agudeza de cada ojo
     "fecha": "2026-11-05T10:20:00", "umbralCorte": "6/9",
     "ojos": {
       "OD": { "pasaLejos": false, "umbral": "6/18", "puntoRemoto": "R4", "miopiaEstimadaD": -1.94,
-              "pasaConMas2": null, "mejoraEstenopeico": null, "abanico": [60, 75], "pasaCerca": true,
+              "pasaConMas2": null, "mejoraEstenopeico": null, "abanico": [60, 60], "pasaCerca": true,
               "dudoso": false, "categorias": ["miopia"] },
       "OI": { "...": "..." }
     },
