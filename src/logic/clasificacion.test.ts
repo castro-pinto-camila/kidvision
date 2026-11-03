@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { clasificar, semaforoNino, type Hallazgos } from './clasificacion';
+import type { MotivoDudoso } from './calidad';
+import {
+  clasificar,
+  indicacionNino,
+  semaforoNino,
+  type Hallazgos,
+  type Semaforo,
+} from './clasificacion';
 
 const NORMAL: Hallazgos = {
   pasaLejos: true,
@@ -89,5 +96,27 @@ describe('semáforo del niño', () => {
 
   it('VERDE solo si los dos son VERDE', () => {
     expect(semaforoNino(['VERDE', 'VERDE'])).toBe('VERDE');
+  });
+});
+
+describe('indicación para el niño', () => {
+  const ojo = (semaforo: Semaforo, ...motivosDudoso: MotivoDudoso[]) => ({ semaforo, motivosDudoso });
+
+  it('ROJO → derivar, aunque el otro ojo haya llegado al límite del dispositivo', () => {
+    expect(indicacionNino([ojo('ROJO'), ojo('AMARILLO', 'limite-dispositivo')])).toBe('derivar');
+  });
+
+  it('VERDE → no derivar', () => {
+    expect(indicacionNino([ojo('VERDE'), ojo('VERDE')])).toBe('no-derivar');
+  });
+
+  it('AMARILLO por el límite del dispositivo → repetir con otro celular', () => {
+    expect(indicacionNino([ojo('VERDE'), ojo('AMARILLO', 'limite-dispositivo')])).toBe(
+      'repetir-otro-celular',
+    );
+  });
+
+  it('AMARILLO por otro motivo → repetir', () => {
+    expect(indicacionNino([ojo('AMARILLO', 'respuestas-iguales'), ojo('VERDE')])).toBe('repetir');
   });
 });

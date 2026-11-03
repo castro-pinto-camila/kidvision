@@ -54,8 +54,8 @@ const delOjo = (pasos: Paso[], ojo: 'OD' | 'OI') =>
 describe('niño con visión normal', () => {
   const { resultado, pasos } = correr(ambos({ refraccion: 0 }));
 
-  it('sigue el orden del SPEC: lejos, clip, abanico, cerca; ojo derecho y luego izquierdo', () => {
-    expect(delOjo(pasos, 'OD')).toEqual([
+  it('sigue el orden del SPEC: en la caja ojo derecho y luego izquierdo; al final, cerca de ambos', () => {
+    expect(pasos.map(resumen)).toEqual([
       'OD colocar R0',
       'OD lejos R0 6/9',
       'OD colocar R0 + clip',
@@ -64,11 +64,30 @@ describe('niño con visión normal', () => {
       'OD colocar R0 (quitar clip)',
       'OD abanico 1',
       'OD abanico 2',
+      'OI colocar R0',
+      'OI lejos R0 6/9',
+      'OI colocar R0 + clip',
+      'OI espera 60',
+      'OI clip R0 6/9',
+      'OI colocar R0 (quitar clip)',
+      'OI abanico 1',
+      'OI abanico 2',
       'OD colocar cerca',
       'OD cerca cerca 6/9',
+      'OI colocar cerca',
+      'OI cerca cerca 6/9',
+      'fin',
     ]);
-    expect(resumen(pasos[delOjo(pasos, 'OD').length])).toBe('OI colocar R0');
-    expect(pasos.at(-1)!.tipo).toBe('fin');
+  });
+
+  it('el niño sale de la caja una sola vez', () => {
+    const lugares = pasos.flatMap((p) => (p.tipo === 'colocar' ? [p.lugar] : []));
+    const salidas = lugares.filter((l, i) => l === 'cerca' && lugares[i - 1] !== 'cerca');
+    expect(salidas).toHaveLength(1);
+  });
+
+  it('indicación: no derivar', () => {
+    expect(resultado.indicacion).toBe('no-derivar');
   });
 
   it('es normal y VERDE', () => {
@@ -137,6 +156,19 @@ describe('miopía', () => {
     });
     expect(resultado.ojos.OD.miopiaEstimadaD).toBeCloseTo(-1.47, 2);
     expect(resultado.semaforo).toBe('ROJO');
+  });
+
+  it('miope de −2,00 D en ambos ojos: R4, −1,94 D y ROJO', () => {
+    const { resultado } = correr(ambos({ refraccion: -2, borrosa: 24 }));
+    for (const ojo of [resultado.ojos.OD, resultado.ojos.OI]) {
+      expect(ojo.puntoRemoto).toBe('R4');
+      expect(ojo.puntoRemotoEstado).toBe('confirmado');
+      expect(ojo.miopiaEstimadaD).toBeCloseTo(-1.94, 2);
+      expect(ojo.categorias).toEqual(['miopia']);
+      expect(ojo.semaforo).toBe('ROJO');
+    }
+    expect(resultado.semaforo).toBe('ROJO');
+    expect(resultado.indicacion).toBe('derivar');
   });
 
   it('punto remoto en la última ranura (R10) queda confirmado sin ranura siguiente', () => {
@@ -268,6 +300,7 @@ describe('control de calidad en el flujo', () => {
     expect(resultado.ojos.OD.semaforo).toBe('AMARILLO');
     expect(resultado.ojos.OI.dudoso).toBe(false);
     expect(resultado.semaforo).toBe('AMARILLO');
+    expect(resultado.indicacion).toBe('repetir');
   });
 
   it('falla un nivel grande y acierta ≥ 4 de 5 en uno menor → dudoso', () => {
@@ -305,6 +338,7 @@ describe('control de calidad en el flujo', () => {
       categorias: [],
       semaforo: 'AMARILLO',
     });
+    expect(resultado.indicacion).toBe('repetir-otro-celular');
   });
 });
 

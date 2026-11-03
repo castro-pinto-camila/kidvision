@@ -1,6 +1,7 @@
 /**
  * Clasificación por ojo y semáforo (SPEC.md, «Clasificación por ojo»).
  */
+import type { MotivoDudoso } from './calidad';
 
 export type Semaforo = 'VERDE' | 'AMARILLO' | 'ROJO';
 
@@ -60,4 +61,21 @@ export function semaforoNino(ojos: Semaforo[]): Semaforo {
   if (ojos.includes('ROJO')) return 'ROJO';
   if (ojos.includes('AMARILLO')) return 'AMARILLO';
   return 'VERDE';
+}
+
+export type Indicacion = 'derivar' | 'no-derivar' | 'repetir' | 'repetir-otro-celular';
+
+/**
+ * Qué hacer con el niño. Si sale AMARILLO y algún ojo llegó al límite del
+ * dispositivo, repetir en el mismo celular no sirve: hay que usar otro.
+ */
+export function indicacionNino(
+  ojos: { semaforo: Semaforo; motivosDudoso: MotivoDudoso[] }[],
+): Indicacion {
+  const semaforo = semaforoNino(ojos.map((o) => o.semaforo));
+  if (semaforo === 'ROJO') return 'derivar';
+  if (semaforo === 'VERDE') return 'no-derivar';
+  return ojos.some((o) => o.motivosDudoso.includes('limite-dispositivo'))
+    ? 'repetir-otro-celular'
+    : 'repetir';
 }

@@ -12,7 +12,14 @@ import { ranuras, type ConfigCaja, type Ranura } from '../core/caja';
 import { esDibujable, nivelPorNombre, type Pantalla } from '../core/optotipos';
 import { abanicoConsistente, BOTONES_ABANICO, hacerAbanico, type AnguloAbanico } from './abanico';
 import { hayRespuestasIguales, type MotivoDudoso } from './calidad';
-import { clasificar, semaforoNino, type Categoria, type Semaforo } from './clasificacion';
+import {
+  clasificar,
+  indicacionNino,
+  semaforoNino,
+  type Categoria,
+  type Indicacion,
+  type Semaforo,
+} from './clasificacion';
 import { ACIERTOS_PARA_PASAR, LETRAS_POR_LINEA, type Respuesta } from './linea';
 import { DIRECCIONES, type Azar } from './orientaciones';
 import {
@@ -73,6 +80,8 @@ export interface ResultadoSesion {
   umbralCorte: string;
   ojos: Record<Ojo, ResultadoOjo>;
   semaforo: Semaforo;
+  /** Qué hacer: derivar, no derivar, repetir o repetir con otro celular. */
+  indicacion: Indicacion;
   duracionSeg: number;
 }
 
@@ -86,15 +95,24 @@ interface Sesion {
   posicion: Posicion;
 }
 
-function* evaluarOjo(ojo: Ojo, s: Sesion): Flujo<ResultadoOjo> {
-  const ctx: Contexto = {
-    ojo,
-    pantalla: s.pantalla,
-    azar: s.azar,
-    posicion: s.posicion,
-    ultima: null,
-    registro: [],
-  };
+/** Lo que se mide de un ojo dentro de la caja (pasos 1 a 5). */
+interface DatosCaja {
+  pasaLejos: boolean;
+  umbral: string | null;
+  pasaConMas2: boolean | null;
+  puntoRemoto: Ranura | null;
+  puntoRemotoEstado: EstadoPuntoRemoto | null;
+  mejoraEstenopeico: boolean | null;
+  umbralEstenopeico: string | null;
+  abanico: [AnguloAbanico, AnguloAbanico];
+  motivos: Set<MotivoDudoso>;
+}
+
+function nuevoContexto(ojo: Ojo, s: Sesion): Contexto {
+  return { ojo, pantalla: s.pantalla, azar: s.azar, posicion: s.posicion, ultima: null, registro: [] };
+}
+
+function* pruebasEnCaja(ctx: Contexto, s: Sesion): Flujo<DatosCaja> {
   const R0 = s.ranuras[0];
   const corte = nivelPorNombre(s.umbralCorte);
   const motivos = new Set<MotivoDudoso>();
@@ -141,37 +159,56 @@ function* evaluarOjo(ojo: Ojo, s: Sesion): Flujo<ResultadoOjo> {
   const lugarAbanico = puntoRemoto ?? R0;
   yield* ir(ctx, lugarAbanico);
   const abanico = yield* hacerAbanico(ctx, lugarAbanico);
-  const consistente = abanicoConsistente(abanico[0], abanico[1]);
 
-  // 6. Agudeza cercana a 40 cm, fuera de la caja.
+  return {
+    pasaLejos,
+    umbral,
+    pasaConMas2,
+    puntoRemoto,
+    puntoRemotoEstado,
+    mejoraEstenopeico,
+    umbralEstenopeico,
+    abanico,
+    motivos,
+  };
+}
+
+/** 6. Agudeza cercana a 40 cm, fuera de la caja. */
+function* pruebaCerca(ctx: Contexto): Flujo<boolean> {
   yield* ir(ctx, LUGAR_CERCA);
-  const pasaCerca =
-    (yield* mostrarLinea(ctx, 'cerca', LUGAR_CERCA, nivelPorNombre(NIVEL_CERCA))) >= ACIERTOS_PARA_PASAR;
+  return (
+    (yield* mostrarLinea(ctx, 'cerca', LUGAR_CERCA, nivelPorNombre(NIVEL_CERCA))) >= ACIERTOS_PARA_PASAR
+  );
+}
 
+/** Control de calidad final y clasificación de un ojo. */
+function cerrarOjo(ctx: Contexto, d: DatosCaja, pasaCerca: boolean): ResultadoOjo {
+  const motivos = new Set(d.motivos);
   const respuestas = ctx.registro.flatMap((l) => l.toques.map((t) => t.respuesta));
   if (hayRespuestasIguales(respuestas)) motivos.add('respuestas-iguales');
 
+  const consistente = abanicoConsistente(d.abanico[0], d.abanico[1]);
   const dudoso = motivos.size > 0;
   const { categorias, semaforo } = clasificar({
-    pasaLejos,
-    puntoRemoto: puntoRemoto?.id ?? null,
-    pasaConMas2,
-    mejoraEstenopeico,
+    pasaLejos: d.pasaLejos,
+    puntoRemoto: d.puntoRemoto?.id ?? null,
+    pasaConMas2: d.pasaConMas2,
+    mejoraEstenopeico: d.mejoraEstenopeico,
     abanicoConsistente: consistente,
     pasaCerca,
     dudoso,
   });
 
   return {
-    pasaLejos,
-    umbral,
-    puntoRemoto: puntoRemoto?.id ?? null,
-    puntoRemotoEstado,
-    miopiaEstimadaD: puntoRemoto ? puntoRemoto.Vojo : null,
-    pasaConMas2,
-    mejoraEstenopeico,
-    umbralEstenopeico,
-    abanico,
+    pasaLejos: d.pasaLejos,
+    umbral: d.umbral,
+    puntoRemoto: d.puntoRemoto?.id ?? null,
+    puntoRemotoEstado: d.puntoRemotoEstado,
+    miopiaEstimadaD: d.puntoRemoto ? d.puntoRemoto.Vojo : null,
+    pasaConMas2: d.pasaConMas2,
+    mejoraEstenopeico: d.mejoraEstenopeico,
+    umbralEstenopeico: d.umbralEstenopeico,
+    abanico: d.abanico,
     abanicoConsistente: consistente,
     pasaCerca,
     dudoso,
@@ -184,14 +221,23 @@ function* evaluarOjo(ojo: Ojo, s: Sesion): Flujo<ResultadoOjo> {
 
 function* evaluarSesion(s: Sesion, ahora: () => number): Flujo<ResultadoSesion> {
   const inicio = ahora();
-  // Orden: ojo derecho y luego izquierdo.
-  const OD = yield* evaluarOjo('OD', s);
-  const OI = yield* evaluarOjo('OI', s);
+  const od = nuevoContexto('OD', s);
+  const oi = nuevoContexto('OI', s);
+  // Dentro de la caja: ojo derecho y luego izquierdo.
+  const cajaOD = yield* pruebasEnCaja(od, s);
+  const cajaOI = yield* pruebasEnCaja(oi, s);
+  // Al final, la prueba de cerca de los dos ojos: el niño sale de la caja una sola vez.
+  const cercaOD = yield* pruebaCerca(od);
+  const cercaOI = yield* pruebaCerca(oi);
+
+  const OD = cerrarOjo(od, cajaOD, cercaOD);
+  const OI = cerrarOjo(oi, cajaOI, cercaOI);
   return {
     fecha: new Date(inicio).toISOString(),
     umbralCorte: s.umbralCorte,
     ojos: { OD, OI },
     semaforo: semaforoNino([OD.semaforo, OI.semaforo]),
+    indicacion: indicacionNino([OD, OI]),
     duracionSeg: Math.round((ahora() - inicio) / 1000),
   };
 }

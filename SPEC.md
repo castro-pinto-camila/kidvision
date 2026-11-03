@@ -80,7 +80,7 @@ La columna de píxeles y los ejemplos de resolución usan 0,06 mm por **píxel f
 
 ## Pruebas por ojo
 
-El ojo evaluado se elige pintando en negro la mitad de pantalla del otro ojo. La «E» se centra frente al lente (31 mm desde el centro de la pantalla por defecto, editable). En cada cambio, la app indica «Coloca el celular en la ranura Rx» y espera a que el docente confirme. Orden: ojo derecho y luego izquierdo.
+El ojo evaluado se elige pintando en negro la mitad de pantalla del otro ojo. La «E» se centra frente al lente (31 mm desde el centro de la pantalla por defecto, editable). En cada cambio, la app indica «Coloca el celular en la ranura Rx» y espera a que el docente confirme. Orden: los pasos 1 a 5 dentro de la caja, primero con el ojo derecho y luego con el izquierdo; al final, el paso 6 (cerca) de ambos ojos, derecho y luego izquierdo, para que el niño salga de la caja una sola vez.
 
 1. **Agudeza lejana (R0):** cinco «E» de nivel 6/9 en orientaciones aleatorias, separadas un ancho de letra, con barras de apiñamiento. Pasa con ≥ 4 de 5 (IAPB). Si falla, se mide el umbral: desde 6/60 hacia abajo, la agudeza es el último nivel con ≥ 3 de 5 aciertos. El umbral llega hasta el nivel de corte y se detiene en el primer nivel con < 3 de 5 (si falla el 6/60, la agudeza es «menor que 6/60»). Tras esa primera falla se muestra un nivel más pequeño, si se puede dibujar, como control de calidad. «No sé» cuenta como error. Dos «E» seguidas nunca tienen la misma orientación, tampoco entre una línea y la siguiente.
 2. **Si pasó: clip de +2.00 D (R0).** Temporizador de 60 s y relectura de la línea 6/9. «Sigue leyendo» = ≥ 4 de 5.
@@ -120,6 +120,8 @@ semaforo        = dudoso ? AMARILLO : (normal ? VERDE : ROJO)
 `pasaConMas2` y `mejoraEstenopeico` valen `null` cuando esa prueba no se hizo; en las fórmulas, `!x` significa «x es falso», no «x es null».
 
 **Semáforo del niño:** ROJO si algún ojo es ROJO; si no, AMARILLO si algún ojo es AMARILLO; si no, VERDE.
+
+**Indicación:** ROJO → «derivar»; VERDE → «no derivar»; AMARILLO → «repetir», salvo que algún ojo tenga el motivo «límite del dispositivo»: entonces «repetir con otro celular». Un ojo que llega al límite del dispositivo no se clasifica (sin categoría) y queda amarillo.
 
 A la familia se le muestra «derivar» o «no derivar» y la agudeza de cada ojo. La categoría probable y la miopía estimada van en la constancia, marcadas como «estimación de tamizaje, no es una receta».
 
