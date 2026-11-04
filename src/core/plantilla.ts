@@ -43,6 +43,15 @@ export interface MedidasCaja {
   /** Lo que sobra delante del plano de los lentes y detrás de la bandeja en R0. */
   margenDelantero: number;
   holguraTrasera: number;
+  /** Salientes de la tapa +2.00: lo que sobresalen a cada lado, su largo y a qué distancia del borde de arriba empiezan. */
+  salienteTapa: number;
+  salienteLargo: number;
+  salienteDesdeArriba: number;
+  /** Aire entre lo más bajo de los salientes y lo más alto de S1 y S2. */
+  holguraSeparador: number;
+  /** Pestaña para levantar la tapa (doblada hacia el ojo, en el borde de abajo). */
+  pestanaAncho: number;
+  pestanaLargo: number;
 }
 
 export const MEDIDAS_POR_DEFECTO: MedidasCaja = {
@@ -61,6 +70,12 @@ export const MEDIDAS_POR_DEFECTO: MedidasCaja = {
   filaImpares: 18,
   margenDelantero: 10,
   holguraTrasera: 5,
+  salienteTapa: 3,
+  salienteLargo: 12,
+  salienteDesdeArriba: 2,
+  holguraSeparador: 1,
+  pestanaAncho: 20,
+  pestanaLargo: 7,
 };
 
 export type Trazo = 'corte' | 'doblez' | 'guia';
@@ -232,14 +247,9 @@ export function anchoTapa(m: MedidasCaja = MEDIDAS_POR_DEFECTO): number {
   return m.anchoInterior - 2 * m.carton;
 }
 
-/** Panel con dos agujeros para lentes (panel de lentes y tapa +2.00). */
-function panelLentes(
-  nombre: string,
-  caja: ConfigCaja,
-  m: MedidasCaja,
-  conBisagra: boolean,
-  ancho: number = m.anchoInterior,
-): Omit<Pieza, 'x' | 'y'> {
+/** Panel con dos agujeros para lentes. */
+function panelLentes(nombre: string, caja: ConfigCaja, m: MedidasCaja): Omit<Pieza, 'x' | 'y'> {
+  const ancho = m.anchoInterior;
   const alto = m.altoInterior;
   const cy = alto - m.alturaLentes;
   const formas: Forma[] = [
@@ -255,13 +265,76 @@ function panelLentes(
     ),
     { tipo: 'texto', x: ancho / 2, y: alto - 4, texto: nombre, tam: 4, ancla: 'middle' },
   ];
-  if (conBisagra) {
-    formas.push(
-      { tipo: 'linea', x1: 0, y1: 0, x2: ancho, y2: 0, trazo: 'doblez' },
-      { tipo: 'texto', x: ancho / 2, y: 5, texto: 'bisagra: pegar arriba del panel de lentes, lado del ojo', tam: 3, ancla: 'middle' },
-    );
-  }
   return { nombre, ancho, alto, formas };
+}
+
+export interface MedidasTapa {
+  /** Ancho del cuerpo (sin salientes): lo que cabe entre S1 y S2. */
+  ancho: number;
+  alto: number;
+  /** Altura sobre el piso, de la parte más baja a la más alta de los salientes (con la tapa abajo). */
+  salienteZmin: number;
+  salienteZmax: number;
+  /** Ancho total con los salientes: queda por encima de S1 y S2. */
+  anchoConSalientes: number;
+}
+
+export function medidasTapa(m: MedidasCaja = MEDIDAS_POR_DEFECTO): MedidasTapa {
+  const alto = m.altoInterior;
+  return {
+    ancho: anchoTapa(m),
+    alto,
+    salienteZmax: alto - m.salienteDesdeArriba,
+    salienteZmin: alto - m.salienteDesdeArriba - m.salienteLargo,
+    anchoConSalientes: anchoTapa(m) + 2 * m.salienteTapa,
+  };
+}
+
+/** Altura de S1 y S2: más bajos que el panel, para que los salientes de la tapa se apoyen encima sin trabarse. */
+export function altoSeparador(m: MedidasCaja = MEDIDAS_POR_DEFECTO): number {
+  return medidasTapa(m).salienteZmin - m.holguraSeparador;
+}
+
+/**
+ * Tapa +2.00 con bisagra arriba. Salientes a los lados (arriba) para que se
+ * apoye sobre S1 y S2 y quede a plomo, y pestaña en el borde de abajo, que se
+ * dobla hacia el ojo para levantarla con la uña por la muesca de la nariz.
+ */
+function tapaLentes(caja: ConfigCaja, m: MedidasCaja): Omit<Pieza, 'x' | 'y'> {
+  const t = medidasTapa(m);
+  const s = m.salienteTapa;
+  const W = t.ancho;
+  const H = t.alto;
+  const y1 = m.salienteDesdeArriba;
+  const y2 = y1 + m.salienteLargo;
+  const cx = s + W / 2;
+  const pa = m.pestanaAncho / 2;
+  const cy = H - m.alturaLentes;
+  return {
+    nombre: 'Tapa +2.00',
+    ancho: t.anchoConSalientes,
+    alto: H + m.pestanaLargo,
+    formas: [
+      {
+        tipo: 'poligono',
+        puntos: [
+          [s, 0], [s + W, 0], [s + W, y1], [2 * s + W, y1], [2 * s + W, y2], [s + W, y2],
+          [s + W, H], [cx + pa, H], [cx + pa, H + m.pestanaLargo], [cx - pa, H + m.pestanaLargo], [cx - pa, H],
+          [s, H], [s, y2], [0, y2], [0, y1], [s, y1],
+        ],
+        trazo: 'corte',
+      },
+      ...[-1, 1].map(
+        (k): Forma => ({ tipo: 'circulo', x: cx + k * caja.lenteDesdeCentro_mm, y: cy, r: m.diametroLente / 2, trazo: 'corte' }),
+      ),
+      { tipo: 'linea', x1: s, y1: 0, x2: s + W, y2: 0, trazo: 'doblez' },
+      { tipo: 'texto', x: cx, y: 5, texto: 'bisagra: pegar arriba del panel de lentes, lado del ojo', tam: 3, ancla: 'middle' },
+      { tipo: 'linea', x1: cx - pa, y1: H, x2: cx + pa, y2: H, trazo: 'doblez' },
+      { tipo: 'texto', x: cx, y: H + m.pestanaLargo - 1.5, texto: 'pestaña: doblar hacia el ojo', tam: 3, ancla: 'middle' },
+      { tipo: 'texto', x: s + 1, y: y2 + 5, texto: 'salientes: cinta', tam: 2.5 },
+      { tipo: 'texto', x: cx, y: H - 4, texto: 'Tapa +2.00', tam: 4, ancla: 'middle' },
+    ],
+  };
 }
 
 function apoyoCara(caja: ConfigCaja, m: MedidasCaja): Omit<Pieza, 'x' | 'y'> {
@@ -300,7 +373,7 @@ function apoyoCara(caja: ConfigCaja, m: MedidasCaja): Omit<Pieza, 'x' | 'y'> {
 
 function separador(caja: ConfigCaja, m: MedidasCaja, n: number): Omit<Pieza, 'x' | 'y'> {
   const ancho = dimensiones(caja, m).separador;
-  const alto = m.altoInterior;
+  const alto = altoSeparador(m);
   return {
     nombre: `Separador ${n}`,
     ancho,
@@ -433,7 +506,7 @@ export function generarPlantilla(caja: ConfigCaja, m: MedidasCaja = MEDIDAS_POR_
     [paredIzquierda(caja, m)],
     [reglaSuelta(caja, m)],
     [piso(caja, m)],
-    [panelLentes('Panel de lentes (+3.00)', caja, m, false), panelLentes('Tapa +2.00', caja, m, true, anchoTapa(m))],
+    [panelLentes('Panel de lentes (+3.00)', caja, m), tapaLentes(caja, m)],
     [apoyoCara(caja, m), panelTrasero(m)],
     [tapaSuperior(caja, m), separador(caja, m, 1), separador(caja, m, 2)],
     [bandeja(m)],

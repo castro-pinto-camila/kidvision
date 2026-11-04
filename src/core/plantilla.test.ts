@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { CAJA_POR_DEFECTO, crearCaja } from './caja';
 import {
   agujerosPasador,
+  altoSeparador,
+  medidasTapa,
   dimensiones,
   espacioCelular,
   generarPlantilla,
@@ -192,5 +194,31 @@ describe('hoja de armado', () => {
   it('da las distancias para comprobar, calculadas desde la configuración', () => {
     expect(armado).toContain('333,3 mm');
     expect(armado).toContain('en R10, 125,0 mm');
+  });
+});
+
+describe('salientes de la tapa +2.00 y separadores S1 y S2', () => {
+  const t = medidasTapa();
+
+  it('los salientes miden 3 mm de ancho y al menos 10 mm de largo (2 mm se doblan en cartón)', () => {
+    expect(M.salienteTapa).toBe(3);
+    expect(M.salienteLargo).toBeGreaterThanOrEqual(10);
+    expect(t.salienteZmax - t.salienteZmin).toBe(M.salienteLargo);
+  });
+
+  it('con S1 y S2 a la altura del panel (56 mm) los salientes quedarían trabados', () => {
+    // Los salientes ocupan el ancho de S1/S2 (3 mm a cada lado): si S llega al panel, se cruzan en altura.
+    expect(M.altoInterior).toBeGreaterThan(t.salienteZmin);
+  });
+
+  it('con S1 y S2 más bajos, los salientes pasan por encima con holgura', () => {
+    expect(altoSeparador()).toBe(41);
+    expect(t.salienteZmin - altoSeparador()).toBeGreaterThanOrEqual(M.holguraSeparador);
+    expect(t.salienteZmax).toBeLessThanOrEqual(M.altoInterior);
+  });
+
+  it('con los salientes la tapa llena exactamente el ancho interior', () => {
+    expect(t.ancho).toBe(172);
+    expect(t.anchoConSalientes).toBe(M.anchoInterior);
   });
 });
