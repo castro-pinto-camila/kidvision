@@ -8,6 +8,7 @@
     "dev:celular": "vite --host --mode celular",
     "plantilla": "node scripts/plantilla.ts",
     "iconos": "node scripts/iconos.ts",
+    "guia": "vitest run --config vitest.guia.config.ts",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",

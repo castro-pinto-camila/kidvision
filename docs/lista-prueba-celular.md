@@ -58,3 +58,6 @@ Antes de empezar: celular con la batería cargada, sin funda, brillo al máximo 
 ## 8. Cierre
 - [ ] Los textos se entienden sin saber de salud visual.
 - [ ] Anota todo lo que te confundió, aunque funcione.
+
+## 9. Comprobar los resultados (opcional)
+- [ ] Elige uno o dos escenarios de `docs/guia-resultados.md` (por ejemplo «Vista normal» y «Miopía leve»), haz la prueba con esa secuencia y compara el semáforo, la categoría, el punto remoto y la indicación con la guía.
