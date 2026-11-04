@@ -31,6 +31,7 @@ import {
   type Respuesta,
 } from './linea';
 import { DIRECCIONES, type Azar } from './orientaciones';
+import { type VersionLineas } from './secuencias';
 import {
   esperar,
   ir,
@@ -60,7 +61,10 @@ export interface OpcionesPrueba {
   pantalla: Pantalla;
   /** Nivel de corte de la línea de tamizaje: «6/9» (por defecto) o «6/12». */
   umbralCorte?: string;
+  /** Solo para pruebas: «E» al azar. La prueba real usa las secuencias fijas. */
   azar?: Azar;
+  /** Juego de secuencias fijas: A (primera evaluación del niño) o B (la siguiente). */
+  version?: VersionLineas;
   /** Reloj en milisegundos (para medir la duración). */
   ahora?: () => number;
 }
@@ -105,7 +109,8 @@ interface Sesion {
   ranuras: Ranura[];
   pantalla: Pantalla;
   umbralCorte: string;
-  azar: Azar;
+  azar: Azar | null;
+  version: VersionLineas;
   posicion: Posicion;
 }
 
@@ -126,7 +131,7 @@ interface DatosOjo {
 
 function nuevoOjo(ojo: Ojo, s: Sesion): DatosOjo {
   return {
-    ctx: { ojo, pantalla: s.pantalla, azar: s.azar, ultima: null, registro: [] },
+    ctx: { ojo, pantalla: s.pantalla, azar: s.azar, version: s.version, vistas: new Map(), ultima: null, registro: [] },
     pasaLejos: false,
     sinEstenopeico: null,
     pasaConMas2: null,
@@ -190,7 +195,15 @@ function* evaluarSesion(s: Sesion, ahora: () => number): Flujo<ResultadoSesion> 
 
   // 0. Línea de práctica grande, para que el niño entienda el juego. No cuenta.
   yield* ir(s.posicion, R0, null, null);
-  const practica: Contexto = { ojo: 'OD', pantalla: s.pantalla, azar: s.azar, ultima: null, registro: [] };
+  const practica: Contexto = {
+    ojo: 'OD',
+    pantalla: s.pantalla,
+    azar: s.azar,
+    version: s.version,
+    vistas: new Map(),
+    ultima: null,
+    registro: [],
+  };
   yield* mostrarLinea(practica, 'practica', R0, nivelPorNombre(NIVEL_PRACTICA), 0);
 
   // 1. Agudeza lejana en R0: ojo derecho y luego izquierdo. Si falla, el umbral.
@@ -319,7 +332,8 @@ export class PruebaVisual {
       ranuras: lista,
       pantalla: opciones.pantalla,
       umbralCorte,
-      azar: opciones.azar ?? Math.random,
+      azar: opciones.azar ?? null,
+      version: opciones.version ?? 'A',
       posicion: { ojo: null, lugar: null, accesorio: null },
     };
     this.flujo = evaluarSesion(sesion, opciones.ahora ?? Date.now);

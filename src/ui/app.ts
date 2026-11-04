@@ -27,6 +27,7 @@ import {
 } from '../data/salon';
 import type { ResultadoSesion } from '../logic/flujo';
 import { estadoPreparacion, primerPendiente, puedeEmpezar, type AccionPaso } from '../logic/preparacion';
+import { versionPorEvaluaciones, type VersionLineas } from '../logic/secuencias';
 import { montarBienvenida } from './bienvenida';
 import { montarPortada } from './portada';
 import { montarCalibracion } from './calibracion';
@@ -53,6 +54,8 @@ interface Estado {
   guardado: 'ok' | 'error' | null;
   idEvaluacion: number | null;
   avisoInicio?: string;
+  /** Juego de «E» fijas de la prueba en curso. */
+  version: VersionLineas;
   /** A dónde volver al terminar la calibración. */
   volverDeCalibrar: string;
 }
@@ -68,6 +71,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
     resultado: null,
     guardado: null,
     idEvaluacion: null,
+    version: 'A',
     volverDeCalibrar: '#/',
   };
   try {
@@ -100,7 +104,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
   }
 
   // Se llama dentro del toque: el navegador lo exige para la pantalla completa.
-  async function empezarPrueba(estudiante: Estudiante | null): Promise<void> {
+  async function empezarPrueba(estudiante: Estudiante | null, version: VersionLineas = 'A'): Promise<void> {
     // Se vuelve a comprobar la pantalla: el zoom o el tamaño de letra pudieron cambiar desde la calibración.
     if (!puedeEmpezar(preparacion(), estudiante === null)) {
       estado.avisoInicio = 'La pantalla cambió (zoom, tamaño de letra o pantalla) desde que calibraste. Vuelve a calibrar antes de empezar.';
@@ -109,6 +113,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
     }
     estado.practica = estudiante === null;
     estado.estudiante = estudiante;
+    estado.version = version;
     estado.avisos = await prepararPantalla();
     estado.enPrueba = true;
     ir('#/prueba');
@@ -195,6 +200,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
           config: { ...estado.config, pxPorMm: estado.config.pxPorMm },
           avisos: estado.avisos,
           practica: estado.practica,
+          version: estado.version,
           guardarOrientacion: (invertida, intercambiadas) => {
             if (
               invertida === estado.config.pantallaInvertida &&
@@ -239,7 +245,8 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
           historial,
           pendiente: primerPendiente(preparacion()),
           resolver: (accion) => hacer(accion, location.hash),
-          empezar: () => void empezarPrueba(estudiante),
+          // Primera evaluación del niño: juego A; la siguiente, juego B (no ve las mismas «E»).
+          empezar: () => void empezarPrueba(estudiante, versionPorEvaluaciones(historial.length)),
           verConstancia: (idEv) => ir(`#/constancia/${idEv}`),
           volver: () => ir('#/'),
         });

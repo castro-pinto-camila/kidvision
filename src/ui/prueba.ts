@@ -13,6 +13,7 @@ import { anguloFisico, BOTONES_ABANICO } from '../logic/abanico';
 import { PruebaVisual, type Paso, type ResultadoSesion } from '../logic/flujo';
 import { respuestasParaDecidir, type Respuesta, type Toque } from '../logic/linea';
 import { descontarPausa } from '../logic/pausa';
+import type { VersionLineas } from '../logic/secuencias';
 import type { Evento, Ojo, PasoAbanico, PasoColocar, PasoEspera, PasoLinea } from '../logic/pasos';
 import { dibujarAbanico, dibujarCirculo, dibujarLetra, dibujarLinea, pintar, prepararLienzo } from './dibujo';
 import { liberarPantalla } from './dispositivo';
@@ -25,6 +26,8 @@ export interface OpcionesPantallaPrueba {
   avisos: string[];
   /** Modo práctica (sin caja): aviso en todas las pantallas; el resultado no vale. */
   practica: boolean;
+  /** Juego de «E» fijas: A en la primera evaluación del niño, B en la siguiente. */
+  version: VersionLineas;
   /** Guarda lo que se corrigió en la comprobación con la «D». */
   guardarOrientacion: (invertida: boolean, intercambiadas: boolean) => void;
   alTerminar: (resultado: ResultadoSesion) => void;
@@ -47,7 +50,7 @@ const AZUL_FIGURA = '#2563eb';
 export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () => void {
   const { config } = op;
   const pantalla: Pantalla = { pxPorMm: config.pxPorMm, dpr: window.devicePixelRatio || 1 };
-  const prueba = new PruebaVisual({ caja: config.caja, pantalla, umbralCorte: config.umbralCorte });
+  const prueba = new PruebaVisual({ caja: config.caja, pantalla, umbralCorte: config.umbralCorte, version: op.version });
 
   const lienzo = h('canvas', { class: 'lienzo' });
   const capa = h('div', { class: 'capa' });

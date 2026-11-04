@@ -6,6 +6,7 @@
 import type { Geometria } from '../core/caja';
 import { GEOMETRIA_CERCA, type Nivel, type Pantalla } from '../core/optotipos';
 import { contarAciertos, LETRAS_POR_LINEA, respuestasParaDecidir, type Toque } from './linea';
+import { secuenciaLinea, type VersionLineas } from './secuencias';
 import { generarOrientaciones, type Azar, type Direccion } from './orientaciones';
 
 export type Ojo = 'OD' | 'OI';
@@ -105,7 +106,12 @@ export interface Posicion {
 export interface Contexto {
   ojo: Ojo;
   pantalla: Pantalla;
-  azar: Azar;
+  /** Solo para pruebas: si se da, las «E» salen al azar; si es null, salen las secuencias fijas. */
+  azar: Azar | null;
+  /** Juego de secuencias fijas: A o B. */
+  version: VersionLineas;
+  /** Cuántas veces se mostró cada línea (por clave), para que la repetición de una línea tenga otra secuencia. */
+  vistas: Map<string, number>;
   ultima: Direccion | null;
   registro: RegistroLinea[];
 }
@@ -160,7 +166,12 @@ export function* mostrarLinea(
   nivel: Nivel,
   necesarios: number,
 ): Flujo<number> {
-  const orientaciones = generarOrientaciones(LETRAS_POR_LINEA, ctx.azar, ctx.ultima);
+  const clave = `${prueba}|${ctx.ojo}|${lugar.id}|${nivel.nombre}`;
+  const vez = (ctx.vistas.get(clave) ?? 0) + 1;
+  ctx.vistas.set(clave, vez);
+  const orientaciones = ctx.azar
+    ? generarOrientaciones(LETRAS_POR_LINEA, ctx.azar, ctx.ultima)
+    : secuenciaLinea(ctx.version, `${clave}|${vez}`, ctx.ultima, LETRAS_POR_LINEA);
   ctx.ultima = orientaciones[orientaciones.length - 1];
   const evento = exigir(
     yield { tipo: 'linea', ojo: ctx.ojo, prueba, lugar, nivel, orientaciones, necesarios },

@@ -4,6 +4,7 @@
  * Ángulos en grados, antihorario desde la horizontal, sobre 180°.
  */
 import { exigir, type Contexto, type Flujo, type Lugar } from './pasos';
+import { GIROS_ABANICO } from './secuencias';
 
 /** Botones del docente: cada uno es una línea de la carta, con el número que lleva en sus dos extremos. */
 export const BOTONES_ABANICO = ['1', '2', '3', '4', '5', '6'] as const;
@@ -52,7 +53,11 @@ export function abanicoConsistente(primera: AnguloAbanico, segunda: AnguloAbanic
 /** Las dos vueltas: sin giro y con un giro al azar de 60°, 90° o 120°. */
 export function* hacerAbanico(ctx: Contexto, lugar: Lugar): Flujo<[AnguloAbanico, AnguloAbanico]> {
   const opciones = ROTACIONES_SEGUNDA_VUELTA;
-  const giro = opciones[Math.min(Math.floor(ctx.azar() * opciones.length), opciones.length - 1)];
+  // Sin azar (la prueba real): el giro es fijo por ojo y por juego de secuencias.
+  const azar = ctx.azar;
+  const giro = azar
+    ? opciones[Math.min(Math.floor(azar() * opciones.length), opciones.length - 1)]
+    : GIROS_ABANICO[ctx.version][ctx.ojo];
   const angulos: AnguloAbanico[] = [];
   for (const [vuelta, rotacion] of [[1, 0], [2, giro]] as const) {
     const { eleccion } = exigir(
