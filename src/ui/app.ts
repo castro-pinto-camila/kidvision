@@ -4,6 +4,7 @@
 import { configuracionPorDefecto, guardarConfiguracion, leerConfiguracion, type Configuracion } from '../data/config';
 import { abrirDB } from '../data/db';
 import type { ResultadoSesion } from '../logic/flujo';
+import { montarCalibracion } from './calibracion';
 import { montarConfiguracion } from './configuracion';
 import { liberarPantalla, prepararPantalla } from './dispositivo';
 import { montarInicio } from './inicio';
@@ -17,6 +18,8 @@ interface Estado {
   enPrueba: boolean;
   resultado: ResultadoSesion | null;
   avisoInicio?: string;
+  /** A dónde volver al terminar la calibración. */
+  volverDeCalibrar: string;
 }
 
 export async function iniciarApp(raiz: HTMLElement): Promise<void> {
@@ -26,6 +29,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
     avisos: [],
     enPrueba: false,
     resultado: null,
+    volverDeCalibrar: '#/',
   };
   try {
     estado.db = await abrirDB();
@@ -55,7 +59,16 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
     }
 
     if (ruta === '#/config') {
-      desmontar = montarConfiguracion(raiz, estado.config, guardar, () => ir('#/'));
+      desmontar = montarConfiguracion(raiz, estado.config, {
+        guardar,
+        calibrar: () => {
+          estado.volverDeCalibrar = '#/config';
+          ir('#/calibrar');
+        },
+        volver: () => ir('#/'),
+      });
+    } else if (ruta === '#/calibrar') {
+      desmontar = montarCalibracion(raiz, estado.config, guardar, () => ir(estado.volverDeCalibrar));
     } else if (ruta === '#/prueba' && estado.enPrueba && estado.config.pxPorMm !== null) {
       try {
         desmontar = montarPrueba(raiz, {
@@ -102,6 +115,10 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
             ir('#/prueba');
           },
           configurar: () => ir('#/config'),
+          calibrar: () => {
+            estado.volverDeCalibrar = '#/';
+            ir('#/calibrar');
+          },
         },
         aviso,
       );

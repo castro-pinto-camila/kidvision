@@ -384,3 +384,204 @@ td.no {
   font-size: 1.5rem;
   font-weight: 700;
 }
+
+/* ---------- Calibración ---------- */
+
+.pasos {
+  display: flex;
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 16px;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.pasos li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pasos .numero {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gris);
+  font-weight: 700;
+}
+
+.pasos .actual {
+  color: #111827;
+  font-weight: 700;
+}
+
+.pasos .actual .numero {
+  background: var(--azul);
+  color: #fff;
+}
+
+.pasos .hecho .numero {
+  background: var(--verde);
+  color: #fff;
+}
+
+.tarjeta {
+  position: relative;
+  color: var(--azul);
+}
+
+.tarjeta .dni {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.deslizador {
+  flex: 3;
+  min-width: 0;
+  accent-color: var(--azul);
+}
+
+.regla {
+  position: relative;
+  margin-bottom: 36px;
+}
+
+.regla .cm {
+  position: absolute;
+  top: 26px;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+}
+
+.confirmacion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #dcfce7;
+  color: #14532d;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 8px 0 16px;
+}
+
+.confirmacion .check,
+.fila-estado .icono {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  font-weight: 700;
+  color: #fff;
+  background: var(--verde);
+}
+
+/* ---------- Configuración ---------- */
+
+.tarjetas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fila-estado {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--gris);
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+.fila-estado .texto {
+  flex: 1 1 200px;
+}
+
+.fila-estado.pendiente .icono {
+  background: var(--amarillo);
+}
+
+.fila-estado.mal .icono {
+  background: var(--rojo);
+}
+
+.avanzado {
+  margin: 24px 0;
+  border: 1px solid var(--gris);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.avanzado summary {
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.campo .etiqueta small {
+  display: block;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.campo .valor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ranura {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.ranura > span:first-child {
+  width: 36px;
+  font-weight: 700;
+}
+
+.ranura input {
+  width: 90px;
+  min-height: 44px;
+  padding: 4px 8px;
+}
+
+.tabla-scroll {
+  overflow-x: auto;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%) translateY(120%);
+  background: #111827;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 999px;
+  opacity: 0;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+  pointer-events: none;
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

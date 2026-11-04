@@ -8,6 +8,8 @@ import { ALMACEN_CONFIG, escribir, leer } from './db';
 export interface Configuracion {
   /** Píxeles CSS por mm, de la calibración con la tarjeta; null = sin calibrar. */
   pxPorMm: number | null;
+  /** devicePixelRatio al calibrar: si cambia (zoom o tamaño de letra del celular), hay que recalibrar. */
+  dprCalibracion: number | null;
   caja: ConfigCaja;
   umbralCorte: '6/9' | '6/12';
   franja: Franja;
@@ -18,9 +20,22 @@ export interface Configuracion {
 
 const CLAVE = 'actual';
 
+export type EstadoCalibracion = 'sin-calibrar' | 'vigente' | 'cambio-zoom';
+
+/**
+ * Si el devicePixelRatio cambió desde la calibración, los píxeles CSS ya no
+ * miden lo mismo: el zoom o el tamaño de letra del celular cambió.
+ */
+export function estadoCalibracion(config: Configuracion, dprActual: number): EstadoCalibracion {
+  if (config.pxPorMm === null) return 'sin-calibrar';
+  if (config.dprCalibracion !== null && Math.abs(config.dprCalibracion - dprActual) > 0.01) return 'cambio-zoom';
+  return 'vigente';
+}
+
 export function configuracionPorDefecto(): Configuracion {
   return {
     pxPorMm: null,
+    dprCalibracion: null,
     caja: { ...CAJA_POR_DEFECTO, ranuras_mm: [...CAJA_POR_DEFECTO.ranuras_mm] },
     umbralCorte: '6/9',
     franja: { lado: 'arriba', ancho_mm: 15 },

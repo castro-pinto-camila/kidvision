@@ -1,6 +1,7 @@
 /**
- * Pantalla de configuración: calibración con tarjeta, caja, franja y verificación.
- * Cada cambio se guarda solo.
+ * Configuración. Arriba, lo que necesita el docente: si la pantalla está
+ * calibrada y si el celular sirve. Lo técnico de la caja queda plegado, con
+ * una explicación de cada número. Cada cambio se guarda solo.
  */
 import { crearCaja, ranuras } from '../core/caja';
 import { cabe, disponer, medidasLinea, type LadoFranja } from '../core/disposicion';
@@ -13,15 +14,9 @@ import {
   nivelPorNombre,
   type Pantalla,
 } from '../core/optotipos';
-import type { Configuracion } from '../data/config';
+import { estadoCalibracion, type Configuracion } from '../data/config';
 import { h } from './dom';
 import { textoDioptrias } from './textos';
-
-/** Ancho de un DNI o tarjeta bancaria (ISO/IEC 7810 ID-1). */
-export const ANCHO_TARJETA_MM = 85.6;
-const ALTO_TARJETA_MM = 53.98;
-/** Valor inicial típico de un celular, antes de calibrar. */
-const PX_POR_MM_INICIAL = 6.3;
 
 const coma = (n: number, decimales = 1) => n.toFixed(decimales).replace('.', ',');
 
@@ -29,67 +24,87 @@ function leerNumero(texto: string): number {
   return Number.parseFloat(texto.replace(',', '.'));
 }
 
+export interface AccionesConfiguracion {
+  guardar: (c: Configuracion) => Promise<void>;
+  calibrar: () => void;
+  volver: () => void;
+}
+
 export function montarConfiguracion(
   raiz: HTMLElement,
   config: Configuracion,
-  guardar: (c: Configuracion) => Promise<void>,
-  volver: () => void,
+  acciones: AccionesConfiguracion,
 ): () => void {
   const c: Configuracion = structuredClone(config);
-  let pxCalibracion = c.pxPorMm ?? PX_POR_MM_INICIAL;
-  const estadoGuardado = h('span', { class: 'guardado' });
+  const dpr = window.devicePixelRatio || 1;
+  const aviso = h('div', { class: 'toast', role: 'status' });
+  let temporizadorAviso: number | undefined;
+
+  function avisar(texto: string): void {
+    aviso.textContent = texto;
+    aviso.classList.add('visible');
+    clearTimeout(temporizadorAviso);
+    temporizadorAviso = window.setTimeout(() => aviso.classList.remove('visible'), 1800);
+  }
 
   async function guardarYActualizar(): Promise<void> {
     actualizar();
     try {
-      await guardar(c);
-      estadoGuardado.textContent = 'Guardado ✓';
+      await acciones.guardar(c);
+      avisar('Guardado');
     } catch {
-      estadoGuardado.textContent = 'No se pudo guardar';
+      avisar('No se pudo guardar');
     }
   }
 
-  // --- Calibración ---------------------------------------------------------
-  const tarjeta = h('div', { class: 'tarjeta' });
-  const regla = h('div', { class: 'regla' });
-  const textoCalibracion = h('p', { class: 'nota' });
-  const avisoGirarCal = h('p', { class: 'aviso' });
+  // --- Lo del docente -------------------------------------------------------
+  const estadoDocente = h('section', { class: 'tarjetas' });
 
-  function ajustar(deltaPx: number): void {
-    const ancho = pxCalibracion * ANCHO_TARJETA_MM + deltaPx;
-    pxCalibracion = Math.max(1, ancho / ANCHO_TARJETA_MM);
-    c.pxPorMm = pxCalibracion;
-    void guardarYActualizar();
+  function dibujarEstadoDocente(): void {
+    const estado = estadoCalibracion(c, dpr);
+    const pantalla: Pantalla | null = c.pxPorMm === null ? null : { pxPorMm: c.pxPorMm, dpr };
+    const sirve = pantalla !== null && esDibujable(nivelPorNombre('6/9'), ranuras(c.caja)[0], pantalla);
+    const textoCalibracion = {
+      'sin-calibrar': 'La pantalla todavía no está calibrada.',
+      vigente: 'Pantalla calibrada.',
+      'cambio-zoom': 'Cambió el zoom o el tamaño de letra del celular: vuelve a calibrar.',
+    }[estado];
+    const filas: HTMLElement[] = [
+      h(
+        'div',
+        { class: `fila-estado ${estado === 'vigente' ? 'ok' : 'pendiente'}` },
+        h('span', { class: 'icono', 'aria-hidden': 'true' }, estado === 'vigente' ? '✓' : '!'),
+        h('span', { class: 'texto' }, textoCalibracion),
+        h(
+          'button',
+          { class: estado === 'vigente' ? 'boton' : 'boton principal', onclick: acciones.calibrar },
+          estado === 'sin-calibrar' ? 'Calibrar' : 'Volver a calibrar',
+        ),
+      ),
+    ];
+    if (pantalla) {
+      filas.push(
+        h(
+          'div',
+          { class: `fila-estado ${sirve ? 'ok' : 'mal'}` },
+          h('span', { class: 'icono', 'aria-hidden': 'true' }, sirve ? '✓' : '✕'),
+          h(
+            'span',
+            { class: 'texto' },
+            sirve
+              ? 'Tu celular sirve para la prueba.'
+              : 'Tu celular no sirve para la prueba: su pantalla no puede dibujar la línea 6/9. Usa otro celular.',
+          ),
+        ),
+      );
+    }
+    estadoDocente.replaceChildren(...filas);
   }
 
-  const calibracion = h(
-    'section',
-    {},
-    h('h2', {}, '1. Calibrar la pantalla'),
-    h(
-      'p',
-      {},
-      'Apoya un DNI o una tarjeta bancaria sobre el rectángulo azul. Ajusta con los botones hasta que el rectángulo tenga el mismo ancho que la tarjeta.',
-    ),
-    avisoGirarCal,
-    tarjeta,
-    h(
-      'div',
-      { class: 'fila-botones' },
-      h('button', { class: 'boton', onclick: () => ajustar(-10) }, '− −'),
-      h('button', { class: 'boton', onclick: () => ajustar(-1) }, '−'),
-      h('button', { class: 'boton', onclick: () => ajustar(1) }, '+'),
-      h('button', { class: 'boton', onclick: () => ajustar(10) }, '+ +'),
-    ),
-    h('button', { class: 'boton principal', onclick: () => ajustar(0) }, 'Ya coincide: guardar'),
-    textoCalibracion,
-    h('p', {}, 'Comprueba con una regla: esta línea debe medir 10 cm.'),
-    regla,
-  );
-
-  // --- Caja ----------------------------------------------------------------
+  // --- Ajustes de la caja (plegados) ---------------------------------------
   function campo(
     etiqueta: string,
+    explicacion: string,
     valor: number,
     unidad: string,
     aplicar: (n: number) => boolean,
@@ -105,33 +120,43 @@ export function montarConfiguracion(
       }
       entrada.value = coma(vigente, decimales);
     });
-    return h('label', { class: 'campo' }, h('span', {}, etiqueta), entrada, h('span', { class: 'unidad' }, unidad));
+    return h(
+      'label',
+      { class: 'campo' },
+      h('span', { class: 'etiqueta' }, etiqueta, h('small', {}, explicacion)),
+      h('span', { class: 'valor' }, entrada, h('span', { class: 'unidad' }, unidad)),
+    );
   }
 
   const camposRanuras = h('div', { class: 'ranuras' });
   function dibujarCamposRanuras(): void {
     camposRanuras.replaceChildren(
-      ...c.caja.ranuras_mm.map((d, i) =>
-        campo(`R${i}`, d, 'mm', (n) => {
-          if (n <= 0) return false;
-          c.caja.ranuras_mm[i] = n;
-          return true;
-        }),
-      ),
+      ...c.caja.ranuras_mm.map((d, i) => {
+        let vigente = d;
+        const entrada = h('input', { type: 'text', inputmode: 'decimal', value: coma(d) });
+        entrada.addEventListener('change', () => {
+          const n = leerNumero(entrada.value);
+          if (Number.isFinite(n) && n > 0) {
+            vigente = n;
+            c.caja.ranuras_mm[i] = n;
+            void guardarYActualizar();
+          }
+          entrada.value = coma(vigente);
+        });
+        return h('label', { class: 'ranura' }, h('span', {}, `R${i}`), entrada, h('span', { class: 'unidad' }, 'mm'));
+      }),
     );
   }
   dibujarCamposRanuras();
 
-  const selectorUmbral = h(
-    'select',
-    {},
-    h('option', { value: '6/9', selected: c.umbralCorte === '6/9' }, '6/9 (recomendado por la IAPB)'),
-    h('option', { value: '6/12', selected: c.umbralCorte === '6/12' }, '6/12'),
-  );
-  selectorUmbral.addEventListener('change', () => {
-    c.umbralCorte = selectorUmbral.value as Configuracion['umbralCorte'];
-    void guardarYActualizar();
-  });
+  function selector<T extends string>(opciones: [T, string][], actual: T, aplicar: (v: T) => void): HTMLSelectElement {
+    const s = h('select', {}, ...opciones.map(([v, t]) => h('option', { value: v, selected: v === actual }, t)));
+    s.addEventListener('change', () => {
+      aplicar(s.value as T);
+      void guardarYActualizar();
+    });
+    return s;
+  }
 
   const LADOS: [LadoFranja, string][] = [
     ['arriba', 'Arriba'],
@@ -139,74 +164,115 @@ export function montarConfiguracion(
     ['izquierda', 'Izquierda'],
     ['derecha', 'Derecha'],
   ];
-  const selectorLado = h(
-    'select',
-    {},
-    ...LADOS.map(([v, t]) => h('option', { value: v, selected: c.franja.lado === v }, t)),
-  );
-  selectorLado.addEventListener('change', () => {
-    c.franja.lado = selectorLado.value as LadoFranja;
-    void guardarYActualizar();
-  });
 
-  const caja = h(
-    'section',
-    {},
-    h('h2', {}, '2. Caja'),
-    campo('Potencia del lente (P)', c.caja.P, 'D', (n) => n > 0 && ((c.caja.P = n), true)),
-    campo('Distancia lente–ojo (e)', c.caja.e_mm, 'mm', (n) => n >= 0 && ((c.caja.e_mm = n), true)),
+  const tablas = h('div', {});
+
+  const ajustes = h(
+    'details',
+    { class: 'avanzado' },
+    h('summary', {}, 'Ajustes de la caja (para quien la arma)'),
+    h(
+      'p',
+      { class: 'nota' },
+      'Estos números vienen listos para la caja estándar. Cámbialos solo si mediste tu caja y no coinciden.',
+    ),
+    h('h3', {}, 'Lentes'),
     campo(
-      'Centro del lente desde el centro de la pantalla',
+      'Potencia de los lentes de la caja',
+      'Son lentes de lectura de +3.00: déjalo en 3.',
+      c.caja.P,
+      'D',
+      (n) => n > 0 && ((c.caja.P = n), true),
+    ),
+    campo(
+      'Distancia del lente al ojo',
+      'Desde el lente hasta el ojo del niño. Normalmente 15 mm.',
+      c.caja.e_mm,
+      'mm',
+      (n) => n >= 0 && ((c.caja.e_mm = n), true),
+    ),
+    campo(
+      'Separación de cada lente',
+      'Distancia horizontal entre el centro de la pantalla y el centro de cada lente.',
       c.caja.lenteDesdeCentro_mm,
       'mm',
       (n) => n >= 0 && ((c.caja.lenteDesdeCentro_mm = n), true),
     ),
-    h('h3', {}, 'Distancia de la pantalla al lente en cada ranura'),
+    h('h3', {}, 'Ranuras'),
+    h(
+      'p',
+      { class: 'nota' },
+      'Distancia entre la pantalla y el lente en cada ranura. Mídela con una regla y corrígela si tu caja salió distinta.',
+    ),
     camposRanuras,
     h(
       'button',
       {
-        class: 'boton secundario',
+        class: 'boton',
         onclick: () => {
           c.caja.ranuras_mm = crearCaja(c.caja.P, c.caja.e_mm).ranuras_mm;
           dibujarCamposRanuras();
           void guardarYActualizar();
         },
       },
-      'Recalcular distancias según P',
+      'Volver a las distancias de fábrica',
     ),
     h('h3', {}, 'Prueba'),
-    h('label', { class: 'campo' }, h('span', {}, 'Línea de corte'), selectorUmbral),
-    h('label', { class: 'campo' }, h('span', {}, 'Lado de los botones (fuera de la caja)'), selectorLado),
-    campo('Ancho de la franja de botones', c.franja.ancho_mm, 'mm', (n) => n >= 8 && ((c.franja.ancho_mm = n), true)),
+    h(
+      'label',
+      { class: 'campo' },
+      h('span', { class: 'etiqueta' }, 'Línea para pasar de lejos', h('small', {}, 'La IAPB recomienda 6/9.')),
+      selector<Configuracion['umbralCorte']>(
+        [
+          ['6/9', '6/9'],
+          ['6/12', '6/12'],
+        ],
+        c.umbralCorte,
+        (v) => (c.umbralCorte = v),
+      ),
+    ),
+    h(
+      'label',
+      { class: 'campo' },
+      h(
+        'span',
+        { class: 'etiqueta' },
+        'Lado de los botones',
+        h('small', {}, 'El borde de la pantalla que queda fuera de la caja.'),
+      ),
+      selector(LADOS, c.franja.lado, (v) => (c.franja.lado = v)),
+    ),
+    campo(
+      'Alto de la franja de botones',
+      'Cuánto de la pantalla ocupan los botones.',
+      c.franja.ancho_mm,
+      'mm',
+      (n) => n >= 8 && ((c.franja.ancho_mm = n), true),
+    ),
+    h(
+      'button',
+      {
+        class: 'boton',
+        onclick: () => {
+          c.pantallaInvertida = false;
+          c.mitadesIntercambiadas = false;
+          void guardarYActualizar();
+        },
+      },
+      'Olvidar la corrección de la «D»',
+    ),
+    tablas,
   );
 
-  // --- Verificación --------------------------------------------------------
-  const verificacion = h('section', {});
-
   function actualizar(): void {
-    const px = pxCalibracion;
-    tarjeta.style.width = `${px * ANCHO_TARJETA_MM}px`;
-    tarjeta.style.height = `${px * ALTO_TARJETA_MM}px`;
-    regla.style.width = `${px * 100}px`;
-    regla.style.backgroundSize = `${px * 10}px 100%`;
-    avisoGirarCal.textContent =
-      px * ANCHO_TARJETA_MM > window.innerWidth - 32 ? 'Gira el celular a horizontal para ver la tarjeta completa.' : '';
-    textoCalibracion.textContent =
-      c.pxPorMm === null
-        ? 'Todavía no está calibrado.'
-        : `Calibrado: ${coma(c.pxPorMm, 2)} píxeles por mm.`;
-
+    dibujarEstadoDocente();
     if (c.pxPorMm === null) {
-      verificacion.replaceChildren(h('h2', {}, '3. Verificación'), h('p', {}, 'Primero calibra la pantalla.'));
+      tablas.replaceChildren(h('p', { class: 'nota' }, 'Calibra la pantalla para ver las tablas de verificación.'));
       return;
     }
-    const pantalla: Pantalla = { pxPorMm: c.pxPorMm, dpr: window.devicePixelRatio || 1 };
+    const pantalla: Pantalla = { pxPorMm: c.pxPorMm, dpr };
     const lista = ranuras(c.caja);
-    const apto = esDibujable(nivelPorNombre('6/9'), lista[0], pantalla);
     const mmPorPixel = 1 / (pantalla.pxPorMm * pantalla.dpr);
-
-    // Pantalla horizontal de este celular.
     const vista = {
       ancho: Math.max(window.innerWidth, window.innerHeight),
       alto: Math.min(window.innerWidth, window.innerHeight),
@@ -214,44 +280,37 @@ export function montarConfiguracion(
     const dispOD = disponer(vista, c.pxPorMm, 'OD', c.caja.lenteDesdeCentro_mm, c.franja);
     const dispOI = disponer(vista, c.pxPorMm, 'OI', c.caja.lenteDesdeCentro_mm, c.franja);
 
-    verificacion.replaceChildren(
-      h('h2', {}, '3. Verificación'),
-      h(
-        'div',
-        { class: `veredicto ${apto ? 'ok' : 'mal'}` },
-        apto
-          ? 'Este celular sirve para la prueba.'
-          : 'Este celular NO sirve para la prueba: no puede dibujar la línea 6/9 en R0. Usa un celular con mejor pantalla.',
-      ),
+    tablas.replaceChildren(
+      h('h3', {}, 'Verificación'),
       h(
         'p',
         { class: 'nota' },
-        `Cada píxel físico mide ${coma(mmPorPixel, 3)} mm (devicePixelRatio ${pantalla.dpr}). ` +
+        `Cada píxel físico mide ${coma(mmPorPixel, 3)} mm (devicePixelRatio ${dpr}). ` +
           `Pantalla horizontal: ${coma(vista.ancho / c.pxPorMm, 0)} × ${coma(vista.alto / c.pxPorMm, 0)} mm.`,
       ),
-      h('h3', {}, 'Qué se puede dibujar en cada ranura'),
+      h('h4', {}, 'Qué se puede dibujar en cada ranura'),
       h(
-        'table',
-        {},
-        h('tr', {}, h('th', {}, 'Ranura'), h('th', {}, 'd'), h('th', {}, 'V en el ojo'), h('th', {}, 'Niveles'), h('th', {}, 'Punto remoto')),
-        ...lista.map((r) =>
-          h(
-            'tr',
-            {},
-            h('td', {}, r.id),
-            h('td', {}, `${coma(r.d_mm)} mm`),
-            h('td', {}, textoDioptrias(r.Vojo)),
-            h('td', {}, nivelesDibujables(r, pantalla).map((n) => n.nombre).join(' ') || 'ninguno'),
-            h('td', {}, r.id === 'R0' ? '—' : (nivelObjetivo(r, pantalla)?.nombre ?? 'no se puede')),
+        'div',
+        { class: 'tabla-scroll' },
+        h(
+          'table',
+          {},
+          h('tr', {}, h('th', {}, 'Ranura'), h('th', {}, 'd'), h('th', {}, 'V en el ojo'), h('th', {}, 'Niveles'), h('th', {}, 'Punto remoto')),
+          ...lista.map((r) =>
+            h(
+              'tr',
+              {},
+              h('td', {}, r.id),
+              h('td', {}, `${coma(r.d_mm)} mm`),
+              h('td', {}, textoDioptrias(r.Vojo)),
+              h('td', {}, nivelesDibujables(r, pantalla).map((n) => n.nombre).join(' ') || 'ninguno'),
+              h('td', {}, r.id === 'R0' ? '—' : (nivelObjetivo(r, pantalla)?.nombre ?? 'no se puede')),
+            ),
           ),
         ),
       ),
-      h('h3', {}, '¿Cabe la línea en la mitad de pantalla de cada ojo?'),
-      h(
-        'p',
-        { class: 'nota' },
-        'Medido en R0, donde las letras son más grandes, con cinco «E» y sus barras.',
-      ),
+      h('h4', {}, '¿Cabe la línea en la mitad de pantalla de cada ojo?'),
+      h('p', { class: 'nota' }, 'Medido en R0, donde las letras son más grandes, con cinco «E» y sus barras.'),
       h(
         'table',
         {},
@@ -280,16 +339,18 @@ export function montarConfiguracion(
       h(
         'header',
         { class: 'cabecera' },
-        h('button', { class: 'boton secundario', onclick: volver }, '← Volver'),
+        h('button', { class: 'boton secundario', onclick: acciones.volver }, '← Volver'),
         h('h1', {}, 'Configuración'),
-        estadoGuardado,
       ),
-      calibracion,
-      caja,
-      verificacion,
+      estadoDocente,
+      ajustes,
+      aviso,
     ),
   );
   actualizar();
   window.addEventListener('resize', actualizar);
-  return () => window.removeEventListener('resize', actualizar);
+  return () => {
+    clearTimeout(temporizadorAviso);
+    window.removeEventListener('resize', actualizar);
+  };
 }

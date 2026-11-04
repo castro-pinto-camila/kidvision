@@ -4,6 +4,7 @@ import { abrirDB } from './db';
 import {
   completar,
   configuracionPorDefecto,
+  estadoCalibracion,
   guardarConfiguracion,
   leerConfiguracion,
 } from './config';
@@ -41,5 +42,26 @@ describe('configuración', () => {
     const vieja = { pxPorMm: 6 } as Parameters<typeof completar>[0];
     expect(completar(vieja).franja.ancho_mm).toBe(15);
     expect(completar(vieja).pxPorMm).toBe(6);
+  });
+});
+
+describe('estado de la calibración', () => {
+  it('sin calibrar', () => {
+    expect(estadoCalibracion(configuracionPorDefecto(), 2)).toBe('sin-calibrar');
+  });
+
+  it('vigente si el devicePixelRatio es el mismo que al calibrar', () => {
+    const c = { ...configuracionPorDefecto(), pxPorMm: 6.3, dprCalibracion: 2.625 };
+    expect(estadoCalibracion(c, 2.625)).toBe('vigente');
+  });
+
+  it('pide recalibrar si cambió el zoom o el tamaño de letra del celular', () => {
+    const c = { ...configuracionPorDefecto(), pxPorMm: 6.3, dprCalibracion: 2.625 };
+    expect(estadoCalibracion(c, 2.25)).toBe('cambio-zoom');
+  });
+
+  it('una calibración vieja sin devicePixelRatio guardado se acepta', () => {
+    const c = { ...configuracionPorDefecto(), pxPorMm: 6.3 };
+    expect(estadoCalibracion(c, 3)).toBe('vigente');
   });
 });
