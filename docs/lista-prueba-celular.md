@@ -14,10 +14,16 @@ Antes de empezar: celular con la batería cargada, sin funda, brillo al máximo 
 - [ ] Se puede instalar (Chrome: menú ⋮ → «Instalar app» o «Agregar a la pantalla de inicio»). Tiene su ícono.
 - [ ] Al abrirla desde el ícono, se ve a pantalla completa.
 
-## 2. Calibración con regla
-- [ ] Toca «Calibrar pantalla» y sigue los 3 pasos.
-- [ ] Al terminar, la app dibuja una línea de 100 mm. Ponle la regla encima: debe medir **100 mm ± 1 mm**.
-- [ ] Cierra la app, ábrela otra vez: la calibración se conserva.
+## 2. Calibración
+Tolerancia ±5 %; el objetivo es ±2 %.
+- [ ] Toca «Calibrar pantalla»: es un solo paso, con tres opciones (DNI o tarjeta, regla del kit, regla común).
+- [ ] El rectángulo o la línea empieza casi del tamaño correcto: el ajuste es pequeño. Arrastra el punto azul con el dedo y usa − / + para afinar.
+- [ ] Prueba cada referencia por separado (las tres deben dar casi el mismo valor): la tarjeta contra el rectángulo, la tira del kit contra la línea de 10 cm (0 en el borde izquierdo, 10 al final de lo resaltado) y una regla común.
+- [ ] Al guardar, apoya la regla sobre una línea o referencia de otra pantalla de la app (o mide el rectángulo): la medida debe estar dentro de ±5 % (ideal ±2 %), es decir, 100 mm entre 95 y 105 (ideal 98 a 102).
+- [ ] Cierra la app y ábrela otra vez: la calibración se conserva.
+- [ ] Hacer zoom con dos dedos no amplía la página.
+- [ ] Cambia el tamaño de letra o el zoom del navegador de Android: al intentar empezar una prueba, la app pide calibrar de nuevo y no deja empezar.
+- [ ] Si instalas la app en la pantalla de inicio, la app instalada pide el colegio y la calibración de nuevo (guarda sus datos aparte del navegador). Calibra dentro de ella.
 
 ## 3. Modo práctica (sin caja)
 - [ ] Entra al modo práctica desde el inicio.
@@ -30,7 +36,7 @@ Antes de empezar: celular con la batería cargada, sin funda, brillo al máximo 
 - [ ] Toca «Preparar» al niño: las instrucciones se entienden.
 - [ ] Pon el celular en la caja, sin funda, con esponja a los costados.
 - [ ] El celular **no se apaga ni se oscurece** durante la prueba (pantalla siempre encendida).
-- [ ] Los avisos «Pon el pasador en R…» coinciden con el número de la caja.
+- [ ] Los avisos «Pon el pasador en R…» coinciden con el número de la caja. Si solo cambia la tapa, el aviso dice «Baja la tapa +2.00» o «Sube la tapa +2.00», sin hablar del pasador.
 - [ ] Los botones se alcanzan con el pulgar en la franja de arriba que sobresale de la caja.
 - [ ] Baja y sube la tapa +2.00 cuando la app lo pide: baja sola, queda a plomo y se levanta con la pestaña.
 - [ ] Al terminar aparece el semáforo y la agudeza de cada ojo.
