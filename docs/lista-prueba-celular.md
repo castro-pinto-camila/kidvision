@@ -68,3 +68,10 @@ Tolerancia ±5 %; el objetivo es ±2 %.
 
 ## 9. Comprobar los resultados (opcional)
 - [ ] Elige uno o dos escenarios de `docs/guia-resultados.md` (por ejemplo «Vista normal» y «Miopía leve»), haz la prueba con esa secuencia y compara el semáforo, la categoría, el punto remoto y la indicación con la guía.
+
+## 10. «E» fijas
+- [ ] Haz la prueba dos veces con el mismo niño de práctica o con dos niños nuevos (juego A): las flechas de cada línea son las mismas y coinciden con `docs/guia-resultados.md`.
+- [ ] Con un niño que ya tiene una evaluación guardada, las flechas son otras (juego B).
+- [ ] El ojo derecho y el izquierdo no leen las mismas flechas en la misma línea.
+- [ ] Sigue la secuencia de un escenario de la guía (por ejemplo «Límite: 2 errores en la línea de lejos»): el resultado coincide con el de la guía.
+- [ ] Abre `docs/tabla-reglas-ojo.csv` y `docs/tabla-reglas-nino.csv` en Excel y compáralos con el SPEC: ninguna fila debe contradecirlo.
