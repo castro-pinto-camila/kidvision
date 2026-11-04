@@ -55,8 +55,8 @@ La óptica solo depende de la distancia entre la pantalla y el lente, no del tam
 - **Esponja a los costados** para centrar el celular entre las paredes.
 - **Celulares aceptados:** pantallas de 6,0" a 6,8", **sin funda**. La app comprueba además que el celular pueda dibujar el 6/9 en R0.
 - El borde superior del celular sobresale de la caja: ahí queda la franja de botones del docente.
-- La tapa de +2.00 D va unida con una bisagra arriba del panel de lentes, del lado del ojo, y se baja dentro del espacio entre los lentes y el apoyo para la cara.
-- **Plantilla de corte:** `npm run plantilla` genera `docs/plantilla-caja.html` (hojas A4 horizontales que se unen por una línea roja) y `docs/plantilla-caja.svg` (una hoja grande), a escala 1:1, calculadas desde la configuración de la caja, con una regla de 10 cm para comprobar la impresión y la indicación «Imprimir sin ajustar a página». Con la configuración por defecto la caja mide unos 380 × 184 × 62 mm (largo con el apoyo × ancho × alto).
+- La tapa de +2.00 D va unida con una bisagra arriba del panel de lentes, del lado del ojo, y se baja dentro del espacio entre los lentes y el apoyo para la cara. Mide 172 mm de ancho (cabe entre S1 y S2), tiene dos salientes de 3 mm de ancho y 12 mm de largo en las esquinas de arriba (se refuerzan con cinta) que se apoyan sobre S1 y S2 y la dejan a plomo, y una pestaña abajo, doblada hacia el ojo, para levantarla por la muesca de la nariz. S1 y S2 son más bajos que el panel (41 mm) para no trabar los salientes. El techo delantero empieza detrás del panel de lentes (deja libres la bisagra y el hueco de la tapa) y termina 8 mm antes del tope de R10, así que el celular no lo toca.
+- **Plantilla de corte:** `npm run plantilla` genera `docs/plantilla-caja.html` (hojas A4 horizontales que se unen por una línea roja) y `docs/plantilla-caja.svg` (una hoja grande), a escala 1:1, calculadas desde la configuración de la caja, con una regla de 10 cm para comprobar la impresión y la indicación «Imprimir sin ajustar a página», más una hoja de armado (piezas, esquema y pasos, con cómo comprobar que la tapa asienta bien). Con la configuración por defecto la caja mide unos 380 × 184 × 62 mm (largo con el apoyo × ancho × alto).
 - Centrar los lentes por software no hace falta por ahora: con la pantalla en el foco, 5 mm de desvío equivalen a menos de 1° y no afectan la agudeza. Cuando exista la caja se agregará una comprobación simple: «¿Ves la línea de «E» completa por cada lente? Sí / No».
 
 ## Tamaño de los optotipos
@@ -181,14 +181,14 @@ El niño se registra por código, sin nombre, para proteger los datos de menores
 
 ## Criterios de aceptación
 
-- [ ] Las pruebas unitarias reproducen la tabla de ranuras (d ± 0,1 mm; V en el ojo ± 0,01 D).
-- [ ] En R0 la altura calculada no depende de `e`, y la tabla de tamaños se reproduce ± 0,05 mm.
-- [ ] La regla de resolución desactiva los niveles cuyo trazo mide menos de 2 px físicos.
-- [ ] Hay pruebas del punto remoto: encontrado y confirmado, no confirmado (dudoso) y no encontrado.
-- [ ] Hay pruebas para cada regla de clasificación y de control de calidad.
-- [ ] Tras calibrar, una línea de 100 mm en pantalla mide 100 ± 1 mm con regla.
-- [ ] Después de la primera carga, la app completa una evaluación en modo avión.
-- [ ] La app registra la duración de cada evaluación.
+- [x] Las pruebas unitarias reproducen la tabla de ranuras (d ± 0,1 mm; V en el ojo ± 0,01 D).
+- [x] En R0 la altura calculada no depende de `e`, y la tabla de tamaños se reproduce ± 0,05 mm.
+- [x] La regla de resolución desactiva los niveles cuyo trazo mide menos de 2 px físicos.
+- [x] Hay pruebas del punto remoto: encontrado y confirmado, no confirmado (dudoso) y no encontrado.
+- [x] Hay pruebas para cada regla de clasificación y de control de calidad.
+- [ ] Tras calibrar, una línea de 100 mm en pantalla mide 100 ± 1 mm con regla. *(pendiente: comprobar con regla en el celular)*
+- [ ] Después de la primera carga, la app completa una evaluación en modo avión. *(pendiente: la prueba en el celular; en el navegador ya abre y funciona con el servidor apagado)*
+- [x] La app registra la duración de cada evaluación.
 
 ## Plan de sesiones
 
@@ -196,5 +196,9 @@ El niño se registra por código, sin nombre, para proteger los datos de menores
 1. **Núcleo óptico (`src/core`):** ranuras, vergencias, tamaño de optotipos, regla de resolución y nivel objetivo por ranura.
 2. **Lógica (`src/logic`):** flujo por ojo como máquina de estados, búsqueda del punto remoto, control de calidad y clasificación.
 3. **Pantallas de prueba (`src/ui`):** calibración, configuración de la caja (con el aviso de celular no apto), media pantalla por ojo, avisos de ranura, prueba de cerca a 40 cm y botones en los bordes.
-4. **Resultado y datos:** semáforo, constancia, lista del salón, IndexedDB, modo sin conexión y CSV.
-5. **Publicación:** despliegue en GitHub Pages con HTTPS (el service worker no funciona sin HTTPS fuera de localhost).
+4. **Resultado y datos:** semáforo, constancia, lista del salón, IndexedDB, modo sin conexión y CSV. *(Hecha; falta probar en el celular: ver `docs/lista-prueba-celular.md`.)*
+5. **Publicación:** despliegue en GitHub Pages con HTTPS (el service worker no funciona sin HTTPS fuera de localhost). *(En curso: ver `docs/publicar-github-pages.md`.)*
+
+## Pendientes
+
+- **Tutorial y ayuda en cada paso** de la app. Se hacen después de que se pruebe la app publicada en el celular. No empezar antes.
