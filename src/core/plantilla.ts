@@ -227,9 +227,19 @@ function piso(caja: ConfigCaja, m: MedidasCaja): Omit<Pieza, 'x' | 'y'> {
   };
 }
 
+/** Ancho de la tapa +2.00: baja entre S1 y S2, que ocupan un cartón a cada lado. */
+export function anchoTapa(m: MedidasCaja = MEDIDAS_POR_DEFECTO): number {
+  return m.anchoInterior - 2 * m.carton;
+}
+
 /** Panel con dos agujeros para lentes (panel de lentes y tapa +2.00). */
-function panelLentes(nombre: string, caja: ConfigCaja, m: MedidasCaja, conBisagra: boolean): Omit<Pieza, 'x' | 'y'> {
-  const ancho = m.anchoInterior;
+function panelLentes(
+  nombre: string,
+  caja: ConfigCaja,
+  m: MedidasCaja,
+  conBisagra: boolean,
+  ancho: number = m.anchoInterior,
+): Omit<Pieza, 'x' | 'y'> {
   const alto = m.altoInterior;
   const cy = alto - m.alturaLentes;
   const formas: Forma[] = [
@@ -412,7 +422,7 @@ export function generarPlantilla(caja: ConfigCaja, m: MedidasCaja = MEDIDAS_POR_
     [paredIzquierda(caja, m)],
     [reglaSuelta(caja, m)],
     [piso(caja, m)],
-    [panelLentes('Panel de lentes (+3.00)', caja, m, false), panelLentes('Tapa +2.00', caja, m, true)],
+    [panelLentes('Panel de lentes (+3.00)', caja, m, false), panelLentes('Tapa +2.00', caja, m, true, anchoTapa(m))],
     [apoyoCara(caja, m), panelTrasero(m)],
     [tapaSuperior(caja, m), separador(caja, m, 1), separador(caja, m, 2)],
     [bandeja(m)],
