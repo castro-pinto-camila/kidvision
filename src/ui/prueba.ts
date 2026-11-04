@@ -292,6 +292,40 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
     else dibujar();
   }
 
+  /**
+   * Modo práctica: sin la caja no hay tapa +2.00 que nuble la vista, así que
+   * esa línea no se puede hacer. La app simula la respuesta de un niño con
+   * vista normal (no la ve) y lo explica, sin pedirle al docente que toque
+   * «No sé» (no debe acostumbrarse a eso para la prueba real).
+   */
+  function dibujarSimulacionTapa(paso: PasoLinea): void {
+    const v = vista();
+    prepararLienzo(lienzo, v.ancho, v.alto);
+    const simular = () => {
+      const simulados: Toque[] = [];
+      while (
+        respuestasParaDecidir(paso.orientaciones, simulados.map((t) => t.respuesta), paso.necesarios) === null
+      ) {
+        simulados.push({ respuesta: 'nose', ms: 0 });
+      }
+      responder({ tipo: 'linea', toques: simulados });
+    };
+    capa.replaceChildren(
+      h(
+        'div',
+        { class: 'panel' },
+        h('p', { class: 'banda-practica' }, 'Modo práctica (sin caja): el resultado no vale y no se guarda.'),
+        h('h2', {}, `Lectura con la tapa +2.00 · ${NOMBRE_OJO[paso.ojo]}`),
+        h(
+          'p',
+          { class: 'instruccion' },
+          'En la prueba real, aquí un niño con vista normal ve borroso. En práctica, la app simula esa respuesta.',
+        ),
+        h('button', { class: 'boton principal', onclick: simular }, 'Entendido'),
+      ),
+    );
+  }
+
   function dibujarLineaE(paso: PasoLinea): void {
     const d = disposicion(paso.lugar.id === 'cerca' ? null : paso.ojo);
     const g = fondo(d);
@@ -356,7 +390,7 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
       case 'espera':
         return dibujarEspera(paso);
       case 'linea':
-        return dibujarLineaE(paso);
+        return op.practica && paso.prueba === 'clip' ? dibujarSimulacionTapa(paso) : dibujarLineaE(paso);
       case 'abanico':
         return dibujarAbanicoPaso(paso);
       case 'fin':

@@ -44,6 +44,17 @@ Con la tapa de +2.00 D bajada sobre el lente y el celular en R0, la potencia tot
 
 `P`, `e`, las distancias de las ranuras y la posición horizontal del centro del lente son **parámetros editables** en la configuración, porque la caja real tendrá tolerancias.
 
+### Requisitos de la caja
+
+La óptica solo depende de la distancia entre la pantalla y el lente, no del tamaño del celular. Para que una misma caja sirva para distintos celulares:
+
+- **Tope del lado del lente:** en cada ranura, la pantalla se apoya contra un tope ubicado exactamente a `d` del plano del lente; detrás del celular va una cuña o esponja que lo empuja contra el tope. Así la pantalla queda siempre en el mismo plano, sea cual sea el grosor del celular (un error de 2 mm equivale a 0,02 D en R0 y a 0,13 D en R10).
+- **Esponja a los costados** para centrar el celular entre las paredes.
+- **Celulares aceptados:** pantallas de 6,0" a 6,8", **sin funda**. La app comprueba además que el celular pueda dibujar el 6/9 en R0.
+- El borde superior del celular sobresale de la caja: ahí queda la franja de botones del docente.
+- La tapa de +2.00 D va unida a la caja con una bisagra, sobre los lentes.
+- Centrar los lentes por software no hace falta por ahora: con la pantalla en el foco, 5 mm de desvío equivalen a menos de 1° y no afectan la agudeza. Cuando exista la caja se agregará una comprobación simple: «¿Ves la línea de «E» completa por cada lente? Sí / No».
+
 ## Tamaño de los optotipos
 
 La «E» ocupa una cuadrícula de 5 × 5 trazos.
@@ -162,7 +173,7 @@ El niño se registra por código, sin nombre, para proteger los datos de menores
 5. **Resultado:** semáforo, agudeza de cada ojo, miopía estimada, categorías y si es confiable o dudoso.
 6. **Constancia:** texto simple, simulación aproximada de cómo ve el niño y enlace de WhatsApp (wa.me con el mensaje); versión imprimible.
 7. **Resumen del salón:** conteo por color, lista de derivados y exportación a CSV.
-8. **Modo práctica (sin caja):** desde el inicio, para que el docente aprenda. Funciona igual que la prueba, pero muestra un aviso visible en todas sus pantallas («Modo práctica: el resultado no vale y no se guarda») y nunca guarda datos.
+8. **Modo práctica (sin caja):** desde el inicio, para que el docente aprenda. Funciona igual que la prueba, pero muestra un aviso visible en todas sus pantallas («Modo práctica: el resultado no vale y no se guarda») y nunca guarda datos. Como sin caja no hay tapa +2.00 que nuble la vista, la relectura con la tapa se simula sola: la app muestra «En la prueba real, aquí un niño con vista normal ve borroso. En práctica, la app simula esa respuesta» y registra que no la leyó. Nunca se le pide al docente que toque «No sé», para no crearle ese hábito en la prueba real.
 
 ## Criterios de aceptación
 
