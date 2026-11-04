@@ -3,6 +3,8 @@ import { CAJA_POR_DEFECTO, crearCaja } from './caja';
 import {
   agujerosPasador,
   altoSeparador,
+  anchoTapa,
+  geometriaTecho,
   medidasTapa,
   dimensiones,
   espacioCelular,
@@ -220,5 +222,41 @@ describe('salientes de la tapa +2.00 y separadores S1 y S2', () => {
   it('con los salientes la tapa llena exactamente el ancho interior', () => {
     expect(t.ancho).toBe(172);
     expect(t.anchoConSalientes).toBe(M.anchoInterior);
+  });
+});
+
+describe('tapa +2.00 y techo delantero', () => {
+  const caja = CAJA_POR_DEFECTO;
+  const d = dimensiones(caja);
+  const techo = geometriaTecho(caja);
+  // Zona de la bisagra y del hueco de la tapa, en x desde el plano de los lentes (x = 0):
+  // del apoyo (x = -e + cartón) hasta la cara de atrás del panel de lentes (x = +cartón/2).
+  const hueco = { desde: -caja.e_mm + M.carton, hasta: M.carton / 2 };
+
+  it('la tapa cabe entre S1 y S2', () => {
+    expect(anchoTapa()).toBe(172);
+    expect(anchoTapa() + 2 * M.carton).toBeLessThanOrEqual(M.anchoInterior);
+    expect(medidasTapa().ancho).toBeLessThanOrEqual(M.anchoInterior - 2 * M.carton);
+  });
+
+  it('el hueco de la tapa mide lo que dicen S1 y S2 y deja lugar a la tapa de cartón', () => {
+    expect(hueco.hasta - hueco.desde).toBeCloseTo(d.separador + M.carton / 2, 9);
+    expect(d.separador).toBeGreaterThan(2 * M.carton);
+  });
+
+  it('el techo no cubre la bisagra ni el hueco de la tapa', () => {
+    expect(techo.desde).toBeGreaterThanOrEqual(hueco.hasta);
+  });
+
+  it('el techo llega hasta justo antes de R10 y el celular en R10 no lo toca', () => {
+    const tope10 = Math.min(...caja.ranuras_mm); // el celular empieza en el tope
+    expect(techo.hasta).toBeLessThan(tope10);
+    expect(tope10 - techo.hasta).toBeGreaterThanOrEqual(M.carton + M.holguraTrasera);
+    expect(techo.hasta - techo.desde).toBeGreaterThan(100);
+  });
+
+  it('la pieza del techo en la plantilla mide lo mismo', () => {
+    const pieza = generarPlantilla(caja).piezas.find((x) => x.nombre === 'Techo delantero')!;
+    expect(pieza.ancho).toBeCloseTo(techo.hasta - techo.desde, 9);
   });
 });
