@@ -1,6 +1,6 @@
 /**
- * Bienvenida: la primera vez, antes de entrar a «Mi salón», se pide el colegio
- * y se calibra la pantalla. Cada paso muestra si ya está hecho.
+ * Bienvenida: la primera vez, antes de entrar a «Mi salón», se pide el colegio,
+ * el salón y se calibra la pantalla. Cada paso muestra si ya está hecho.
  */
 import type { Preparacion } from '../logic/preparacion';
 import { h } from './dom';
@@ -8,8 +8,9 @@ import { icono } from './iconos';
 
 export interface ContextoBienvenida {
   colegioActual: string;
+  salonActual: string;
   preparacion: Preparacion;
-  guardarColegio: (nombre: string) => Promise<void>;
+  guardarDatos: (colegio: string, salon: string) => Promise<void>;
   calibrar: () => void;
   /** Vuelve a dibujar la pantalla con el estado nuevo. */
   refrescar: () => void;
@@ -18,12 +19,20 @@ export interface ContextoBienvenida {
 
 export function montarBienvenida(raiz: HTMLElement, ctx: ContextoBienvenida): () => void {
   const [colegio, calibracion, celular] = ctx.preparacion.pasos;
-  const entrada = h('input', {
+  const entradaColegio = h('input', {
     type: 'text',
     class: 'texto-largo',
     value: ctx.colegioActual,
     placeholder: 'IE 1234 San Martín',
     'aria-label': 'Nombre del colegio',
+    autocomplete: 'off',
+  });
+  const entradaSalon = h('input', {
+    type: 'text',
+    class: 'texto-largo',
+    value: ctx.salonActual,
+    placeholder: '3B',
+    'aria-label': 'Salón',
     autocomplete: 'off',
   });
   const error = h('p', { class: 'error' });
@@ -33,18 +42,24 @@ export function montarBienvenida(raiz: HTMLElement, ctx: ContextoBienvenida): ()
       class: 'formulario',
       onsubmit: async (ev: Event) => {
         ev.preventDefault();
-        const nombre = entrada.value.trim();
+        const nombre = entradaColegio.value.trim();
+        const salon = entradaSalon.value.trim();
         if (!nombre) {
           error.textContent = 'Escribe el nombre del colegio.';
           return;
         }
-        await ctx.guardarColegio(nombre);
+        if (!salon) {
+          error.textContent = 'Escribe el salón, por ejemplo 3B.';
+          return;
+        }
+        await ctx.guardarDatos(nombre, salon);
         ctx.refrescar();
       },
     },
-    h('label', { class: 'campo' }, h('span', { class: 'etiqueta' }, 'Nombre del colegio', h('small', {}, 'Sale en la constancia para la familia.')), entrada),
+    h('label', { class: 'campo' }, h('span', { class: 'etiqueta' }, 'Nombre del colegio', h('small', {}, 'Sale en la constancia para la familia.')), entradaColegio),
+    h('label', { class: 'campo' }, h('span', { class: 'etiqueta' }, 'Salón', h('small', {}, 'Por ejemplo 3B o 5.º A. Sale en la constancia y en el archivo del salón.')), entradaSalon),
     error,
-    h('button', { class: colegio.listo ? 'boton' : 'boton principal', type: 'submit' }, colegio.listo ? 'Cambiar el colegio' : 'Guardar el colegio'),
+    h('button', { class: colegio.listo ? 'boton' : 'boton principal', type: 'submit' }, colegio.listo ? 'Cambiar colegio o salón' : 'Guardar colegio y salón'),
   );
 
   const fila = (listo: boolean, texto: string) =>
@@ -55,8 +70,8 @@ export function montarBienvenida(raiz: HTMLElement, ctx: ContextoBienvenida): ()
       'main',
       { class: 'pagina' },
       h('header', { class: 'cabecera' }, h('span', { class: 'logo' }, icono('ojo')), h('div', { class: 'titulos' }, h('h1', {}, 'Bienvenida'), h('p', { class: 'lema' }, 'Dos pasos antes de empezar'))),
-      h('h2', {}, '1. El colegio'),
-      fila(colegio.listo, colegio.listo ? colegio.texto : 'Todavía no escribiste el colegio.'),
+      h('h2', {}, '1. El colegio y el salón'),
+      fila(colegio.listo, colegio.texto),
       formulario,
       h('h2', {}, '2. La pantalla del celular'),
       fila(calibracion.listo, calibracion.texto),

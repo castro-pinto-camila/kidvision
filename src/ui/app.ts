@@ -173,8 +173,9 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
     } else if (ruta === '#/bienvenida') {
       desmontar = montarBienvenida(raiz, {
         colegioActual: estado.config.colegio,
+        salonActual: estado.config.salon,
         preparacion: preparacion(),
-        guardarColegio: (nombre) => guardar({ ...estado.config, colegio: nombre }),
+        guardarDatos: (colegio, salon) => guardar({ ...estado.config, colegio, salon }),
         calibrar: () => hacer('calibrar', '#/bienvenida'),
         refrescar: mostrar,
         seguir: () => ir('#/'),

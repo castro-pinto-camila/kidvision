@@ -1,5 +1,5 @@
 /**
- * Qué falta para poder evaluar: colegio, pantalla calibrada y celular apto.
+ * Qué falta para poder evaluar: colegio y salón, pantalla calibrada y celular apto.
  * Lógica pura: la interfaz solo dibuja los pasos y sus botones.
  */
 import { ranuras } from '../core/caja';
@@ -33,14 +33,22 @@ export function estadoPreparacion(config: Configuracion, dpr: number, huella?: H
   const apto =
     calibrada && esDibujable(nivelPorNombre('6/9'), ranuras(config.caja)[0], { pxPorMm: config.pxPorMm!, dpr });
 
+  const salon = (config.salon ?? '').trim();
+  const faltaColegio = colegio === '';
+  const faltaSalon = salon === '';
   const pasoColegio: Paso =
-    colegio !== ''
-      ? { id: 'colegio', listo: true, texto: `Colegio: ${colegio}`, boton: null, accion: null }
+    !faltaColegio && !faltaSalon
+      ? { id: 'colegio', listo: true, texto: `Colegio: ${colegio} · Salón: ${salon}`, boton: null, accion: null }
       : {
           id: 'colegio',
           listo: false,
-          texto: 'Falta el nombre del colegio (sale en la constancia).',
-          boton: 'Escribir el colegio',
+          texto:
+            faltaColegio && faltaSalon
+              ? 'Falta el colegio y el salón (salen en la constancia).'
+              : faltaSalon
+                ? 'Falta el salón, por ejemplo «3B» (sale en la constancia).'
+                : 'Falta el nombre del colegio (sale en la constancia).',
+          boton: faltaSalon && !faltaColegio ? 'Escribir el salón' : 'Escribir el colegio y el salón',
           accion: 'colegio',
         };
 

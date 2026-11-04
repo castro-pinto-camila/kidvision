@@ -119,11 +119,32 @@ export function montarConfiguracion(
     c.colegio = entradaColegio.value.trim();
     void guardarYActualizar();
   });
+  const entradaSalon = h('input', {
+    type: 'text',
+    class: 'texto-largo',
+    value: c.salon,
+    placeholder: '3B',
+    'aria-label': 'Salón',
+  });
+  entradaSalon.addEventListener('change', () => {
+    c.salon = entradaSalon.value.trim();
+    void guardarYActualizar();
+  });
   const colegio = h(
-    'label',
-    { class: 'campo' },
-    h('span', { class: 'etiqueta' }, 'Colegio', h('small', {}, 'Sale en la constancia para la familia.')),
-    entradaColegio,
+    'div',
+    {},
+    h(
+      'label',
+      { class: 'campo' },
+      h('span', { class: 'etiqueta' }, 'Colegio', h('small', {}, 'Sale en la constancia para la familia.')),
+      entradaColegio,
+    ),
+    h(
+      'label',
+      { class: 'campo' },
+      h('span', { class: 'etiqueta' }, 'Salón', h('small', {}, 'Por ejemplo 3B o 5.º A.')),
+      entradaSalon,
+    ),
   );
 
   const datos = h(

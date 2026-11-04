@@ -25,6 +25,8 @@ export interface Configuracion {
   caja: ConfigCaja;
   /** Nombre del colegio: se escribe una vez y va en la constancia y en cada evaluación. */
   colegio: string;
+  /** Salón de la docente (por ejemplo «3B»): va junto al colegio en la constancia, el WhatsApp y el CSV. */
+  salon: string;
   umbralCorte: '6/9' | '6/12';
   franja: Franja;
   /** Resultado de la comprobación con la «D»: dibujo girado 180° y/o mitades cambiadas. */
@@ -65,6 +67,7 @@ export function configuracionPorDefecto(): Configuracion {
     huella: null,
     caja: { ...CAJA_POR_DEFECTO, ranuras_mm: [...CAJA_POR_DEFECTO.ranuras_mm] },
     colegio: '',
+    salon: '',
     umbralCorte: '6/9',
     franja: { lado: 'arriba', ancho_mm: 15 },
     pantallaInvertida: false,
