@@ -9,6 +9,16 @@
   .portada { padding: 16mm; }
   .hoja { width: 297mm; height: 210mm; page-break-after: always; break-after: page; }
   .hoja svg { display: block; }
+  .armado { box-sizing: border-box; padding: 9mm 11mm; font-size: 9pt; line-height: 1.28; }
+  .armado h1 { font-size: 15pt; margin: 0 0 3mm; }
+  .armado h2 { font-size: 10.5pt; margin: 0 0 2mm; }
+  .armado .columnas { display: grid; grid-template-columns: 1fr 1.3fr; gap: 7mm; }
+  .armado table { border-collapse: collapse; margin-bottom: 3mm; }
+  .armado th, .armado td { text-align: left; vertical-align: top; padding: 0.7mm 1.4mm; border-bottom: 0.2mm solid #ccc; }
+  .armado th { white-space: nowrap; }
+  .armado ol { margin: 0; padding-left: 5mm; }
+  .armado li { margin-bottom: 1mm; }
+  .armado .atencion { margin-top: 2mm; padding: 2mm 3mm; border: 0.4mm solid #b45309; background: #fef3c7; }
   @media screen { .hoja { margin: 8mm auto; box-shadow: 0 0 4px #999; } }
 </style>
 </head>
@@ -17,7 +27,63 @@
 <h1>Plantilla de la caja KidVision</h1>
 <p><strong>Imprimir sin ajustar a página (escala 100 %).</strong> Antes de cortar, mide la regla de 10 cm de cada hoja.</p>
 <p>Medidas exteriores aproximadas: <strong>380,3 × 184,0 × 62,0 mm</strong> (largo con el apoyo para la cara × ancho × alto, sin contar el celular que sobresale).</p>
-<p>12 hojas A4 horizontales. También está la hoja grande en un solo archivo SVG para imprenta.</p>
+<p>Después de esta portada viene la hoja de armado, y luego 12 hojas A4 horizontales con las piezas. También está la hoja grande en un solo archivo SVG para imprenta.</p>
+</section>
+<section class="hoja armado">
+<h1>Cómo armar la caja</h1>
+<div class="columnas">
+<div>
+<h2>Para qué sirve cada pieza</h2>
+<table>
+<tr><th>Piso</th><td>La base. La bandeja se desliza encima.</td></tr>
+<tr><th>Pared derecha</th><td>Lleva los agujeros del pasador, R0 a R10, en dos filas: pares arriba, impares abajo.</td></tr>
+<tr><th>Pared izquierda</th><td>Lleva en su cara interior la regla R0 a R10, donde se alinea la muesca de la bandeja.</td></tr>
+<tr><th>Regla para la canaleta</th><td>Repuesto de esa regla: se pega en el borde de arriba de la pared izquierda si la pared se arma con otro cartón.</td></tr>
+<tr><th>Panel de lentes (+3.00)</th><td>Sostiene los dos lentes de lectura de +3.00. Su centro marca el plano de los lentes, desde donde se miden todas las distancias.</td></tr>
+<tr><th>Tapa +2.00</th><td>Lleva los lentes de +2.00. Se baja delante de los lentes de la caja solo cuando la app lo pide.</td></tr>
+<tr><th>Apoyo para la cara</th><td>Donde el niño apoya la cara. Queda a 15,0 mm de los lentes.</td></tr>
+<tr><th>S1 y S2 (separadores)</th><td>Dos tacos de 10,5 mm entre el panel de lentes y el apoyo para la cara, uno en cada extremo. Fijan esos 15,0 mm: si faltan o se aplastan, el ojo queda a otra distancia.</td></tr>
+<tr><th>Panel trasero</th><td>Cierra la caja por detrás de la bandeja.</td></tr>
+<tr><th>Techo delantero</th><td>Cubre la parte de los lentes. Detrás queda abierta la canaleta, por donde sobresale el celular.</td></tr>
+<tr><th>Bandeja</th><td>Lleva el celular: la pantalla se apoya contra el tope y la esponja va detrás. Se mueve de R0 a R10.</td></tr>
+</table>
+<svg xmlns="http://www.w3.org/2000/svg" width="130mm" height="48mm" viewBox="0 0 130 48">
+<text x="4" y="5" font-size="3" text-anchor="start" font-family="Arial, sans-serif">Vista de costado, sin escala. El niño mira desde la izquierda.</text>
+<rect x="4" y="16" width="3" height="24" fill="#dbeafe" stroke="#000" stroke-width="0.4"/><text x="5.5" y="14" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">Apoyo</text>
+<rect x="7" y="31" width="11" height="4" fill="#fde68a" stroke="#000" stroke-width="0.4"/><text x="12.5" y="29" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">S1/S2</text>
+<rect x="18" y="16" width="3" height="24" fill="#fff" stroke="#000" stroke-width="0.4"/><text x="19.5" y="11" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">Lentes</text>
+<rect x="21" y="14" width="40" height="2" fill="#e5e7eb" stroke="#000" stroke-width="0.3"/>
+<text x="41" y="12" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">Techo delantero</text>
+<text x="72" y="24" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">canaleta abierta</text>
+<rect x="82" y="27" width="12" height="13" fill="#fce7f3" stroke="#000" stroke-width="0.4"/><text x="96" y="38" font-size="3" text-anchor="start" font-family="Arial, sans-serif">Bandeja</text>
+<rect x="84" y="8" width="3" height="32" fill="#2563eb"/>
+<text x="89" y="10" font-size="3" text-anchor="start" font-family="Arial, sans-serif">celular</text>
+<circle cx="91" cy="32" r="1.2" fill="#000"/>
+<text x="96" y="32" font-size="3" text-anchor="start" font-family="Arial, sans-serif">pasador</text>
+<rect x="122" y="16" width="3" height="24" fill="#fff" stroke="#000" stroke-width="0.4"/><text x="123.5" y="14" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">Trasero</text>
+<rect x="14" y="40" width="111" height="2" fill="#e5e7eb" stroke="#000" stroke-width="0.3"/>
+<text x="70" y="46" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">Piso, con las paredes a los costados</text>
+</svg>
+</div>
+<div>
+<h2>Pasos, en orden de pegado</h2>
+<ol>
+<li><strong>Imprime y recorta.</strong> Imprime al 100 % y mide la regla de 10 cm de cada hoja. Une las hojas por la línea roja. Corta por las líneas negras continuas y marca los dobleces (líneas punteadas negras) sin cortarlos. Las líneas grises son guías: no se cortan.</li>
+<li><strong>Haz los agujeros.</strong> Los del pasador (pared derecha y costado derecho de la bandeja), con un palito de 4,0 mm. Los de los lentes, en el panel de lentes y en la tapa +2.00.</li>
+<li><strong>Arma la bandeja.</strong> Dobla hacia arriba el tope, el fondo y los dos costados, y pega las esquinas. El tope (el lado con la ventana) va adelante, mirando a los lentes.</li>
+<li><strong>Paredes al piso.</strong> Pega la pared derecha y la izquierda a los costados del piso. «Derecha» es la derecha del niño cuando mira por los lentes. La franja gris «Plano de los lentes» de las dos paredes va adelante, a la misma altura. La regla de la pared izquierda mira hacia adentro.</li>
+<li><strong>Panel de lentes.</strong> Pégalo entre las paredes, justo sobre la franja gris «Plano de los lentes» (su cartón la cubre exacta). Coloca los lentes de +3.00 en sus agujeros.</li>
+<li><strong>Panel trasero.</strong> Pégalo entre las paredes, al final.</li>
+<li><strong>S1, S2 y apoyo para la cara.</strong> Pega S1 y S2 de pie en la cara del panel de lentes que mira al niño, uno en cada extremo, junto a las paredes. Pega el apoyo para la cara sobre S1 y S2, con la muesca de la nariz abajo.</li>
+<li><strong>Techo delantero.</strong> Pégalo sobre las paredes, desde el frente hacia atrás. Detrás queda abierta la canaleta.</li>
+<li><strong>Tapa +2.00.</strong> Su bisagra va arriba del panel de lentes, del lado del niño, para que baje delante de los lentes de la caja. Coloca los lentes de +2.00. <em>Antes de pegarla, lee el recuadro «Atención».</em></li>
+<li><strong>Mete la bandeja</strong> por la canaleta, con el tope hacia los lentes. Pon el celular sin funda, con la pantalla contra el tope y la esponja detrás y a los costados.</li>
+<li><strong>Usa el pasador.</strong> Cuando la app diga «Pon el pasador en R4», desliza la bandeja hasta que su agujero quede frente al agujero R4 de la pared derecha y atraviesa los dos con el pasador. La bandeja tiene dos agujeros: usa el de la misma fila que el número (pares arriba, impares abajo). <em>Alternativa:</em> alinea la muesca de la bandeja con la marca R4 de la regla y sujétala con un clip.</li>
+<li><strong>Comprueba las medidas.</strong> Con el pasador en R0, del plano de los lentes al tope debe haber 333,3 mm; en R10, 125,0 mm. Si no coincide, corrige esas distancias en la app: Configuración → Ajustes de la caja.</li>
+</ol>
+<div class="atencion"><strong>Atención antes de pegar la tapa +2.00.</strong> S1 y S2 ocupan 3 mm a cada lado del espacio donde baja la tapa, y el techo delantero cubre el borde de arriba del panel de lentes, donde va la bisagra. Prueba la tapa en seco: si no baja o no se puede levantar, no la pegues todavía; la próxima versión de la plantilla corrige estas piezas.</div>
+</div>
+</div>
 </section>
 <section class="hoja"><svg xmlns="http://www.w3.org/2000/svg" width="297mm" height="210mm" viewBox="0 0 297 210">
 <rect x="0" y="0" width="297" height="210" fill="#fff"/>

@@ -397,6 +397,10 @@ export interface Plantilla {
   ancho: number;
   alto: number;
   dimensiones: DimensionesCaja;
+  /** Datos con que se calculó, para la hoja de armado. */
+  ranuras_mm: number[];
+  e_mm: number;
+  medidas: MedidasCaja;
 }
 
 /** Ubica todas las piezas en una hoja grande, una debajo de otra. */
@@ -425,7 +429,15 @@ export function generarPlantilla(caja: ConfigCaja, m: MedidasCaja = MEDIDAS_POR_
     ancho = Math.max(ancho, x - separacion + margen);
     y += Math.max(...fila.map((p) => p.alto)) + separacion;
   }
-  return { piezas, ancho, alto: y - separacion + margen, dimensiones: dimensiones(caja, m) };
+  return {
+    piezas,
+    ancho,
+    alto: y - separacion + margen,
+    dimensiones: dimensiones(caja, m),
+    ranuras_mm: [...caja.ranuras_mm],
+    e_mm: caja.e_mm,
+    medidas: m,
+  };
 }
 
 // --- SVG -----------------------------------------------------------------
@@ -554,6 +566,110 @@ ${leyenda(160, pagina.alto - pie + 17)}
   return hojas;
 }
 
+/** Para qué sirve cada pieza, con el mismo nombre que lleva en la plantilla. */
+function piezasArmado(p: Plantilla): [string, string][] {
+  const sep = coma(p.dimensiones.separador);
+  return [
+    ['Piso', 'La base. La bandeja se desliza encima.'],
+    ['Pared derecha', 'Lleva los agujeros del pasador, R0 a R10, en dos filas: pares arriba, impares abajo.'],
+    ['Pared izquierda', 'Lleva en su cara interior la regla R0 a R10, donde se alinea la muesca de la bandeja.'],
+    [
+      'Regla para la canaleta',
+      'Repuesto de esa regla: se pega en el borde de arriba de la pared izquierda si la pared se arma con otro cartón.',
+    ],
+    [
+      'Panel de lentes (+3.00)',
+      'Sostiene los dos lentes de lectura de +3.00. Su centro marca el plano de los lentes, desde donde se miden todas las distancias.',
+    ],
+    ['Tapa +2.00', 'Lleva los lentes de +2.00. Se baja delante de los lentes de la caja solo cuando la app lo pide.'],
+    ['Apoyo para la cara', `Donde el niño apoya la cara. Queda a ${coma(p.e_mm)} mm de los lentes.`],
+    [
+      'S1 y S2 (separadores)',
+      `Dos tacos de ${sep} mm entre el panel de lentes y el apoyo para la cara, uno en cada extremo. Fijan esos ${coma(p.e_mm)} mm: si faltan o se aplastan, el ojo queda a otra distancia.`,
+    ],
+    ['Panel trasero', 'Cierra la caja por detrás de la bandeja.'],
+    ['Techo delantero', 'Cubre la parte de los lentes. Detrás queda abierta la canaleta, por donde sobresale el celular.'],
+    [
+      'Bandeja',
+      'Lleva el celular: la pantalla se apoya contra el tope y la esponja va detrás. Se mueve de R0 a R10.',
+    ],
+  ];
+}
+
+/** Pasos de armado, en el orden en que se pegan las piezas. */
+function pasosArmado(p: Plantilla): string[] {
+  const m = p.medidas;
+  const nUltima = p.ranuras_mm.length - 1;
+  return [
+    '<strong>Imprime y recorta.</strong> Imprime al 100 % y mide la regla de 10 cm de cada hoja. Une las hojas por la línea roja. Corta por las líneas negras continuas y marca los dobleces (líneas punteadas negras) sin cortarlos. Las líneas grises son guías: no se cortan.',
+    `<strong>Haz los agujeros.</strong> Los del pasador (pared derecha y costado derecho de la bandeja), con un palito de ${coma(m.diametroPasador)} mm. Los de los lentes, en el panel de lentes y en la tapa +2.00.`,
+    '<strong>Arma la bandeja.</strong> Dobla hacia arriba el tope, el fondo y los dos costados, y pega las esquinas. El tope (el lado con la ventana) va adelante, mirando a los lentes.',
+    '<strong>Paredes al piso.</strong> Pega la pared derecha y la izquierda a los costados del piso. «Derecha» es la derecha del niño cuando mira por los lentes. La franja gris «Plano de los lentes» de las dos paredes va adelante, a la misma altura. La regla de la pared izquierda mira hacia adentro.',
+    '<strong>Panel de lentes.</strong> Pégalo entre las paredes, justo sobre la franja gris «Plano de los lentes» (su cartón la cubre exacta). Coloca los lentes de +3.00 en sus agujeros.',
+    '<strong>Panel trasero.</strong> Pégalo entre las paredes, al final.',
+    '<strong>S1, S2 y apoyo para la cara.</strong> Pega S1 y S2 de pie en la cara del panel de lentes que mira al niño, uno en cada extremo, junto a las paredes. Pega el apoyo para la cara sobre S1 y S2, con la muesca de la nariz abajo.',
+    '<strong>Techo delantero.</strong> Pégalo sobre las paredes, desde el frente hacia atrás. Detrás queda abierta la canaleta.',
+    '<strong>Tapa +2.00.</strong> Su bisagra va arriba del panel de lentes, del lado del niño, para que baje delante de los lentes de la caja. Coloca los lentes de +2.00. <em>Antes de pegarla, lee el recuadro «Atención».</em>',
+    '<strong>Mete la bandeja</strong> por la canaleta, con el tope hacia los lentes. Pon el celular sin funda, con la pantalla contra el tope y la esponja detrás y a los costados.',
+    '<strong>Usa el pasador.</strong> Cuando la app diga «Pon el pasador en R4», desliza la bandeja hasta que su agujero quede frente al agujero R4 de la pared derecha y atraviesa los dos con el pasador. La bandeja tiene dos agujeros: usa el de la misma fila que el número (pares arriba, impares abajo). <em>Alternativa:</em> alinea la muesca de la bandeja con la marca R4 de la regla y sujétala con un clip.',
+    `<strong>Comprueba las medidas.</strong> Con el pasador en R0, del plano de los lentes al tope debe haber ${coma(p.ranuras_mm[0])} mm; en R${nUltima}, ${coma(p.ranuras_mm[nUltima])} mm. Si no coincide, corrige esas distancias en la app: Configuración → Ajustes de la caja.`,
+  ];
+}
+
+/** Dibujo de costado, sin escala: el orden de las piezas de adelante hacia atrás. */
+function esquemaArmado(): string {
+  const rect = (x: number, y: number, w: number, alto: number, color = '#fff') =>
+    `<rect x="${x}" y="${y}" width="${w}" height="${alto}" fill="${color}" stroke="#000" stroke-width="0.4"/>`;
+  const texto = (x: number, y: number, t: string, ancla = 'middle') =>
+    `<text x="${x}" y="${y}" font-size="3" text-anchor="${ancla}" font-family="Arial, sans-serif">${t}</text>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="130mm" height="48mm" viewBox="0 0 130 48">
+${texto(4, 5, 'Vista de costado, sin escala. El niño mira desde la izquierda.', 'start')}
+${rect(4, 16, 3, 24, '#dbeafe')}${texto(5.5, 14, 'Apoyo')}
+${rect(7, 31, 11, 4, '#fde68a')}${texto(12.5, 29, 'S1/S2')}
+${rect(18, 16, 3, 24)}${texto(19.5, 11, 'Lentes')}
+<rect x="21" y="14" width="40" height="2" fill="#e5e7eb" stroke="#000" stroke-width="0.3"/>
+${texto(41, 12, 'Techo delantero')}
+${texto(72, 24, 'canaleta abierta')}
+${rect(82, 27, 12, 13, '#fce7f3')}${texto(96, 38, 'Bandeja', 'start')}
+<rect x="84" y="8" width="3" height="32" fill="#2563eb"/>
+${texto(89, 10, 'celular', 'start')}
+<circle cx="91" cy="32" r="1.2" fill="#000"/>
+${texto(96, 32, 'pasador', 'start')}
+${rect(122, 16, 3, 24)}${texto(123.5, 14, 'Trasero')}
+<rect x="14" y="40" width="111" height="2" fill="#e5e7eb" stroke="#000" stroke-width="0.3"/>
+<text x="70" y="46" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">Piso, con las paredes a los costados</text>
+</svg>`;
+}
+
+/** Hoja de armado: va después de la portada. */
+export function hojaArmadoHtml(p: Plantilla): string {
+  const filas = piezasArmado(p)
+    .map(([nombre, uso]) => `<tr><th>${escapar(nombre)}</th><td>${escapar(uso)}</td></tr>`)
+    .join('\n');
+  const pasos = pasosArmado(p)
+    .map((paso) => `<li>${paso}</li>`)
+    .join('\n');
+  return `<section class="hoja armado">
+<h1>Cómo armar la caja</h1>
+<div class="columnas">
+<div>
+<h2>Para qué sirve cada pieza</h2>
+<table>
+${filas}
+</table>
+${esquemaArmado()}
+</div>
+<div>
+<h2>Pasos, en orden de pegado</h2>
+<ol>
+${pasos}
+</ol>
+<div class="atencion"><strong>Atención antes de pegar la tapa +2.00.</strong> S1 y S2 ocupan 3 mm a cada lado del espacio donde baja la tapa, y el techo delantero cubre el borde de arriba del panel de lentes, donde va la bisagra. Prueba la tapa en seco: si no baja o no se puede levantar, no la pegues todavía; la próxima versión de la plantilla corrige estas piezas.</div>
+</div>
+</div>
+</section>`;
+}
+
 /** Página HTML para imprimir las hojas A4 desde el navegador, una por página. */
 export function plantillaHtml(p: Plantilla, titulo: string): string {
   const d = p.dimensiones;
@@ -569,6 +685,16 @@ export function plantillaHtml(p: Plantilla, titulo: string): string {
   .portada { padding: 16mm; }
   .hoja { width: 297mm; height: 210mm; page-break-after: always; break-after: page; }
   .hoja svg { display: block; }
+  .armado { box-sizing: border-box; padding: 9mm 11mm; font-size: 9pt; line-height: 1.28; }
+  .armado h1 { font-size: 15pt; margin: 0 0 3mm; }
+  .armado h2 { font-size: 10.5pt; margin: 0 0 2mm; }
+  .armado .columnas { display: grid; grid-template-columns: 1fr 1.3fr; gap: 7mm; }
+  .armado table { border-collapse: collapse; margin-bottom: 3mm; }
+  .armado th, .armado td { text-align: left; vertical-align: top; padding: 0.7mm 1.4mm; border-bottom: 0.2mm solid #ccc; }
+  .armado th { white-space: nowrap; }
+  .armado ol { margin: 0; padding-left: 5mm; }
+  .armado li { margin-bottom: 1mm; }
+  .armado .atencion { margin-top: 2mm; padding: 2mm 3mm; border: 0.4mm solid #b45309; background: #fef3c7; }
   @media screen { .hoja { margin: 8mm auto; box-shadow: 0 0 4px #999; } }
 </style>
 </head>
@@ -577,8 +703,9 @@ export function plantillaHtml(p: Plantilla, titulo: string): string {
 <h1>${escapar(titulo)}</h1>
 <p><strong>${AVISO}.</strong> Antes de cortar, mide la regla de 10 cm de cada hoja.</p>
 <p>Medidas exteriores aproximadas: <strong>${coma(d.largoTotal)} × ${coma(d.anchoTotal)} × ${coma(d.altoTotal)} mm</strong> (largo con el apoyo para la cara × ancho × alto, sin contar el celular que sobresale).</p>
-<p>${hojas.length} hojas A4 horizontales. También está la hoja grande en un solo archivo SVG para imprenta.</p>
+<p>Después de esta portada viene la hoja de armado, y luego ${hojas.length} hojas A4 horizontales con las piezas. También está la hoja grande en un solo archivo SVG para imprenta.</p>
 </section>
+${hojaArmadoHtml(p)}
 ${hojas.map((h) => `<section class="hoja">${h.svg}</section>`).join('\n')}
 </body>
 </html>

@@ -5,6 +5,7 @@ import {
   dimensiones,
   espacioCelular,
   generarPlantilla,
+  hojaArmadoHtml,
   hojasA4,
   marcasRegla,
   MEDIDAS_POR_DEFECTO as M,
@@ -141,5 +142,55 @@ describe('archivos para imprimir', () => {
 
   it('la página HTML dice las medidas totales', () => {
     expect(plantillaHtml(p, 'Caja KidVision')).toContain('380,3 × 184,0 × 62,0 mm');
+  });
+});
+
+describe('hoja de armado', () => {
+  const p = generarPlantilla(CAJA_POR_DEFECTO);
+  const html = plantillaHtml(p, 'Caja KidVision');
+  const armado = hojaArmadoHtml(p);
+
+  it('va justo después de la portada y antes de las hojas de piezas', () => {
+    const portada = html.indexOf('class="portada hoja"');
+    const hoja = html.indexOf('Cómo armar la caja');
+    const primeraPieza = html.indexOf('Hoja 1 de');
+    expect(portada).toBeGreaterThan(-1);
+    expect(hoja).toBeGreaterThan(portada);
+    expect(primeraPieza).toBeGreaterThan(hoja);
+  });
+
+  it('explica para qué sirve cada pieza de la plantilla, incluidos S1 y S2', () => {
+    for (const nombre of [
+      'Piso',
+      'Pared derecha',
+      'Pared izquierda',
+      'Regla para la canaleta',
+      'Panel de lentes (+3.00)',
+      'Tapa +2.00',
+      'Apoyo para la cara',
+      'S1 y S2 (separadores)',
+      'Panel trasero',
+      'Techo delantero',
+      'Bandeja',
+    ]) {
+      expect(armado).toContain(`<th>${nombre}</th>`);
+    }
+    expect(armado).toContain('Dos tacos de 10,5 mm');
+  });
+
+  it('tiene los pasos numerados en orden de pegado y explica el pasador', () => {
+    const pasos = armado.match(/<li>/g) ?? [];
+    expect(pasos.length).toBeGreaterThanOrEqual(10);
+    const orden = ['Paredes al piso', 'Panel de lentes.', 'S1, S2 y apoyo', 'Techo delantero.', 'Mete la bandeja', 'Usa el pasador'];
+    const posiciones = orden.map((t) => armado.indexOf(t));
+    expect(posiciones.every((x) => x > -1)).toBe(true);
+    expect([...posiciones].sort((a, b) => a - b)).toEqual(posiciones);
+    expect(armado).toContain('Pon el pasador en R4');
+    expect(armado).toContain('pares arriba, impares abajo');
+  });
+
+  it('da las distancias para comprobar, calculadas desde la configuración', () => {
+    expect(armado).toContain('333,3 mm');
+    expect(armado).toContain('en R10, 125,0 mm');
   });
 });
