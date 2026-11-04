@@ -1274,3 +1274,14 @@ td.no {
   flex: 1;
   text-align: center;
 }
+
+/* Botón ✕ de la franja y ventana «¿Salir de la prueba?» */
+.franja .boton.salir-x {
+  flex: 0 0 auto;
+  min-width: 44px;
+  font-size: 1.1rem;
+}
+
+.panel.salida {
+  z-index: 20;
+}

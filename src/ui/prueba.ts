@@ -12,6 +12,7 @@ import type { Configuracion } from '../data/config';
 import { anguloFisico, BOTONES_ABANICO } from '../logic/abanico';
 import { PruebaVisual, type Paso, type ResultadoSesion } from '../logic/flujo';
 import { respuestasParaDecidir, type Respuesta, type Toque } from '../logic/linea';
+import { descontarPausa } from '../logic/pausa';
 import type { Evento, Ojo, PasoAbanico, PasoColocar, PasoEspera, PasoLinea } from '../logic/pasos';
 import { dibujarAbanico, dibujarCirculo, dibujarLetra, dibujarLinea, pintar, prepararLienzo } from './dibujo';
 import { liberarPantalla } from './dispositivo';
@@ -101,10 +102,50 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
     }, MS_TRANSICION);
   }
 
+  /**
+   * «¿Salir de la prueba?»: una ventana propia (no la del navegador, que en
+   * pantalla completa a veces no se ve). «Seguir» es el botón principal para
+   * que un toque apurado no salga por error. Salir no guarda nada.
+   */
   function salir(): void {
-    if (!confirm('¿Salir de la prueba? Se perderán las respuestas de este niño.')) return;
-    void liberarPantalla();
-    op.alSalir();
+    if (contenedor.querySelector('.salida')) return;
+    const inicioPausa = performance.now();
+    const cerrar = () => ventana.remove();
+    const ventana = h(
+      'div',
+      { class: 'panel salida', role: 'alertdialog', 'aria-label': '¿Salir de la prueba?' },
+      h('h2', {}, '¿Salir de la prueba?'),
+      h(
+        'p',
+        { class: 'instruccion' },
+        op.practica
+          ? 'La práctica no se guarda. Vuelves a la pantalla anterior.'
+          : 'Se perderán las respuestas de este niño: no se guarda nada y tendrás que empezar de nuevo.',
+      ),
+      h(
+        'button',
+        {
+          class: 'boton principal grande',
+          onclick: () => {
+            ultimoToque = descontarPausa(ultimoToque, inicioPausa, performance.now());
+            cerrar();
+          },
+        },
+        'Seguir con la prueba',
+      ),
+      h(
+        'button',
+        {
+          class: 'boton',
+          onclick: () => {
+            void liberarPantalla();
+            op.alSalir();
+          },
+        },
+        'Salir sin guardar',
+      ),
+    );
+    contenedor.append(ventana);
   }
 
   function detenerReloj(): void {
@@ -148,6 +189,7 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
       },
       (estado || op.practica) && h('span', { class: 'estado' }, marcaPractica + estado),
       ...botones,
+      h('button', { class: 'boton secundario salir-x', 'aria-label': 'Salir de la prueba', onclick: salir }, '✕'),
     );
   }
 
