@@ -1,9 +1,7 @@
 /**
  * Textos para el docente.
  */
-import type { MotivoDudoso } from '../logic/calidad';
-import type { Categoria, Indicacion, Semaforo } from '../logic/clasificacion';
-import type { ResultadoOjo } from '../logic/flujo';
+import type { Indicacion, Semaforo } from '../logic/clasificacion';
 import type { Ojo, PasoColocar, Prueba } from '../logic/pasos';
 
 export const NOMBRE_OJO: Record<Ojo, string> = { OD: 'ojo derecho', OI: 'ojo izquierdo' };
@@ -75,28 +73,4 @@ export const TEXTO_INDICACION: Record<Indicacion, string> = {
   'repetir-otro-celular': 'Repetir la prueba con otro celular',
 };
 
-export const TEXTO_CATEGORIA: Record<Categoria, string> = {
-  miopia: 'Miopía probable',
-  hipermetropia: 'Hipermetropía probable',
-  astigmatismo: 'Astigmatismo probable',
-  otraCausa: 'Baja visión por otra causa (oftalmología)',
-  indeterminado: 'Error refractivo de tipo no determinado',
-  normal: 'Sin hallazgos',
-};
-
-export const TEXTO_MOTIVO: Record<MotivoDudoso, string> = {
-  'respuestas-iguales': 'Dio cinco respuestas iguales seguidas.',
-  'falla-grande-acierta-menor': 'Falló letras grandes pero acertó letras más pequeñas.',
-  'punto-remoto-no-confirmado': 'El punto remoto no se confirmó en la ranura siguiente.',
-  'limite-dispositivo': 'La pantalla de este celular no alcanza para una de las ranuras.',
-};
-
-export function textoAgudeza(o: ResultadoOjo, corte: string): string {
-  if (o.pasaLejos) return `${corte} o mejor`;
-  return o.umbral === '<6/60' ? 'menor que 6/60' : (o.umbral ?? '—');
-}
-
-/** −1,94 D */
-export function textoDioptrias(d: number): string {
-  return `${d.toFixed(2).replace('.', ',').replace('-', '−')} D`;
-}
+export { TEXTO_CATEGORIA, TEXTO_MOTIVO, textoAgudeza, textoDioptrias } from '../logic/constancia';
