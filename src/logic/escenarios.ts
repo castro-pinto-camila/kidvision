@@ -9,11 +9,11 @@
  */
 import { CAJA_POR_DEFECTO } from '../core/caja';
 import type { Pantalla } from '../core/optotipos';
-import { BOTONES_ABANICO } from './abanico';
+import { anguloFisico, BOTONES_ABANICO } from './abanico';
 import type { Categoria, Indicacion, Semaforo } from './clasificacion';
 import { PruebaVisual, type Paso, type ResultadoOjo, type ResultadoSesion } from './flujo';
-import { contarAciertos } from './linea';
-import { azarConSemilla, responderComo, type Nino, type OjoSimulado } from './ninoSimulado';
+import { contarAciertos, respuestasParaDecidir } from './linea';
+import { responderComo, type Nino, type OjoSimulado } from './ninoSimulado';
 import type { Evento, Ojo } from './pasos';
 
 /** 0,06 mm por píxel físico, como las tablas del SPEC.md. */
@@ -240,6 +240,81 @@ export const ESCENARIOS: Escenario[] = [
     },
     regla: 'Cinco respuestas iguales seguidas = resultado dudoso: el semáforo pasa a amarillo y se indica repetir la prueba.',
   },
+  {
+    id: 'borde-lejos-1-error',
+    titulo: 'Límite: 1 error en la línea de lejos (4 de 5) todavía pasa',
+    descripcion: 'Vista normal, pero se equivoca en 1 «E» de la línea 6/9 de lejos y en 1 «E» de la línea de cerca.',
+    nino: ambos({ refraccion: 0, erroresPorLinea: { lejos: 1, cerca: 1 } }),
+    esperado: {
+      semaforo: 'VERDE',
+      indicacion: 'no-derivar',
+      ojos: {
+        OD: { semaforo: 'VERDE', categorias: ['normal'], puntoRemoto: null },
+        OI: { semaforo: 'VERDE', categorias: ['normal'], puntoRemoto: null },
+      },
+    },
+    regla: 'Una línea de tamizaje se pasa con 4 de 5 o más (IAPB). Con 1 error sigue siendo normal.',
+  },
+  {
+    id: 'borde-lejos-2-errores',
+    titulo: 'Límite: 2 errores en la línea de lejos (3 de 5) no pasa',
+    descripcion: 'Vista normal, pero se equivoca en 2 «E» de la línea 6/9 de lejos. En todo lo demás responde bien.',
+    nino: ambos({ refraccion: 0, erroresPorLinea: { lejos: 2 } }),
+    esperado: {
+      semaforo: 'ROJO',
+      indicacion: 'derivar',
+      ojos: {
+        OD: { semaforo: 'ROJO', categorias: ['miopia'], puntoRemoto: 'R1' },
+        OI: { semaforo: 'ROJO', categorias: ['miopia'], puntoRemoto: 'R1' },
+      },
+    },
+    regla: 'Con 3 de 5 la línea de lejos falla. Como en R1 ve bien (4 de 5 o más) y se confirma en R2, el punto remoto es R1: miopía de −0,50 D. Un error pequeño en la línea de lejos ya manda a derivar: es un tamizaje.',
+  },
+  {
+    id: 'borde-cerca-2-errores',
+    titulo: 'Límite: 2 errores en la línea de cerca',
+    descripcion: 'Vista normal de lejos, pero se equivoca en 2 «E» de la línea de cerca (40 cm).',
+    nino: ambos({ refraccion: 0, erroresPorLinea: { cerca: 2 } }),
+    esperado: {
+      semaforo: 'ROJO',
+      indicacion: 'derivar',
+      ojos: {
+        OD: { semaforo: 'ROJO', categorias: ['hipermetropia'], puntoRemoto: null },
+        OI: { semaforo: 'ROJO', categorias: ['hipermetropia'], puntoRemoto: null },
+      },
+    },
+    regla: 'Pasa de lejos y falla de cerca = hipermetropía. «Normal» exige pasar también de cerca.',
+  },
+  {
+    id: 'borde-remoto-1-error',
+    titulo: 'Límite: 1 error en las líneas del punto remoto todavía pasa',
+    descripcion: 'Miope (−1,0 D). En cada línea de la búsqueda del punto remoto se equivoca en 1 «E».',
+    nino: ambos({ refraccion: -1, erroresPorLinea: { remoto: 1 } }),
+    esperado: {
+      semaforo: 'ROJO',
+      indicacion: 'derivar',
+      ojos: {
+        OD: { semaforo: 'ROJO', categorias: ['miopia'], puntoRemoto: 'R2' },
+        OI: { semaforo: 'ROJO', categorias: ['miopia'], puntoRemoto: 'R2' },
+      },
+    },
+    regla: 'El punto remoto es la primera ranura con 4 de 5 o más, confirmada en la siguiente. Con 1 error por línea sigue dando R2, igual que sin errores.',
+  },
+  {
+    id: 'borde-remoto-2-errores',
+    titulo: 'Límite: 2 errores en cada línea del punto remoto, nunca pasa',
+    descripcion: 'Miope (−1,0 D). En todas las líneas de la búsqueda se equivoca en 2 «E»: nunca llega a 4 de 5, desde R1 hasta R10.',
+    nino: ambos({ refraccion: -1, erroresPorLinea: { remoto: 2 } }),
+    esperado: {
+      semaforo: 'ROJO',
+      indicacion: 'derivar',
+      ojos: {
+        OD: { semaforo: 'ROJO', categorias: ['otraCausa'], puntoRemoto: null },
+        OI: { semaforo: 'ROJO', categorias: ['otraCausa'], puntoRemoto: null },
+      },
+    },
+    regla: 'Sin ninguna ranura con 4 de 5 no hay punto remoto. Se prueba el estenopeico y, como no mejora, sale «otra causa».',
+  },
 ];
 
 // --- Cómo se ve cada paso ---------------------------------------------------
@@ -275,18 +350,33 @@ function describirPaso(paso: Paso, evento: Evento | null): string {
       return `**Espera ${paso.segundos} s** con los dos ojos mirando el círculo azul, y confirma.`;
     case 'linea': {
       const toques = evento?.tipo === 'linea' ? evento.toques : [];
-      const respuestas = toques.map((t) => t.respuesta);
-      const aciertos = contarAciertos(paso.orientaciones, respuestas);
-      const mostradas = paso.orientaciones.slice(0, respuestas.length).map((d) => FLECHA[d]).join(' ');
-      const toco = respuestas.map((r) => FLECHA[r]).join(' ');
+      const todas = toques.map((t) => t.respuesta);
+      // La app corta la línea en cuanto ya no puede pasar: solo se tocan hasta ahí.
+      const n = respuestasParaDecidir(paso.orientaciones, todas, paso.necesarios) ?? todas.length;
+      const respuestas = todas.slice(0, n);
+      const aciertos = contarAciertos(paso.orientaciones.slice(0, n), respuestas);
       const pasa = aciertos >= paso.necesarios;
-      const resultado = paso.prueba === 'practica' ? '' : pasa ? ` → **pasa** (hacen falta ${paso.necesarios})` : ` → **no pasa** (hacen falta ${paso.necesarios})`;
-      return `${OJO[paso.ojo][0].toUpperCase()}${OJO[paso.ojo].slice(1)}, línea ${paso.nivel.nombre} ${paso.lugar.id === 'cerca' ? 'a 40 cm' : 'en ' + paso.lugar.id.toUpperCase()}, prueba ${PRUEBA[paso.prueba]}: las «E» apuntan ${mostradas}; tocas ${toco}; aciertos ${aciertos} de ${respuestas.length}${resultado}.`;
+      const detalle = respuestas
+        .map((r, i) => `E${i + 1} apunta ${FLECHA[paso.orientaciones[i]]}, tocas ${FLECHA[r]}${r === paso.orientaciones[i] ? ' ✓' : ' ✗'}`)
+        .join(' · ');
+      const resultado =
+        paso.prueba === 'practica'
+          ? ''
+          : pasa
+            ? ` → **pasa** (${aciertos} de 5; hacen falta ${paso.necesarios})`
+            : ` → **no pasa**${n < 5 ? ' (la app corta la línea aquí)' : ''} (${aciertos} aciertos; hacen falta ${paso.necesarios} de 5)`;
+      const lugar = paso.lugar.id === 'cerca' ? 'a 40 cm' : `en ${paso.lugar.id.toUpperCase()}`;
+      return `${OJO[paso.ojo][0].toUpperCase()}${OJO[paso.ojo].slice(1)}, línea ${paso.nivel.nombre} ${lugar}, prueba ${PRUEBA[paso.prueba]}: ${detalle}${resultado}.`;
     }
     case 'abanico': {
       const eleccion = evento?.tipo === 'abanico' ? evento.eleccion : 'iguales';
       const giro = paso.rotacion === 0 ? 'carta sin girar' : `carta girada ${paso.rotacion}°`;
-      const accion = eleccion === 'iguales' ? 'el niño ve todas iguales → tocas «Todas iguales»' : `el niño dice «${BOTONES_ABANICO[eleccion]}» → tocas «${BOTONES_ABANICO[eleccion]}»`;
+      let accion = 'el niño ve todas las líneas iguales → tocas «Todas iguales»';
+      if (eleccion !== 'iguales') {
+        const angulo = anguloFisico(eleccion, paso.rotacion);
+        const donde = angulo === 90 ? 'la línea vertical' : angulo === 0 ? 'la línea horizontal' : `la línea inclinada ${angulo}°`;
+        accion = `el niño ve más negra ${donde} de la pantalla, que en esta carta lleva el número «${BOTONES_ABANICO[eleccion]}» → tocas «${BOTONES_ABANICO[eleccion]}»`;
+      }
       return `Abanico, ${OJO[paso.ojo]}, vuelta ${paso.vuelta} (${giro}): ${accion}.`;
     }
     case 'fin':
@@ -301,7 +391,7 @@ export interface Corrida {
 
 /** Hace la prueba completa con el niño simulado y anota, paso a paso, qué toca el docente. */
 export function correrEscenario(e: Escenario): Corrida {
-  const prueba = new PruebaVisual({ caja: CAJA_POR_DEFECTO, pantalla: PANTALLA_GUIA, azar: azarConSemilla(7) });
+  const prueba = new PruebaVisual({ caja: CAJA_POR_DEFECTO, pantalla: PANTALLA_GUIA, version: 'A' });
   const pasos: string[] = [];
   while (prueba.paso.tipo !== 'fin') {
     const paso = prueba.paso;
@@ -372,7 +462,9 @@ ${filas}
 
 Este archivo lo genera \`npm run guia\`; no se edita a mano. Cada escenario es un niño simulado al que se le hace la prueba completa con el flujo y la clasificación reales de la app. Una prueba automática comprueba que lo que dice «Qué debe salir» (escrito a mano desde las reglas del SPEC) coincide con lo que da la app.
 
-**Cómo usarla para revisar la app en tu celular:** elige un escenario, haz la prueba tocando exactamente la secuencia de la lista (puedes equivocarte a propósito en las flechas, tal como dice cada paso) y compara el semáforo, la categoría y la indicación con los de este archivo.
+**Las «E» son siempre las mismas.** Cada línea de la prueba tiene su propia secuencia de flechas, fija: la que ves aquí es la que sale en el celular. Hay dos juegos: el **A** se usa en la primera evaluación de un niño y en el modo práctica; el **B** (otras flechas), cuando el niño ya tiene una evaluación guardada. Esta guía usa el juego A: prueba con un niño nuevo, sin evaluaciones. Si te equivocas o la prueba se desvía de la guía, las siguientes líneas pueden cambiar un poco.
+
+**Cómo usarla para revisar la app en tu celular:** elige un escenario y haz la prueba tocando exactamente lo que dice cada paso (✓ = tocas la flecha igual a la «E»; ✗ = tocas la que dice la guía, que es una equivocación a propósito). Compara el semáforo, la categoría, el punto remoto y la indicación con los de este archivo.
 
 ## Reglas en una mirada
 

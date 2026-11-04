@@ -11,7 +11,7 @@ import { anguloFisico, BOTONES_ABANICO } from './abanico';
 import type { Paso } from './flujo';
 import type { Respuesta, Toque } from './linea';
 import type { Azar, Direccion } from './orientaciones';
-import type { Evento, Ojo, PasoLinea } from './pasos';
+import type { Evento, Ojo, PasoLinea, Prueba } from './pasos';
 
 export interface OjoSimulado {
   /** Refracción F (D). */
@@ -28,6 +28,11 @@ export interface OjoSimulado {
   ejeAstigmatismo?: number | null;
   /** Responde siempre esto (para probar el control de calidad). */
   respondeSiempre?: Respuesta;
+  /**
+   * Cuántas «E» de cada tipo de línea responde mal aunque la vea bien (la 2.ª, la 4.ª, la 1.ª…).
+   * Sirve para probar los límites: 1 error en 5 pasa (4 de 5), 2 errores no.
+   */
+  erroresPorLinea?: Partial<Record<Prueba, number>>;
 }
 
 export type Nino = Record<Ojo, OjoSimulado>;
@@ -60,9 +65,13 @@ export function leeLinea(ojo: OjoSimulado, paso: PasoLinea): boolean {
 }
 
 /** Respuestas de una línea: todas bien si la lee, todas al revés si no. */
+const ORDEN_ERRORES = [1, 3, 0, 2, 4];
+
 export function toquesPara(paso: PasoLinea, bien: boolean, ojo?: OjoSimulado): Toque[] {
-  return paso.orientaciones.map((d) => ({
-    respuesta: ojo?.respondeSiempre ?? (bien ? d : OPUESTA[d]),
+  const errores = bien ? (ojo?.erroresPorLinea?.[paso.prueba] ?? 0) : 0;
+  const malas = new Set(ORDEN_ERRORES.slice(0, errores));
+  return paso.orientaciones.map((d, i) => ({
+    respuesta: ojo?.respondeSiempre ?? (bien && !malas.has(i) ? d : OPUESTA[d]),
     ms: 1200,
   }));
 }
