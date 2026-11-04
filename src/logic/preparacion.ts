@@ -1,0 +1,84 @@
+/**
+ * Qué falta para poder evaluar: colegio, pantalla calibrada y celular apto.
+ * Lógica pura: la interfaz solo dibuja los pasos y sus botones.
+ */
+import { ranuras } from '../core/caja';
+import { esDibujable, nivelPorNombre } from '../core/optotipos';
+import { estadoCalibracion, type Configuracion } from '../data/config';
+
+export type IdPaso = 'colegio' | 'calibracion' | 'celular';
+/** Qué hace el botón de un paso: pedir el colegio o ir a calibrar. */
+export type AccionPaso = 'colegio' | 'calibrar';
+
+export interface Paso {
+  id: IdPaso;
+  listo: boolean;
+  texto: string;
+  /** Texto del botón; null si el paso no tiene nada que hacer por sí solo. */
+  boton: string | null;
+  accion: AccionPaso | null;
+}
+
+export interface Preparacion {
+  pasos: Paso[];
+  listoParaEvaluar: boolean;
+  /** El modo práctica no necesita el colegio. */
+  listoParaPracticar: boolean;
+}
+
+export function estadoPreparacion(config: Configuracion, dpr: number): Preparacion {
+  const colegio = config.colegio.trim();
+  const calibracion = estadoCalibracion(config, dpr);
+  const calibrada = calibracion === 'vigente';
+  const apto =
+    calibrada && esDibujable(nivelPorNombre('6/9'), ranuras(config.caja)[0], { pxPorMm: config.pxPorMm!, dpr });
+
+  const pasoColegio: Paso =
+    colegio !== ''
+      ? { id: 'colegio', listo: true, texto: `Colegio: ${colegio}`, boton: null, accion: null }
+      : {
+          id: 'colegio',
+          listo: false,
+          texto: 'Falta el nombre del colegio (sale en la constancia).',
+          boton: 'Escribir el colegio',
+          accion: 'colegio',
+        };
+
+  const pasoCalibracion: Paso = {
+    id: 'calibracion',
+    listo: calibrada,
+    texto: {
+      'sin-calibrar': 'Falta calibrar la pantalla con tu DNI.',
+      vigente: 'Pantalla calibrada.',
+      'cambio-zoom': 'Cambió el zoom o el tamaño de letra del celular: vuelve a calibrar la pantalla.',
+    }[calibracion],
+    boton: calibrada ? null : calibracion === 'sin-calibrar' ? 'Calibrar pantalla' : 'Volver a calibrar',
+    accion: calibrada ? null : 'calibrar',
+  };
+
+  const pasoCelular: Paso = !calibrada
+    ? { id: 'celular', listo: false, texto: 'Se comprueba el celular al terminar de calibrar.', boton: null, accion: null }
+    : apto
+      ? { id: 'celular', listo: true, texto: 'Tu celular sirve para la prueba.', boton: null, accion: null }
+      : {
+          id: 'celular',
+          listo: false,
+          texto:
+            'La pantalla no alcanza a dibujar la línea 6/9. Casi siempre es un error al calibrar: vuelve a calibrar con cuidado. Si sigue igual, usa otro celular.',
+          boton: 'Volver a calibrar',
+          accion: 'calibrar',
+        };
+
+  const pasos = [pasoColegio, pasoCalibracion, pasoCelular];
+  return {
+    pasos,
+    listoParaEvaluar: pasos.every((p) => p.listo),
+    listoParaPracticar: pasoCalibracion.listo && pasoCelular.listo,
+  };
+}
+
+/** El primer paso que falta (para avisar y ofrecer su botón); null si ya se puede. */
+export function primerPendiente(prep: Preparacion, paraPracticar = false): Paso | null {
+  const pasos = paraPracticar ? prep.pasos.filter((p) => p.id !== 'colegio') : prep.pasos;
+  return pasos.find((p) => !p.listo && p.boton !== null) ?? pasos.find((p) => !p.listo) ?? null;
+}
