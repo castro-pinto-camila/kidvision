@@ -11,6 +11,8 @@ export interface Configuracion {
   /** devicePixelRatio al calibrar: si cambia (zoom o tamaño de letra del celular), hay que recalibrar. */
   dprCalibracion: number | null;
   caja: ConfigCaja;
+  /** Nombre del colegio: se escribe una vez y va en la constancia y en cada evaluación. */
+  colegio: string;
   umbralCorte: '6/9' | '6/12';
   franja: Franja;
   /** Resultado de la comprobación con la «D»: dibujo girado 180° y/o mitades cambiadas. */
@@ -37,6 +39,7 @@ export function configuracionPorDefecto(): Configuracion {
     pxPorMm: null,
     dprCalibracion: null,
     caja: { ...CAJA_POR_DEFECTO, ranuras_mm: [...CAJA_POR_DEFECTO.ranuras_mm] },
+    colegio: '',
     umbralCorte: '6/9',
     franja: { lado: 'arriba', ancho_mm: 15 },
     pantallaInvertida: false,
