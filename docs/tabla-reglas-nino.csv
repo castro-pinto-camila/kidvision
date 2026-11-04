@@ -1,0 +1,15 @@
+﻿semáforo ojo derecho;semáforo ojo izquierdo;algún ojo en el límite del dispositivo;semáforo del niño;qué hacer
+VERDE;VERDE;no;VERDE;No derivar
+VERDE;AMARILLO;no;AMARILLO;Repetir la prueba
+VERDE;AMARILLO;sí;AMARILLO;Repetir con otro celular
+VERDE;ROJO;no;ROJO;Derivar
+AMARILLO;VERDE;no;AMARILLO;Repetir la prueba
+AMARILLO;VERDE;sí;AMARILLO;Repetir con otro celular
+AMARILLO;AMARILLO;no;AMARILLO;Repetir la prueba
+AMARILLO;AMARILLO;sí;AMARILLO;Repetir con otro celular
+AMARILLO;ROJO;no;ROJO;Derivar
+AMARILLO;ROJO;sí;ROJO;Derivar
+ROJO;VERDE;no;ROJO;Derivar
+ROJO;AMARILLO;no;ROJO;Derivar
+ROJO;AMARILLO;sí;ROJO;Derivar
+ROJO;ROJO;no;ROJO;Derivar

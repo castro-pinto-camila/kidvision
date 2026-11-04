@@ -464,6 +464,8 @@ Este archivo lo genera \`npm run guia\`; no se edita a mano. Cada escenario es u
 
 **Las «E» son siempre las mismas.** Cada línea de la prueba tiene su propia secuencia de flechas, fija: la que ves aquí es la que sale en el celular. Hay dos juegos: el **A** se usa en la primera evaluación de un niño y en el modo práctica; el **B** (otras flechas), cuando el niño ya tiene una evaluación guardada. Esta guía usa el juego A: prueba con un niño nuevo, sin evaluaciones. Si te equivocas o la prueba se desvía de la guía, las siguientes líneas pueden cambiar un poco.
 
+**Para revisar las reglas sin hacer la prueba:** abre en Excel `docs/tabla-reglas-ojo.csv` (las 48 combinaciones de hallazgos que puede dar un ojo y el resultado de cada una) y `docs/tabla-reglas-nino.csv` (qué hacer con el niño según los dos ojos), y compáralas con el SPEC. Si una fila no coincide con lo que dice el SPEC, avísame.
+
 **Cómo usarla para revisar la app en tu celular:** elige un escenario y haz la prueba tocando exactamente lo que dice cada paso (✓ = tocas la flecha igual a la «E»; ✗ = tocas la que dice la guía, que es una equivocación a propósito). Compara el semáforo, la categoría, el punto remoto y la indicación con los de este archivo.
 
 ## Reglas en una mirada

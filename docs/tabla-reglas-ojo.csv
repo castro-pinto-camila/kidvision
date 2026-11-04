@@ -1,0 +1,49 @@
+﻿pasa de lejos;tiene punto remoto;pasa con +2.00;mejora con estenopeico;abanico consistente;pasa de cerca;resultado dudoso;categoría;posible astigmatismo (por validar);semáforo del ojo
+sí;no;no;no se hizo;no;no;no;hipermetropía;no;ROJO
+sí;no;sí;no se hizo;no;no;no;hipermetropía;no;ROJO
+no;sí;no se hizo;no se hizo;no;no;no;miopía;no;ROJO
+no;no;no se hizo;no;no;no;no;otra causa;no;ROJO
+no;no;no se hizo;sí;no;no;no;indeterminado;no;ROJO
+no;no;no se hizo;no se hizo;no;no;no;(sin categoría);no;ROJO
+sí;no;no;no se hizo;sí;no;no;hipermetropía + astigmatismo;no;ROJO
+sí;no;sí;no se hizo;sí;no;no;hipermetropía + astigmatismo;no;ROJO
+no;sí;no se hizo;no se hizo;sí;no;no;miopía + astigmatismo;no;ROJO
+no;no;no se hizo;no;sí;no;no;astigmatismo + otra causa;no;ROJO
+no;no;no se hizo;sí;sí;no;no;astigmatismo;no;ROJO
+no;no;no se hizo;no se hizo;sí;no;no;astigmatismo;no;ROJO
+sí;no;no;no se hizo;no;sí;no;normal;no;VERDE
+sí;no;sí;no se hizo;no;sí;no;hipermetropía;no;ROJO
+no;sí;no se hizo;no se hizo;no;sí;no;miopía;no;ROJO
+no;no;no se hizo;no;no;sí;no;otra causa;no;ROJO
+no;no;no se hizo;sí;no;sí;no;indeterminado;no;ROJO
+no;no;no se hizo;no se hizo;no;sí;no;(sin categoría);no;ROJO
+sí;no;no;no se hizo;sí;sí;no;normal;sí;VERDE
+sí;no;sí;no se hizo;sí;sí;no;hipermetropía;sí;ROJO
+no;sí;no se hizo;no se hizo;sí;sí;no;miopía + astigmatismo;no;ROJO
+no;no;no se hizo;no;sí;sí;no;astigmatismo + otra causa;no;ROJO
+no;no;no se hizo;sí;sí;sí;no;astigmatismo;no;ROJO
+no;no;no se hizo;no se hizo;sí;sí;no;astigmatismo;no;ROJO
+sí;no;no;no se hizo;no;no;sí;hipermetropía;no;AMARILLO
+sí;no;sí;no se hizo;no;no;sí;hipermetropía;no;AMARILLO
+no;sí;no se hizo;no se hizo;no;no;sí;miopía;no;AMARILLO
+no;no;no se hizo;no;no;no;sí;otra causa;no;AMARILLO
+no;no;no se hizo;sí;no;no;sí;indeterminado;no;AMARILLO
+no;no;no se hizo;no se hizo;no;no;sí;(sin categoría);no;AMARILLO
+sí;no;no;no se hizo;sí;no;sí;hipermetropía + astigmatismo;no;AMARILLO
+sí;no;sí;no se hizo;sí;no;sí;hipermetropía + astigmatismo;no;AMARILLO
+no;sí;no se hizo;no se hizo;sí;no;sí;miopía + astigmatismo;no;AMARILLO
+no;no;no se hizo;no;sí;no;sí;astigmatismo + otra causa;no;AMARILLO
+no;no;no se hizo;sí;sí;no;sí;astigmatismo;no;AMARILLO
+no;no;no se hizo;no se hizo;sí;no;sí;astigmatismo;no;AMARILLO
+sí;no;no;no se hizo;no;sí;sí;normal;no;AMARILLO
+sí;no;sí;no se hizo;no;sí;sí;hipermetropía;no;AMARILLO
+no;sí;no se hizo;no se hizo;no;sí;sí;miopía;no;AMARILLO
+no;no;no se hizo;no;no;sí;sí;otra causa;no;AMARILLO
+no;no;no se hizo;sí;no;sí;sí;indeterminado;no;AMARILLO
+no;no;no se hizo;no se hizo;no;sí;sí;(sin categoría);no;AMARILLO
+sí;no;no;no se hizo;sí;sí;sí;normal;sí;AMARILLO
+sí;no;sí;no se hizo;sí;sí;sí;hipermetropía;sí;AMARILLO
+no;sí;no se hizo;no se hizo;sí;sí;sí;miopía + astigmatismo;no;AMARILLO
+no;no;no se hizo;no;sí;sí;sí;astigmatismo + otra causa;no;AMARILLO
+no;no;no se hizo;sí;sí;sí;sí;astigmatismo;no;AMARILLO
+no;no;no se hizo;no se hizo;sí;sí;sí;astigmatismo;no;AMARILLO
