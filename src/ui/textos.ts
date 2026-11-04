@@ -40,7 +40,7 @@ export function textoColocar(p: PasoColocar, primero = false): { titulo: string;
     return {
       titulo: `Prueba de cerca: ${NOMBRE_OJO[p.ojo]}`,
       lineas: [
-        'Saca el celular de la caja.',
+        'Saca el celular de la bandeja.',
         `Apoya un extremo de la tira de cartón de 40 cm en la mejilla del niño, bajo el ${NOMBRE_OJO[p.ojo]}, y sostén el celular en el otro extremo.`,
         `Tapa el ${OTRO_OJO[p.ojo]} con el oclusor.`,
       ],
@@ -49,14 +49,17 @@ export function textoColocar(p: PasoColocar, primero = false): { titulo: string;
   const lineas: string[] = [];
   if (p.quitar === 'clip') lineas.push('Sube la tapa +2.00 de la caja.');
   if (p.quitar === 'estenopeico') lineas.push('Quita el estenopeico.');
-  lineas.push(`Coloca el celular en la ranura ${p.lugar}.`);
+  if (primero) {
+    lineas.push('Pon el celular sin funda en la bandeja, con la pantalla apoyada contra el tope y la esponja detrás.');
+  }
+  lineas.push(`Pon el pasador en ${p.lugar}: desliza la bandeja hasta el agujero ${p.lugar} y atraviésalo con el pasador.`);
   if (p.accesorio === 'clip') lineas.push('Baja la tapa +2.00 de la caja.');
   if (p.accesorio === 'estenopeico') {
     lineas.push('Pon el estenopeico (el oclusor con agujeritos) delante de los lentes de la caja.');
   }
   if (primero) lineas.push(...COMO_RESPONDE);
   if (p.nota === 'abanico') lineas.push(...COMO_ABANICO);
-  return { titulo: `Ranura ${p.lugar}`, lineas };
+  return { titulo: `Pon el pasador en ${p.lugar}`, lineas };
 }
 
 export const TEXTO_SEMAFORO: Record<Semaforo, string> = {
