@@ -675,14 +675,14 @@ function piezasArmado(p: Plantilla): [string, string][] {
       'Panel de lentes (+3.00)',
       'Sostiene los dos lentes de lectura de +3.00. Su centro marca el plano de los lentes, desde donde se miden todas las distancias.',
     ],
-    ['Tapa +2.00', 'Lleva los lentes de +2.00. Se baja delante de los lentes de la caja solo cuando la app lo pide.'],
+    ['Tapa +2.00', 'Lleva los lentes de +2.00. Se baja delante de los lentes de la caja solo cuando la app lo pide. Tiene dos salientes arriba, para que se apoye en S1 y S2 y quede a plomo, y una pestaña abajo para levantarla.'],
     ['Apoyo para la cara', `Donde el niño apoya la cara. Queda a ${coma(p.e_mm)} mm de los lentes.`],
     [
       'S1 y S2 (separadores)',
-      `Dos tacos de ${sep} mm entre el panel de lentes y el apoyo para la cara, uno en cada extremo. Fijan esos ${coma(p.e_mm)} mm: si faltan o se aplastan, el ojo queda a otra distancia.`,
+      `Dos tacos de ${sep} mm entre el panel de lentes y el apoyo para la cara, uno en cada extremo. Fijan esos ${coma(p.e_mm)} mm: si faltan o se aplastan, el ojo queda a otra distancia. Son más bajos que el panel (${coma(altoSeparador(p.medidas))} mm): los salientes de la tapa pasan por encima.`,
     ],
     ['Panel trasero', 'Cierra la caja por detrás de la bandeja.'],
-    ['Techo delantero', 'Cubre la parte de los lentes. Detrás queda abierta la canaleta, por donde sobresale el celular.'],
+    ['Techo delantero', 'Empieza detrás del panel de lentes, para dejar libres la bisagra y el hueco de la tapa. Detrás queda abierta la canaleta, por donde sobresale el celular.'],
     [
       'Bandeja',
       'Lleva el celular: la pantalla se apoya contra el tope y la esponja va detrás. Se mueve de R0 a R10.',
@@ -701,9 +701,9 @@ function pasosArmado(p: Plantilla): string[] {
     '<strong>Paredes al piso.</strong> Pega la pared derecha y la izquierda a los costados del piso. «Derecha» es la derecha del niño cuando mira por los lentes. La franja gris «Plano de los lentes» de las dos paredes va adelante, a la misma altura. La regla de la pared izquierda mira hacia adentro.',
     '<strong>Panel de lentes.</strong> Pégalo entre las paredes, justo sobre la franja gris «Plano de los lentes» (su cartón la cubre exacta). Coloca los lentes de +3.00 en sus agujeros.',
     '<strong>Panel trasero.</strong> Pégalo entre las paredes, al final.',
-    '<strong>S1, S2 y apoyo para la cara.</strong> Pega S1 y S2 de pie en la cara del panel de lentes que mira al niño, uno en cada extremo, junto a las paredes. Pega el apoyo para la cara sobre S1 y S2, con la muesca de la nariz abajo.',
-    '<strong>Techo delantero.</strong> Pégalo sobre las paredes, desde el frente hacia atrás. Detrás queda abierta la canaleta.',
-    '<strong>Tapa +2.00.</strong> Su bisagra va arriba del panel de lentes, del lado del niño, para que baje delante de los lentes de la caja. Coloca los lentes de +2.00. <em>Antes de pegarla, lee el recuadro «Atención».</em>',
+    '<strong>S1, S2 y apoyo para la cara.</strong> Pega S1 y S2 de pie en la cara del panel de lentes que mira al niño, uno en cada extremo, junto a las paredes. Son más bajos que el panel: no los alargues. Pega el apoyo para la cara a S1 y S2, con la muesca de la nariz abajo.',
+    '<strong>Techo delantero.</strong> Pégalo sobre las paredes, empezando justo detrás del panel de lentes. No cubras la bisagra ni el hueco de la tapa. Detrás queda abierta la canaleta.',
+    `<strong>Tapa +2.00.</strong> Refuerza los dos salientes de arriba con cinta (el cartón de 3 mm se dobla). Dobla la pestaña de abajo hacia el ojo. Pega la bisagra arriba del panel de lentes, del lado del niño, y coloca los lentes de +2.00. La tapa se mueve así: se levanta con la pestaña (se alcanza por la muesca de la nariz) y, al soltarla, baja sola delante de los lentes de la caja. <em>Cómo comprobar que asienta bien:</em> bájala; sus dos salientes deben quedar apoyados sobre S1 y S2, la tapa pegada al panel de lentes y sin inclinación, y los dos agujeros frente a los lentes de la caja. Debe subir y bajar sin rozar el apoyo ni el techo. Si queda inclinada, revisa que S1 y S2 midan ${coma(altoSeparador(m))} mm y que ningún pegamento sobresalga.`,
     '<strong>Mete la bandeja</strong> por la canaleta, con el tope hacia los lentes. Pon el celular sin funda, con la pantalla contra el tope y la esponja detrás y a los costados.',
     '<strong>Usa el pasador.</strong> Cuando la app diga «Pon el pasador en R4», desliza la bandeja hasta que su agujero quede frente al agujero R4 de la pared derecha y atraviesa los dos con el pasador. La bandeja tiene dos agujeros: usa el de la misma fila que el número (pares arriba, impares abajo). <em>Alternativa:</em> alinea la muesca de la bandeja con la marca R4 de la regla y sujétala con un clip.',
     `<strong>Comprueba las medidas.</strong> Con el pasador en R0, del plano de los lentes al tope debe haber ${coma(p.ranuras_mm[0])} mm; en R${nUltima}, ${coma(p.ranuras_mm[nUltima])} mm. Si no coincide, corrige esas distancias en la app: Configuración → Ajustes de la caja.`,
@@ -758,7 +758,6 @@ ${esquemaArmado()}
 <ol>
 ${pasos}
 </ol>
-<div class="atencion"><strong>Atención antes de pegar la tapa +2.00.</strong> S1 y S2 ocupan 3 mm a cada lado del espacio donde baja la tapa, y el techo delantero cubre el borde de arriba del panel de lentes, donde va la bisagra. Prueba la tapa en seco: si no baja o no se puede levantar, no la pegues todavía; la próxima versión de la plantilla corrige estas piezas.</div>
 </div>
 </div>
 </section>`;
@@ -788,7 +787,6 @@ export function plantillaHtml(p: Plantilla, titulo: string): string {
   .armado th { white-space: nowrap; }
   .armado ol { margin: 0; padding-left: 5mm; }
   .armado li { margin-bottom: 1mm; }
-  .armado .atencion { margin-top: 2mm; padding: 2mm 3mm; border: 0.4mm solid #b45309; background: #fef3c7; }
   @media screen { .hoja { margin: 8mm auto; box-shadow: 0 0 4px #999; } }
 </style>
 </head>
