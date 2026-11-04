@@ -39,6 +39,7 @@ Tolerancia ±5 %; el objetivo es ±2 %.
 - [ ] Los avisos «Pon el pasador en R…» coinciden con el número de la caja. Si solo cambia la tapa, el aviso dice «Baja la tapa +2.00» o «Sube la tapa +2.00», sin hablar del pasador.
 - [ ] Los botones se alcanzan con el pulgar en la franja de arriba que sobresale de la caja.
 - [ ] Baja y sube la tapa +2.00 cuando la app lo pide: baja sola, queda a plomo y se levanta con la pestaña.
+- [ ] En cada paso de la prueba (comprobación de la «D», líneas, abanico, espera de 60 s) hay un botón ✕ en el extremo de la franja. Tócalo: aparece «¿Salir de la prueba?» con «Seguir con la prueba» (botón principal) y «Salir sin guardar». «Seguir» continúa donde estabas; «Salir» vuelve a la pantalla anterior sin guardar nada.
 - [ ] Al terminar aparece el semáforo y la agudeza de cada ojo.
 - [ ] El niño queda como «evaluado» en «Mi salón».
 - [ ] Anota cuánto duró la evaluación completa.
