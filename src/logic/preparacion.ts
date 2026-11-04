@@ -4,7 +4,7 @@
  */
 import { ranuras } from '../core/caja';
 import { esDibujable, nivelPorNombre } from '../core/optotipos';
-import { estadoCalibracion, type Configuracion } from '../data/config';
+import { estadoCalibracion, type Configuracion, type HuellaPantalla } from '../data/config';
 
 export type IdPaso = 'colegio' | 'calibracion' | 'celular';
 /** Qué hace el botón de un paso: pedir el colegio o ir a calibrar. */
@@ -26,9 +26,9 @@ export interface Preparacion {
   listoParaPracticar: boolean;
 }
 
-export function estadoPreparacion(config: Configuracion, dpr: number): Preparacion {
+export function estadoPreparacion(config: Configuracion, dpr: number, huella?: HuellaPantalla): Preparacion {
   const colegio = config.colegio.trim();
-  const calibracion = estadoCalibracion(config, dpr);
+  const calibracion = estadoCalibracion(config, dpr, huella);
   const calibrada = calibracion === 'vigente';
   const apto =
     calibrada && esDibujable(nivelPorNombre('6/9'), ranuras(config.caja)[0], { pxPorMm: config.pxPorMm!, dpr });
@@ -48,6 +48,7 @@ export function estadoPreparacion(config: Configuracion, dpr: number): Preparaci
     'sin-calibrar': 'Falta calibrar la pantalla con tu DNI.',
     vigente: 'Pantalla calibrada.',
     'cambio-zoom': 'Cambió el zoom o el tamaño de letra del celular: vuelve a calibrar la pantalla.',
+    'cambio-pantalla': 'Parece que cambió la pantalla del celular (o se abrió en otro lugar): vuelve a calibrar.',
   }[calibracion];
 
   // Calibrada pero con una medida con la que no se puede dibujar la línea 6/9: casi siempre es un error al calibrar.

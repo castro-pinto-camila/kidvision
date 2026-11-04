@@ -73,6 +73,7 @@ export function montarConfiguracion(
       'sin-calibrar': 'La pantalla todavía no está calibrada.',
       vigente: 'Pantalla calibrada.',
       'cambio-zoom': 'Cambió el zoom o el tamaño de letra del celular: vuelve a calibrar.',
+      'cambio-pantalla': 'Parece que cambió la pantalla del celular (o se abrió en otro lugar): vuelve a calibrar.',
     }[estado];
     const filas: HTMLElement[] = [
       h(

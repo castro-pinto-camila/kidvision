@@ -65,3 +65,31 @@ describe('estado de la calibración', () => {
     expect(estadoCalibracion(c, 3)).toBe('vigente');
   });
 });
+
+describe('calibración con la huella de la pantalla', () => {
+  const huella = { ancho: 360, alto: 800, dpr: 3, zoom: 1 };
+  const calibrada = { ...configuracionPorDefecto(), pxPorMm: 6.3, dprCalibracion: 3, huella };
+
+  it('vigente si todo sigue igual, también con el celular girado', () => {
+    expect(estadoCalibracion(calibrada, 3, huella)).toBe('vigente');
+    expect(estadoCalibracion(calibrada, 3, { ...huella, ancho: 800, alto: 360 })).toBe('vigente');
+  });
+
+  it('pide recalibrar si hay zoom con los dedos', () => {
+    expect(estadoCalibracion(calibrada, 3, { ...huella, zoom: 1.5 })).toBe('cambio-zoom');
+  });
+
+  it('pide recalibrar si cambió el tamaño de la pantalla (otro celular o ajuste de pantalla)', () => {
+    expect(estadoCalibracion(calibrada, 3, { ...huella, ancho: 412, alto: 915 })).toBe('cambio-pantalla');
+  });
+
+  it('una calibración vieja, sin huella, sigue valiendo si el dpr no cambió', () => {
+    expect(estadoCalibracion({ ...calibrada, huella: null }, 3, huella)).toBe('vigente');
+  });
+
+  it('la huella se guarda y se lee', async () => {
+    const db = await dbNueva();
+    await guardarConfiguracion(db, calibrada);
+    expect((await leerConfiguracion(db)).huella).toEqual(huella);
+  });
+});
