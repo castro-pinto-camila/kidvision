@@ -16,6 +16,7 @@ import type { Evento, Ojo, PasoAbanico, PasoColocar, PasoEspera, PasoLinea } fro
 import { dibujarAbanico, dibujarLetra, dibujarLinea, pintar, prepararLienzo } from './dibujo';
 import { liberarPantalla } from './dispositivo';
 import { h } from './dom';
+import { icono } from './iconos';
 import { NOMBRE_OJO, NOMBRE_PRUEBA, textoColocar } from './textos';
 
 export interface OpcionesPantallaPrueba {
@@ -27,11 +28,12 @@ export interface OpcionesPantallaPrueba {
   alSalir: () => void;
 }
 
-const FLECHAS: [Respuesta, string, string][] = [
-  ['izquierda', '←', 'Izquierda'],
-  ['arriba', '↑', 'Arriba'],
-  ['abajo', '↓', 'Abajo'],
-  ['derecha', '→', 'Derecha'],
+/** Respuesta, giro de la flecha y nombre para lectores de pantalla. */
+const FLECHAS: [Respuesta, number, string][] = [
+  ['izquierda', 180, 'Izquierda'],
+  ['arriba', 270, 'Arriba'],
+  ['abajo', 90, 'Abajo'],
+  ['derecha', 0, 'Derecha'],
 ];
 
 /** Monta la prueba en `raiz`. Devuelve la función para desmontarla. */
@@ -235,8 +237,8 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
     const estado = `${NOMBRE_OJO[paso.ojo]} · ${NOMBRE_PRUEBA[paso.prueba]} ${paso.nivel.nombre} · letra ${Math.min(toques.length + 1, 5)} de 5`;
     capa.replaceChildren(
       franja(d, estado, [
-        ...FLECHAS.map(([r, simbolo, nombre]) =>
-          h('button', { class: 'boton flecha', 'aria-label': nombre, onclick: () => tocar(r) }, simbolo),
+        ...FLECHAS.map(([r, giro, nombre]) =>
+          h('button', { class: 'boton flecha', 'aria-label': nombre, onclick: () => tocar(r) }, icono('flecha', giro)),
         ),
         h('button', { class: 'boton', onclick: () => tocar('nose') }, 'No sé'),
         h(
@@ -244,13 +246,14 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
           {
             class: 'boton secundario',
             disabled: toques.length === 0,
+            'aria-label': 'Borrar la última respuesta',
             onclick: () => {
               toques.pop();
               ultimoToque = performance.now();
               dibujar();
             },
           },
-          'Borrar',
+          icono('borrar'),
         ),
       ]),
     );

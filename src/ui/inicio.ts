@@ -6,6 +6,7 @@ import { ranuras } from '../core/caja';
 import { esDibujable, nivelPorNombre } from '../core/optotipos';
 import { estadoCalibracion, type Configuracion } from '../data/config';
 import { h } from './dom';
+import { icono } from './iconos';
 
 export interface AccionesInicio {
   empezar: () => void;
@@ -33,14 +34,14 @@ export function montarInicio(raiz: HTMLElement, config: Configuracion, acciones:
     h(
       'main',
       { class: 'pagina inicio' },
-      h('div', { class: 'marca' }, h('span', { class: 'logo', 'aria-hidden': 'true' }, 'E'), h('h1', {}, 'KidVision')),
+      h('div', { class: 'marca' }, h('span', { class: 'logo' }, icono('ojo')), h('h1', {}, 'KidVision')),
       h('p', { class: 'lema' }, 'Tamizaje visual escolar con la caja óptica.'),
       aviso && h('p', { class: 'aviso' }, aviso),
       mensaje && h('p', { class: 'aviso' }, mensaje),
       estado === 'vigente'
         ? h('button', { class: 'boton principal grande', disabled: !apto, onclick: acciones.empezar }, 'Empezar prueba')
-        : h('button', { class: 'boton principal grande', onclick: acciones.calibrar }, 'Calibrar pantalla'),
-      h('button', { class: 'boton', onclick: acciones.configurar }, 'Configuración'),
+        : h('button', { class: 'boton principal grande', onclick: acciones.calibrar }, icono('regla'), 'Calibrar pantalla'),
+      h('button', { class: 'boton', onclick: acciones.configurar }, icono('ajustes'), 'Configuración'),
     ),
   );
   return () => {};

@@ -16,6 +16,7 @@ import {
 } from '../core/optotipos';
 import { estadoCalibracion, type Configuracion } from '../data/config';
 import { h } from './dom';
+import { icono } from './iconos';
 import { textoDioptrias } from './textos';
 
 const coma = (n: number, decimales = 1) => n.toFixed(decimales).replace('.', ',');
@@ -73,7 +74,7 @@ export function montarConfiguracion(
       h(
         'div',
         { class: `fila-estado ${estado === 'vigente' ? 'ok' : 'pendiente'}` },
-        h('span', { class: 'icono', 'aria-hidden': 'true' }, estado === 'vigente' ? '✓' : '!'),
+        h('span', { class: 'icono' }, estado === 'vigente' ? icono('check') : '!'),
         h('span', { class: 'texto' }, textoCalibracion),
         h(
           'button',
@@ -87,7 +88,7 @@ export function montarConfiguracion(
         h(
           'div',
           { class: `fila-estado ${sirve ? 'ok' : 'mal'}` },
-          h('span', { class: 'icono', 'aria-hidden': 'true' }, sirve ? '✓' : '✕'),
+          h('span', { class: 'icono' }, sirve ? icono('check') : '✕'),
           h(
             'span',
             { class: 'texto' },
@@ -339,7 +340,7 @@ export function montarConfiguracion(
       h(
         'header',
         { class: 'cabecera' },
-        h('button', { class: 'boton secundario', onclick: acciones.volver }, '← Volver'),
+        h('button', { class: 'boton secundario', 'aria-label': 'Volver', onclick: acciones.volver }, icono('atras')),
         h('h1', {}, 'Configuración'),
       ),
       estadoDocente,

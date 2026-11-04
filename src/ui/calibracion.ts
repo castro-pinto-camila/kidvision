@@ -9,6 +9,7 @@ import { ranuras } from '../core/caja';
 import { esDibujable, nivelPorNombre } from '../core/optotipos';
 import type { Configuracion } from '../data/config';
 import { h } from './dom';
+import { icono } from './iconos';
 
 /** Ancho de un DNI o tarjeta bancaria (ISO/IEC 7810 ID-1). */
 export const ANCHO_TARJETA_MM = 85.6;
@@ -27,7 +28,7 @@ function dibujoDni(): SVGSVGElement {
   svg.setAttribute('preserveAspectRatio', 'none');
   svg.setAttribute('class', 'dni');
   svg.innerHTML = `
-    <rect x="4" y="4" width="848" height="532" rx="34" fill="none" stroke="currentColor" stroke-width="6" stroke-dasharray="22 14"/>
+    <rect x="4" y="4" width="848" height="532" rx="34" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="10 7" vector-effect="non-scaling-stroke"/>
     <rect x="60" y="130" width="190" height="240" rx="16" fill="currentColor" opacity="0.18"/>
     <rect x="300" y="150" width="380" height="34" rx="10" fill="currentColor" opacity="0.18"/>
     <rect x="300" y="220" width="300" height="34" rx="10" fill="currentColor" opacity="0.18"/>
@@ -118,7 +119,8 @@ export function montarCalibracion(
             mostrar();
           },
         },
-        'Siguiente: medir con regla →',
+        'Siguiente: medir con regla',
+        icono('flecha'),
       ),
     ];
   }
@@ -171,7 +173,7 @@ export function montarCalibracion(
     const pantalla = { pxPorMm: px, dpr: window.devicePixelRatio || 1 };
     const sirve = esDibujable(nivelPorNombre('6/9'), ranuras(config.caja)[0], pantalla);
     return [
-      h('div', { class: 'confirmacion' }, h('span', { class: 'check', 'aria-hidden': 'true' }, '✓'), 'Calibración guardada'),
+      h('div', { class: 'confirmacion', role: 'status' }, h('span', { class: 'check' }, icono('check')), 'Calibración guardada'),
       h(
         'div',
         { class: `veredicto ${sirve ? 'ok' : 'mal'}` },
@@ -192,7 +194,7 @@ export function montarCalibracion(
         h(
           'header',
           { class: 'cabecera' },
-          paso !== 3 && h('button', { class: 'boton secundario', onclick: terminar }, '← Cancelar'),
+          paso !== 3 && h('button', { class: 'boton secundario', 'aria-label': 'Cancelar', onclick: terminar }, icono('atras')),
           h('h1', {}, 'Calibrar la pantalla'),
         ),
         pasos(),
