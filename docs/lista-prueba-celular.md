@@ -6,7 +6,7 @@ Antes de empezar: celular con la batería cargada, sin funda, brillo al máximo 
 
 ## 1. Instalar y abrir
 - [ ] Abre el enlace de la app en Chrome (Android) o Safari (iPhone).
-- [ ] La primera vez aparece la **portada** de KidVision con el botón «Comenzar». Después, la **Bienvenida**: escribes el colegio, calibras la pantalla y el botón «Entrar a Mi salón» se activa solo al terminar los dos pasos.
+- [ ] La primera vez aparece la **portada** de KidVision con el botón «Comenzar». Después, la **Bienvenida**: escribes el colegio y el salón (por ejemplo 3B), calibras la pantalla y el botón «Entrar a Mi salón» se activa solo al terminar los dos pasos.
 - [ ] Si algo falta, «Mi salón» muestra «Antes de evaluar» con ✓ o ✗ y un botón en cada paso pendiente.
 - [ ] Cuando todo está listo, dice «Listo para evaluar».
 - [ ] Si calibras mal a propósito, sale un solo aviso («La calibración no parece correcta…») con «Volver a calibrar», sin decir a la vez «Pantalla calibrada».
@@ -75,3 +75,11 @@ Tolerancia ±5 %; el objetivo es ±2 %.
 - [ ] El ojo derecho y el izquierdo no leen las mismas flechas en la misma línea.
 - [ ] Sigue la secuencia de un escenario de la guía (por ejemplo «Límite: 2 errores en la línea de lejos»): el resultado coincide con el de la guía.
 - [ ] Abre `docs/tabla-reglas-ojo.csv` y `docs/tabla-reglas-nino.csv` en Excel y compáralos con el SPEC: ninguna fila debe contradecirlo.
+
+## 11. Salón, regresar y versión
+- [ ] La bienvenida pide colegio **y** salón, y no deja entrar sin los dos. Tiene una flecha para volver a la portada.
+- [ ] «Mi salón» muestra «colegio · salón» en el encabezado.
+- [ ] Al agregar un niño sin escribir el grado, queda con el salón como grado. Al cargar un CSV sin la columna de grado, pasa lo mismo.
+- [ ] La constancia, el mensaje de WhatsApp y el nombre del archivo CSV llevan el colegio y el salón.
+- [ ] Si ya tenías el colegio guardado de antes, «Antes de evaluar» pide «Escribir el salón» y no deja evaluar hasta ponerlo.
+- [ ] En Configuración, abajo, dice «Versión … · publicada el …». El código de tres a siete letras y números debe ser el del último commit en GitHub: así sabes que tienes la versión nueva.
