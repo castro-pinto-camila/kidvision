@@ -6,13 +6,11 @@
  *   #/resultado        Resultado de la prueba recién hecha
  *   #/constancia/<id>  Constancia de una evaluación guardada
  *   #/resumen          Resumen del salón
+ *   #/bienvenida      Primera vez: colegio y calibración
  *   #/config, #/calibrar
  */
-import { ranuras } from '../core/caja';
-import { esDibujable, nivelPorNombre } from '../core/optotipos';
 import {
   configuracionPorDefecto,
-  estadoCalibracion,
   guardarConfiguracion,
   leerConfiguracion,
   type Configuracion,
@@ -27,6 +25,8 @@ import {
   type Estudiante,
 } from '../data/salon';
 import type { ResultadoSesion } from '../logic/flujo';
+import { estadoPreparacion, primerPendiente, type AccionPaso } from '../logic/preparacion';
+import { montarBienvenida } from './bienvenida';
 import { montarCalibracion } from './calibracion';
 import { montarConfiguracion } from './configuracion';
 import { montarConstancia } from './constancia';
@@ -88,19 +88,13 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
     if (estado.db) await guardarConfiguracion(estado.db, c);
   }
 
-  /** null si el celular está listo para la prueba; si no, el motivo. */
-  function problemaCelular(): string | null {
-    const dpr = window.devicePixelRatio || 1;
-    const calibracion = estadoCalibracion(estado.config, dpr);
-    if (calibracion === 'sin-calibrar') return 'Antes de la primera prueba, calibra la pantalla con tu DNI.';
-    if (calibracion === 'cambio-zoom') {
-      return 'Cambió el zoom o el tamaño de letra del celular: vuelve a calibrar la pantalla.';
-    }
-    const apto = esDibujable(nivelPorNombre('6/9'), ranuras(estado.config.caja)[0], {
-      pxPorMm: estado.config.pxPorMm!,
-      dpr,
-    });
-    return apto ? null : 'Este celular no sirve para la prueba: su pantalla no puede dibujar la línea 6/9.';
+  const preparacion = () => estadoPreparacion(estado.config, window.devicePixelRatio || 1);
+
+  /** Lo que hace el botón de cada paso pendiente; después de calibrar se vuelve a `volverA`. */
+  function hacer(accion: AccionPaso, volverA: string): void {
+    if (accion === 'colegio') return ir('#/bienvenida');
+    estado.volverDeCalibrar = volverA;
+    ir('#/calibrar');
   }
 
   // Se llama dentro del toque: el navegador lo exige para la pantalla completa.
@@ -156,7 +150,16 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
       void liberarPantalla();
     }
 
-    if (ruta === '#/config') {
+    if (ruta === '#/bienvenida') {
+      desmontar = montarBienvenida(raiz, {
+        colegioActual: estado.config.colegio,
+        preparacion: preparacion(),
+        guardarColegio: (nombre) => guardar({ ...estado.config, colegio: nombre }),
+        calibrar: () => hacer('calibrar', '#/bienvenida'),
+        refrescar: mostrar,
+        seguir: () => ir('#/'),
+      });
+    } else if (ruta === '#/config') {
       desmontar = montarConfiguracion(raiz, estado.config, {
         guardar,
         calibrar: () => {
@@ -218,7 +221,8 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
         desmontar = montarPreparar(raiz, {
           estudiante,
           historial,
-          problemaCelular: problemaCelular(),
+          pendiente: primerPendiente(preparacion()),
+          resolver: (accion) => hacer(accion, location.hash),
           empezar: () => void empezarPrueba(estudiante),
           verConstancia: (idEv) => ir(`#/constancia/${idEv}`),
           volver: () => ir('#/'),
@@ -240,24 +244,22 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
         (codigo) => ir(`#/nino/${encodeURIComponent(codigo)}`),
         () => ir('#/'),
       );
+    } else if (!estado.config.colegio.trim() && ruta === '#/') {
+      // Primera vez: antes de Mi salón se pide el colegio y se calibra.
+      ir('#/bienvenida');
     } else {
       const aviso = estado.avisoInicio;
       estado.avisoInicio = undefined;
-      const problema = problemaCelular();
       desmontar = montarSalon(raiz, {
         db: estado.db,
         colegio: estado.config.colegio,
-        problemaCelular: problema,
-        necesitaCalibrar: estadoCalibracion(estado.config, window.devicePixelRatio || 1) !== 'vigente',
+        preparacion: preparacion(),
         aviso,
         abrirNino: (codigo) => ir(`#/nino/${encodeURIComponent(codigo)}`),
         practicar: () => void empezarPrueba(null),
         resumen: () => ir('#/resumen'),
         configurar: () => ir('#/config'),
-        calibrar: () => {
-          estado.volverDeCalibrar = '#/';
-          ir('#/calibrar');
-        },
+        resolver: (accion) => hacer(accion, '#/'),
       });
     }
   }

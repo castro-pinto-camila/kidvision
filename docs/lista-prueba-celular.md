@@ -6,7 +6,9 @@ Antes de empezar: celular con la batería cargada, sin funda, brillo al máximo 
 
 ## 1. Instalar y abrir
 - [ ] Abre el enlace de la app en Chrome (Android) o Safari (iPhone).
-- [ ] Aparece «Mi salón» y no hay mensajes de error.
+- [ ] La primera vez aparece la **Bienvenida**: escribes el colegio, calibras la pantalla y el botón «Entrar a Mi salón» se activa solo al terminar los dos pasos.
+- [ ] Si algo falta, «Mi salón» muestra «Antes de evaluar» con ✓ o ✗ y un botón en cada paso pendiente.
+- [ ] Cuando todo está listo, dice «Listo para evaluar».
 - [ ] Se puede instalar (Chrome: menú ⋮ → «Instalar app» o «Agregar a la pantalla de inicio»). Tiene su ícono.
 - [ ] Al abrirla desde el ícono, se ve a pantalla completa.
 

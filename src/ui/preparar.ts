@@ -3,6 +3,7 @@
  * docente, antes de empezar la prueba de un niño.
  */
 import type { Estudiante, Evaluacion } from '../data/salon';
+import type { AccionPaso, Paso } from '../logic/preparacion';
 import { h } from './dom';
 import { icono } from './iconos';
 import { TEXTO_INDICACION } from './textos';
@@ -10,8 +11,10 @@ import { TEXTO_INDICACION } from './textos';
 export interface ContextoPreparar {
   estudiante: Estudiante;
   historial: Evaluacion[];
-  /** Si la prueba no se puede hacer en este celular, por qué. */
-  problemaCelular: string | null;
+  /** Lo que falta para poder evaluar (colegio, calibración o celular); null si ya se puede. */
+  pendiente: Paso | null;
+  /** Botón del paso pendiente. */
+  resolver: (accion: AccionPaso) => void;
   empezar: () => void;
   verConstancia: (id: number) => void;
   volver: () => void;
@@ -89,10 +92,18 @@ export function montarPreparar(raiz: HTMLElement, ctx: ContextoPreparar): () => 
           h('li', {}, dibujo(DIBUJOS[d]), h('div', {}, h('strong', {}, titulo), h('p', {}, texto))),
         ),
       ),
-      ctx.problemaCelular && h('p', { class: 'aviso' }, ctx.problemaCelular),
+      ctx.pendiente &&
+        h(
+          'div',
+          { class: 'aviso' },
+          ctx.pendiente.texto,
+          ctx.pendiente.boton &&
+            ctx.pendiente.accion &&
+            h('button', { class: 'boton principal', onclick: () => ctx.resolver(ctx.pendiente!.accion!) }, ctx.pendiente.boton),
+        ),
       h(
         'button',
-        { class: 'boton principal grande', disabled: ctx.problemaCelular !== null, onclick: ctx.empezar },
+        { class: 'boton principal grande', disabled: ctx.pendiente !== null, onclick: ctx.empezar },
         'Empezar prueba',
       ),
       ctx.historial.length > 0 &&

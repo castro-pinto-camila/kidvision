@@ -11,21 +11,22 @@ import {
   type Evaluacion,
 } from '../data/salon';
 import type { Indicacion } from '../logic/clasificacion';
+import type { AccionPaso, Preparacion } from '../logic/preparacion';
 import { h } from './dom';
 import { icono } from './iconos';
 
 export interface ContextoSalon {
   db: IDBDatabase | null;
   colegio: string;
-  /** Mensaje si la pantalla no está calibrada o el celular no sirve; null si todo está bien. */
-  problemaCelular: string | null;
-  necesitaCalibrar: boolean;
+  /** Qué falta para evaluar: colegio, calibración y celular apto. */
+  preparacion: Preparacion;
   aviso?: string;
   abrirNino: (codigo: string) => void;
   practicar: () => void;
   resumen: () => void;
   configurar: () => void;
-  calibrar: () => void;
+  /** Botón de un paso pendiente: pedir el colegio o calibrar. */
+  resolver: (accion: AccionPaso) => void;
 }
 
 const ESTADO: Record<Indicacion, string> = {
@@ -166,6 +167,28 @@ export function montarSalon(raiz: HTMLElement, ctx: ContextoSalon): () => void {
     void cargar();
   });
 
+  // --- Qué falta para evaluar -------------------------------------------------
+  const pendientes = ctx.preparacion.pasos.filter((p) => !p.listo);
+  const primero = pendientes.find((p) => p.boton !== null);
+  const listoPara = ctx.preparacion.listoParaEvaluar
+    ? h('p', { class: 'veredicto ok' }, icono('check'), ' Listo para evaluar.')
+    : h(
+        'section',
+        { class: 'tarjetas' },
+        h('h2', {}, 'Antes de evaluar'),
+        ...ctx.preparacion.pasos.map((p) =>
+          h(
+            'div',
+            { class: `fila-estado ${p.listo ? 'ok' : p.id === 'celular' && p.boton ? 'mal' : 'pendiente'}` },
+            h('span', { class: 'icono' }, p.listo ? icono('check') : p.id === 'celular' && p.boton ? '✕' : '!'),
+            h('span', { class: 'texto' }, p.texto),
+            p.boton && p.accion
+              ? h('button', { class: p === primero ? 'boton principal' : 'boton', onclick: () => ctx.resolver(p.accion!) }, p.boton)
+              : null,
+          ),
+        ),
+      );
+
   raiz.replaceChildren(
     h(
       'main',
@@ -178,14 +201,7 @@ export function montarSalon(raiz: HTMLElement, ctx: ContextoSalon): () => void {
         h('button', { class: 'boton secundario', 'aria-label': 'Configuración', onclick: ctx.configurar }, icono('ajustes')),
       ),
       ctx.aviso && h('p', { class: 'aviso' }, ctx.aviso),
-      ctx.problemaCelular &&
-        h(
-          'div',
-          { class: 'aviso' },
-          ctx.problemaCelular,
-          ctx.necesitaCalibrar &&
-            h('button', { class: 'boton principal', onclick: ctx.calibrar }, icono('regla'), 'Calibrar pantalla'),
-        ),
+      listoPara,
       mensaje,
       h(
         'div',
@@ -193,8 +209,10 @@ export function montarSalon(raiz: HTMLElement, ctx: ContextoSalon): () => void {
         agregar,
         h('label', { class: 'boton' }, icono('subir'), 'Cargar lista (CSV)', archivo),
         h('button', { class: 'boton', onclick: ctx.resumen }, icono('lista'), 'Resumen del salón'),
-        h('button', { class: 'boton', disabled: ctx.problemaCelular !== null, onclick: ctx.practicar }, 'Modo práctica (sin caja)'),
+        h('button', { class: 'boton', disabled: !ctx.preparacion.listoParaPracticar, onclick: ctx.practicar }, 'Modo práctica (sin caja)'),
       ),
+      !ctx.preparacion.listoParaPracticar &&
+        h('p', { class: 'nota' }, 'El modo práctica se activa cuando la pantalla esté calibrada y el celular sirva (mira «Antes de evaluar»).'),
       lista,
     ),
   );
