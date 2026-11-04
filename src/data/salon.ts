@@ -20,7 +20,7 @@ export interface Estudiante {
 /** Una evaluación, con la forma del JSON de SPEC.md. */
 export interface Evaluacion {
   id?: number;
-  estudiante: Estudiante & { colegio: string };
+  estudiante: Estudiante & { colegio: string; salon?: string };
   dispositivo: {
     pxPorMm: number;
     dpr: number;

@@ -128,7 +128,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
     if (!estado.practica && e && estado.db && estado.config.pxPorMm !== null) {
       try {
         estado.idEvaluacion = await guardarEvaluacion(estado.db, {
-          estudiante: { ...e, colegio: estado.config.colegio },
+          estudiante: { ...e, colegio: estado.config.colegio, salon: estado.config.salon },
           dispositivo: {
             pxPorMm: estado.config.pxPorMm,
             dpr: window.devicePixelRatio || 1,
@@ -265,6 +265,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
         raiz,
         estado.db,
         estado.config.colegio,
+        estado.config.salon,
         (codigo) => ir(`#/nino/${encodeURIComponent(codigo)}`),
         () => ir('#/'),
       );
@@ -277,6 +278,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
       desmontar = montarSalon(raiz, {
         db: estado.db,
         colegio: estado.config.colegio,
+        salon: estado.config.salon,
         preparacion: preparacion(),
         aviso,
         abrirNino: (codigo) => ir(`#/nino/${encodeURIComponent(codigo)}`),

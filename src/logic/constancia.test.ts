@@ -132,3 +132,14 @@ describe('resumen del salón', () => {
     });
   });
 });
+
+describe('salón en el mensaje de WhatsApp', () => {
+  it('lleva el colegio y el salón en la primera línea', () => {
+    const m = mensajeWhatsapp(MIOPE, '3B-07', 'IE 123', '3B');
+    expect(m.split('\n')[0]).toBe('KidVision · IE 123 · 3B');
+  });
+
+  it('sin salón (evaluaciones guardadas antes de existir el salón) queda como antes', () => {
+    expect(mensajeWhatsapp(MIOPE, '3B-07', 'IE 123').split('\n')[0]).toBe('KidVision · IE 123');
+  });
+});

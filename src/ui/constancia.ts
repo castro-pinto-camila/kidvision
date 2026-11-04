@@ -43,7 +43,7 @@ export function montarConstancia(raiz: HTMLElement, ev: Evaluacion, volver: () =
   const profesional = textoProfesional(s);
   const desenfoque = desenfoqueSimulado(s);
   const fecha = s.fecha.slice(0, 10).split('-').reverse().join('/');
-  const mensaje = mensajeWhatsapp(s, ev.estudiante.codigo, ev.estudiante.colegio);
+  const mensaje = mensajeWhatsapp(s, ev.estudiante.codigo, ev.estudiante.colegio, ev.estudiante.salon ?? '');
 
   raiz.replaceChildren(
     h(
@@ -65,7 +65,7 @@ export function montarConstancia(raiz: HTMLElement, ev: Evaluacion, volver: () =
         'header',
         { class: 'membrete' },
         h('strong', {}, 'KidVision · Prueba de la vista en la escuela'),
-        h('span', {}, [ev.estudiante.colegio, `Código ${ev.estudiante.codigo}`, fecha].filter(Boolean).join(' · ')),
+        h('span', {}, [ev.estudiante.colegio, ev.estudiante.salon, `Código ${ev.estudiante.codigo}`, fecha].filter(Boolean).join(' · ')),
       ),
 
       h(

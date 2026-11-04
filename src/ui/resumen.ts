@@ -3,19 +3,9 @@
  */
 import { exportarResumenCsv } from '../data/csv';
 import { leerEstudiantes, ultimasEvaluaciones } from '../data/salon';
-import { resumirSalon } from '../logic/resumen';
+import { nombreArchivoSalon, resumirSalon } from '../logic/resumen';
 import { h } from './dom';
 import { icono } from './iconos';
-
-function nombreArchivo(colegio: string): string {
-  const base = colegio
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-zA-Z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .toLowerCase();
-  return `kidvision-${base || 'salon'}-${new Date().toISOString().slice(0, 10)}.csv`;
-}
 
 function descargar(nombre: string, contenido: string): void {
   const url = URL.createObjectURL(new Blob([contenido], { type: 'text/csv;charset=utf-8' }));
@@ -30,6 +20,7 @@ export function montarResumen(
   raiz: HTMLElement,
   db: IDBDatabase | null,
   colegio: string,
+  salon: string,
   abrirNino: (codigo: string) => void,
   volver: () => void,
 ): () => void {
@@ -72,7 +63,7 @@ export function montarResumen(
         {
           class: 'boton principal',
           disabled: r.total === 0,
-          onclick: () => descargar(nombreArchivo(colegio), exportarResumenCsv(filas)),
+          onclick: () => descargar(nombreArchivoSalon(colegio, salon), exportarResumenCsv(filas)),
         },
         icono('subir', 180),
         'Exportar a CSV (Excel)',

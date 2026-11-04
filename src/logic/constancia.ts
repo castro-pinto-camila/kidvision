@@ -123,11 +123,11 @@ export function textoProfesional(s: ResultadoSesion): Record<Ojo, string[]> {
 }
 
 /** Mensaje de WhatsApp para la familia: solo la parte de la familia. */
-export function mensajeWhatsapp(s: ResultadoSesion, codigo: string, colegio: string): string {
+export function mensajeWhatsapp(s: ResultadoSesion, codigo: string, colegio: string, salon = ''): string {
   const f = textoFamilia(s);
   const fecha = s.fecha.slice(0, 10).split('-').reverse().join('/');
   return [
-    `KidVision${colegio ? ` · ${colegio}` : ''}`,
+    ['KidVision', colegio, salon].filter(Boolean).join(' · '),
     `Prueba de la vista del ${fecha} · Código ${codigo}`,
     '',
     f.titulo,

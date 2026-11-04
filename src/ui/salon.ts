@@ -18,6 +18,8 @@ import { icono } from './iconos';
 export interface ContextoSalon {
   db: IDBDatabase | null;
   colegio: string;
+  /** Salón de la docente: es el grado por defecto de los niños que se agregan. */
+  salon: string;
   /** Qué falta para evaluar: colegio, calibración y celular apto. */
   preparacion: Preparacion;
   aviso?: string;
@@ -110,7 +112,7 @@ export function montarSalon(raiz: HTMLElement, ctx: ContextoSalon): () => void {
   // --- Agregar un niño -------------------------------------------------------
   const codigo = h('input', { type: 'text', placeholder: '3B-07', 'aria-label': 'Código del niño', autocomplete: 'off' });
   const edad = h('input', { type: 'text', inputmode: 'numeric', placeholder: '9', 'aria-label': 'Edad' });
-  const grado = h('input', { type: 'text', placeholder: '3B', 'aria-label': 'Grado' });
+  const grado = h('input', { type: 'text', placeholder: ctx.salon || '3B', 'aria-label': 'Grado' });
   const errorAgregar = h('p', { class: 'error' });
   const agregar = h(
     'details',
@@ -134,7 +136,7 @@ export function montarSalon(raiz: HTMLElement, ctx: ContextoSalon): () => void {
           }
           errorAgregar.textContent = '';
           if (!ctx.db) return;
-          await guardarEstudiantes(ctx.db, [{ codigo: c, edad: n, grado: grado.value.trim() }]);
+          await guardarEstudiantes(ctx.db, [{ codigo: c, edad: n, grado: grado.value.trim() || ctx.salon }]);
           codigo.value = '';
           edad.value = '';
           mostrarMensaje(`Se guardó ${c}.`);
@@ -144,7 +146,7 @@ export function montarSalon(raiz: HTMLElement, ctx: ContextoSalon): () => void {
       },
       h('label', { class: 'campo-corto' }, h('span', {}, 'Código (sin nombre)'), codigo),
       h('label', { class: 'campo-corto' }, h('span', {}, 'Edad'), edad),
-      h('label', { class: 'campo-corto' }, h('span', {}, 'Grado'), grado),
+      h('label', { class: 'campo-corto' }, h('span', {}, 'Grado (si lo dejas vacío, el del salón)'), grado),
       errorAgregar,
       h('button', { class: 'boton principal', type: 'submit' }, 'Guardar niño'),
     ),
@@ -157,7 +159,10 @@ export function montarSalon(raiz: HTMLElement, ctx: ContextoSalon): () => void {
     archivo.value = '';
     if (!f || !ctx.db) return;
     const { estudiantes, errores } = leerListaCsv(await f.text());
-    const { nuevos, actualizados } = await guardarEstudiantes(ctx.db, estudiantes);
+    const { nuevos, actualizados } = await guardarEstudiantes(
+      ctx.db,
+      estudiantes.map((e) => ({ ...e, grado: e.grado || ctx.salon })),
+    );
     const detalles = errores.map((e) => `Fila ${e.fila}: ${e.mensaje}`);
     mostrarMensaje(
       `Se agregaron ${nuevos} niños${actualizados ? ` y se actualizaron ${actualizados}` : ''}.${errores.length ? ` ${errores.length} filas tienen problemas:` : ''}`,
@@ -197,7 +202,7 @@ export function montarSalon(raiz: HTMLElement, ctx: ContextoSalon): () => void {
         'header',
         { class: 'cabecera' },
         h('span', { class: 'logo' }, icono('ojo')),
-        h('div', { class: 'titulos' }, h('h1', {}, 'Mi salón'), ctx.colegio && h('p', { class: 'lema' }, ctx.colegio)),
+        h('div', { class: 'titulos' }, h('h1', {}, 'Mi salón'), (ctx.colegio || ctx.salon) && h('p', { class: 'lema' }, [ctx.colegio, ctx.salon].filter(Boolean).join(' · '))),
         h('button', { class: 'boton secundario', 'aria-label': 'Configuración', onclick: ctx.configurar }, icono('ajustes')),
       ),
       ctx.aviso && h('p', { class: 'aviso' }, ctx.aviso),
