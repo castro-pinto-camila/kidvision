@@ -1,15 +1,42 @@
 /**
- * Arranque y navegación entre pantallas (#/, #/config, #/prueba, #/resultado).
+ * Arranque y navegación entre pantallas:
+ *   #/                 Mi salón
+ *   #/nino/<código>    Preparar al niño
+ *   #/prueba           La prueba
+ *   #/resultado        Resultado de la prueba recién hecha
+ *   #/constancia/<id>  Constancia de una evaluación guardada
+ *   #/resumen          Resumen del salón
+ *   #/config, #/calibrar
  */
-import { configuracionPorDefecto, guardarConfiguracion, leerConfiguracion, type Configuracion } from '../data/config';
+import { ranuras } from '../core/caja';
+import { esDibujable, nivelPorNombre } from '../core/optotipos';
+import {
+  configuracionPorDefecto,
+  estadoCalibracion,
+  guardarConfiguracion,
+  leerConfiguracion,
+  type Configuracion,
+} from '../data/config';
 import { abrirDB } from '../data/db';
+import {
+  borrarSalon,
+  evaluacionesDe,
+  guardarEvaluacion,
+  leerEstudiantes,
+  leerEvaluacion,
+  type Estudiante,
+} from '../data/salon';
 import type { ResultadoSesion } from '../logic/flujo';
 import { montarCalibracion } from './calibracion';
 import { montarConfiguracion } from './configuracion';
+import { montarConstancia } from './constancia';
 import { liberarPantalla, prepararPantalla } from './dispositivo';
-import { montarInicio } from './inicio';
+import { h } from './dom';
+import { montarPreparar } from './preparar';
 import { montarPrueba } from './prueba';
 import { montarResultado } from './resultado';
+import { montarResumen } from './resumen';
+import { montarSalon } from './salon';
 
 interface Estado {
   db: IDBDatabase | null;
@@ -18,7 +45,11 @@ interface Estado {
   enPrueba: boolean;
   /** Modo práctica (sin caja): el resultado no vale y nunca se guarda. */
   practica: boolean;
+  /** Niño de la prueba en curso (null en práctica). */
+  estudiante: Estudiante | null;
   resultado: ResultadoSesion | null;
+  guardado: 'ok' | 'error' | null;
+  idEvaluacion: number | null;
   avisoInicio?: string;
   /** A dónde volver al terminar la calibración. */
   volverDeCalibrar: string;
@@ -31,17 +62,22 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
     avisos: [],
     enPrueba: false,
     practica: false,
+    estudiante: null,
     resultado: null,
+    guardado: null,
+    idEvaluacion: null,
     volverDeCalibrar: '#/',
   };
   try {
     estado.db = await abrirDB();
     estado.config = await leerConfiguracion(estado.db);
   } catch {
-    estado.avisoInicio = 'Este navegador no deja guardar datos: la calibración se perderá al cerrar la app.';
+    estado.avisoInicio = 'Este navegador no deja guardar datos: la calibración y los resultados se perderán al cerrar la app.';
   }
 
   let desmontar: () => void = () => {};
+  /** Cambia en cada navegación: una carga asíncrona vieja no pisa la pantalla nueva. */
+  let turno = 0;
   const ir = (ruta: string) => {
     if (location.hash === ruta) mostrar();
     else location.hash = ruta;
@@ -52,8 +88,67 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
     if (estado.db) await guardarConfiguracion(estado.db, c);
   }
 
+  /** null si el celular está listo para la prueba; si no, el motivo. */
+  function problemaCelular(): string | null {
+    const dpr = window.devicePixelRatio || 1;
+    const calibracion = estadoCalibracion(estado.config, dpr);
+    if (calibracion === 'sin-calibrar') return 'Antes de la primera prueba, calibra la pantalla con tu DNI.';
+    if (calibracion === 'cambio-zoom') {
+      return 'Cambió el zoom o el tamaño de letra del celular: vuelve a calibrar la pantalla.';
+    }
+    const apto = esDibujable(nivelPorNombre('6/9'), ranuras(estado.config.caja)[0], {
+      pxPorMm: estado.config.pxPorMm!,
+      dpr,
+    });
+    return apto ? null : 'Este celular no sirve para la prueba: su pantalla no puede dibujar la línea 6/9.';
+  }
+
+  // Se llama dentro del toque: el navegador lo exige para la pantalla completa.
+  async function empezarPrueba(estudiante: Estudiante | null): Promise<void> {
+    estado.practica = estudiante === null;
+    estado.estudiante = estudiante;
+    estado.avisos = await prepararPantalla();
+    estado.enPrueba = true;
+    ir('#/prueba');
+  }
+
+  async function terminarPrueba(r: ResultadoSesion): Promise<void> {
+    estado.enPrueba = false;
+    estado.resultado = r;
+    estado.guardado = null;
+    estado.idEvaluacion = null;
+    const e = estado.estudiante;
+    if (!estado.practica && e && estado.db && estado.config.pxPorMm !== null) {
+      try {
+        estado.idEvaluacion = await guardarEvaluacion(estado.db, {
+          estudiante: { ...e, colegio: estado.config.colegio },
+          dispositivo: {
+            pxPorMm: estado.config.pxPorMm,
+            dpr: window.devicePixelRatio || 1,
+            caja: {
+              P: estado.config.caja.P,
+              e_mm: estado.config.caja.e_mm,
+              ranuras_mm: [...estado.config.caja.ranuras_mm],
+            },
+          },
+          sesion: r,
+        });
+        estado.guardado = 'ok';
+      } catch {
+        estado.guardado = 'error';
+      }
+    }
+    ir('#/resultado');
+  }
+
+  function cargando(): void {
+    raiz.replaceChildren(h('main', { class: 'pagina' }, h('p', { class: 'nota' }, 'Cargando…')));
+  }
+
   function mostrar(): void {
     desmontar();
+    desmontar = () => {};
+    const miTurno = ++turno;
     const ruta = location.hash || '#/';
     if (ruta !== '#/prueba' && estado.enPrueba) {
       // Se salió de la prueba con el botón «atrás».
@@ -67,6 +162,9 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
         calibrar: () => {
           estado.volverDeCalibrar = '#/config';
           ir('#/calibrar');
+        },
+        borrarSalon: async () => {
+          if (estado.db) await borrarSalon(estado.db);
         },
         volver: () => ir('#/'),
       });
@@ -87,14 +185,10 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
             }
             void guardar({ ...estado.config, pantallaInvertida: invertida, mitadesIntercambiadas: intercambiadas });
           },
-          alTerminar: (r) => {
-            estado.enPrueba = false;
-            estado.resultado = r;
-            ir('#/resultado');
-          },
+          alTerminar: (r) => void terminarPrueba(r),
           alSalir: () => {
             estado.enPrueba = false;
-            ir('#/');
+            ir(estado.estudiante ? `#/nino/${encodeURIComponent(estado.estudiante.codigo)}` : '#/');
           },
         });
       } catch (e) {
@@ -104,35 +198,67 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
         ir('#/');
       }
     } else if (ruta === '#/resultado' && estado.resultado) {
-      desmontar = montarResultado(raiz, estado.resultado, estado.practica, () => ir('#/'));
+      const id = estado.idEvaluacion;
+      desmontar = montarResultado(raiz, {
+        resultado: estado.resultado,
+        codigo: estado.estudiante?.codigo ?? null,
+        practica: estado.practica,
+        guardado: estado.guardado,
+        verConstancia: id !== null ? () => ir(`#/constancia/${id}`) : null,
+        volver: () => ir('#/'),
+      });
+    } else if (ruta.startsWith('#/nino/') && estado.db) {
+      const codigo = decodeURIComponent(ruta.slice('#/nino/'.length));
+      const db = estado.db;
+      cargando();
+      void Promise.all([leerEstudiantes(db), evaluacionesDe(db, codigo)]).then(([lista, historial]) => {
+        if (miTurno !== turno) return;
+        const estudiante = lista.find((e) => e.codigo === codigo);
+        if (!estudiante) return ir('#/');
+        desmontar = montarPreparar(raiz, {
+          estudiante,
+          historial,
+          problemaCelular: problemaCelular(),
+          empezar: () => void empezarPrueba(estudiante),
+          verConstancia: (idEv) => ir(`#/constancia/${idEv}`),
+          volver: () => ir('#/'),
+        });
+      });
+    } else if (ruta.startsWith('#/constancia/') && estado.db) {
+      const id = Number(ruta.slice('#/constancia/'.length));
+      cargando();
+      void leerEvaluacion(estado.db, id).then((ev) => {
+        if (miTurno !== turno) return;
+        if (!ev) return ir('#/');
+        desmontar = montarConstancia(raiz, ev, () => history.back());
+      });
+    } else if (ruta === '#/resumen') {
+      desmontar = montarResumen(
+        raiz,
+        estado.db,
+        estado.config.colegio,
+        (codigo) => ir(`#/nino/${encodeURIComponent(codigo)}`),
+        () => ir('#/'),
+      );
     } else {
       const aviso = estado.avisoInicio;
       estado.avisoInicio = undefined;
-      desmontar = montarInicio(
-        raiz,
-        estado.config,
-        {
-          // Se llaman dentro del toque: el navegador lo exige para la pantalla completa.
-          empezar: async () => {
-            estado.practica = false;
-            estado.avisos = await prepararPantalla();
-            estado.enPrueba = true;
-            ir('#/prueba');
-          },
-          practicar: async () => {
-            estado.practica = true;
-            estado.avisos = await prepararPantalla();
-            estado.enPrueba = true;
-            ir('#/prueba');
-          },
-          configurar: () => ir('#/config'),
-          calibrar: () => {
-            estado.volverDeCalibrar = '#/';
-            ir('#/calibrar');
-          },
-        },
+      const problema = problemaCelular();
+      desmontar = montarSalon(raiz, {
+        db: estado.db,
+        colegio: estado.config.colegio,
+        problemaCelular: problema,
+        necesitaCalibrar: estadoCalibracion(estado.config, window.devicePixelRatio || 1) !== 'vigente',
         aviso,
-      );
+        abrirNino: (codigo) => ir(`#/nino/${encodeURIComponent(codigo)}`),
+        practicar: () => void empezarPrueba(null),
+        resumen: () => ir('#/resumen'),
+        configurar: () => ir('#/config'),
+        calibrar: () => {
+          estado.volverDeCalibrar = '#/';
+          ir('#/calibrar');
+        },
+      });
     }
   }
 

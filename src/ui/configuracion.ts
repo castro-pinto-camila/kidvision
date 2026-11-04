@@ -28,6 +28,8 @@ function leerNumero(texto: string): number {
 export interface AccionesConfiguracion {
   guardar: (c: Configuracion) => Promise<void>;
   calibrar: () => void;
+  /** Borra estudiantes y evaluaciones (la calibración y la caja se conservan). */
+  borrarSalon: () => Promise<void>;
   volver: () => void;
 }
 
@@ -101,6 +103,52 @@ export function montarConfiguracion(
     }
     estadoDocente.replaceChildren(...filas);
   }
+
+  // --- Colegio y datos del salón --------------------------------------------
+  const entradaColegio = h('input', {
+    type: 'text',
+    class: 'texto-largo',
+    value: c.colegio,
+    placeholder: 'IE 1234 San Martín',
+    'aria-label': 'Nombre del colegio',
+  });
+  entradaColegio.addEventListener('change', () => {
+    c.colegio = entradaColegio.value.trim();
+    void guardarYActualizar();
+  });
+  const colegio = h(
+    'label',
+    { class: 'campo' },
+    h('span', { class: 'etiqueta' }, 'Colegio', h('small', {}, 'Sale en la constancia para la familia.')),
+    entradaColegio,
+  );
+
+  const datos = h(
+    'section',
+    { class: 'datos-salon' },
+    h('h2', {}, 'Datos del salón'),
+    h(
+      'p',
+      { class: 'nota' },
+      'Los datos de los niños se guardan solo en este celular. Bórralos cuando termines el tamizaje del salón.',
+    ),
+    h(
+      'button',
+      {
+        class: 'boton peligro',
+        onclick: async () => {
+          if (!confirm('¿Borrar todos los niños y sus resultados de este celular? No se puede deshacer.')) return;
+          try {
+            await acciones.borrarSalon();
+            avisar('Datos del salón borrados');
+          } catch {
+            avisar('No se pudieron borrar');
+          }
+        },
+      },
+      'Borrar todos los datos del salón',
+    ),
+  );
 
   // --- Ajustes de la caja (plegados) ---------------------------------------
   function campo(
@@ -344,7 +392,9 @@ export function montarConfiguracion(
         h('h1', {}, 'Configuración'),
       ),
       estadoDocente,
+      colegio,
       ajustes,
+      datos,
       aviso,
     ),
   );

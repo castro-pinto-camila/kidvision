@@ -154,5 +154,5 @@ export function desenfoqueSimulado(s: ResultadoSesion): number {
   const dens = [denominadorLejos(s.ojos.OD), denominadorLejos(s.ojos.OI)].filter((d): d is number => d !== null);
   if (dens.length === 0) return 0;
   const mar = Math.max(...dens) / 6; // ángulo de resolución mínimo, en minutos
-  return Math.min(0.12 * (mar - 1), 1.2);
+  return Math.min(0.08 * (mar - 1), 1.2);
 }

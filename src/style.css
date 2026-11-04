@@ -771,3 +771,409 @@ td.no {
   color: #5b21b6;
   font-weight: 700;
 }
+
+/* ---------- Mi salón ---------- */
+
+.titulos {
+  flex: 1;
+}
+
+.titulos h1 {
+  margin: 0;
+}
+
+.titulos .lema {
+  margin: 0;
+}
+
+.acciones-salon {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin: 12px 0 16px;
+}
+
+.agregar {
+  grid-column: 1 / -1;
+}
+
+.agregar > summary {
+  list-style: none;
+  width: 100%;
+}
+
+.agregar > summary::-webkit-details-marker {
+  display: none;
+}
+
+.agregar[open] > summary {
+  border-color: var(--azul);
+  color: var(--azul);
+}
+
+.formulario {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  align-items: end;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 16px;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+.formulario .boton.principal,
+.formulario .error {
+  grid-column: 1 / -1;
+}
+
+.campo-corto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: var(--texto-suave);
+}
+
+.campo-corto input {
+  width: 100%;
+}
+
+.error {
+  color: var(--rojo);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.error:empty {
+  display: none;
+}
+
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.texto-largo {
+  flex: 1 1 220px;
+  width: auto !important;
+}
+
+.ninos {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fila-nino {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  min-height: 60px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.fila-nino:active {
+  background: var(--gris);
+}
+
+.punto {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--gris);
+  border: 2px solid #cbd5e1;
+}
+
+.punto.verde {
+  background: var(--verde);
+  border-color: var(--verde);
+}
+.punto.amarillo {
+  background: var(--amarillo);
+  border-color: var(--amarillo);
+}
+.punto.rojo {
+  background: var(--rojo);
+  border-color: var(--rojo);
+}
+
+.fila-nino .codigo {
+  flex: 1;
+  font-weight: 700;
+}
+
+.fila-nino small,
+.estado-nino small {
+  display: block;
+  font-weight: 400;
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+.estado-nino {
+  text-align: right;
+  font-size: 0.95rem;
+}
+
+.vacio {
+  text-align: center;
+  padding: 24px 12px;
+  background: var(--superficie);
+  border: 1px dashed var(--borde);
+  border-radius: 16px;
+}
+
+/* ---------- Preparar al niño ---------- */
+
+.pasos-preparar {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pasos-preparar li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 16px;
+  padding: 10px 14px;
+}
+
+.pasos-preparar p {
+  margin: 2px 0 0;
+}
+
+.dibujo {
+  width: 96px;
+  height: 64px;
+  flex: none;
+  color: var(--texto);
+}
+
+.historial {
+  list-style: none;
+  padding: 0;
+}
+
+.historial li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--borde);
+}
+
+.historial li > span:nth-child(2) {
+  flex: 1;
+}
+
+.guardado-ok {
+  color: var(--verde-texto);
+  background: var(--verde-claro);
+  border-radius: var(--radio);
+  padding: 8px 12px;
+  font-weight: 600;
+}
+
+/* ---------- Constancia ---------- */
+
+.acciones-constancia {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.acciones-constancia .boton.principal {
+  width: auto;
+  flex: 1;
+  margin: 0;
+  text-decoration: none;
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+.acciones-constancia .boton {
+  text-decoration: none;
+}
+
+.membrete {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-bottom: 2px solid var(--texto);
+  padding-bottom: 8px;
+}
+
+.para-familia,
+.para-profesional {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 16px;
+  padding: 4px 18px 14px;
+}
+
+.para-familia {
+  border-top: 8px solid var(--gris);
+}
+
+.para-familia.rojo {
+  border-top-color: var(--rojo);
+}
+.para-familia.verde {
+  border-top-color: var(--verde);
+}
+.para-familia.amarillo {
+  border-top-color: var(--amarillo);
+}
+
+.titulo-familia {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 4px 0;
+}
+
+.ojos-familia {
+  padding-left: 20px;
+}
+
+.simulacion {
+  margin: 12px 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.simulacion > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+  text-align: center;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.pizarron {
+  width: 100%;
+  height: auto;
+}
+
+.simulacion figcaption {
+  grid-column: 1 / -1;
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.aviso-familia {
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.para-profesional {
+  margin-top: 20px;
+  border-style: dashed;
+}
+
+.ojos-profesional {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0 20px;
+}
+
+.ojos-profesional ul {
+  padding-left: 18px;
+  font-size: 0.95rem;
+}
+
+@media print {
+  body,
+  .pagina {
+    background: #fff;
+  }
+  .no-imprimir {
+    display: none !important;
+  }
+  .para-familia,
+  .para-profesional {
+    break-inside: avoid;
+  }
+  .para-profesional {
+    break-before: auto;
+  }
+}
+
+/* ---------- Resumen ---------- */
+
+.conteo {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.cuadro {
+  border-radius: 16px;
+  padding: 14px;
+  text-align: center;
+  color: #fff;
+}
+
+.cuadro strong {
+  display: block;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.cuadro.rojo {
+  background: var(--rojo);
+}
+.cuadro.amarillo {
+  background: var(--amarillo);
+}
+.cuadro.verde {
+  background: var(--verde);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  min-height: 44px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--borde);
+  background: var(--superficie);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ---------- Configuración: datos ---------- */
+
+.boton.peligro {
+  color: var(--rojo);
+  border-color: var(--rojo-claro);
+  width: 100%;
+}
