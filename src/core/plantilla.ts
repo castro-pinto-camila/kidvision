@@ -312,10 +312,20 @@ function separador(caja: ConfigCaja, m: MedidasCaja, n: number): Omit<Pieza, 'x'
   };
 }
 
-function tapaSuperior(caja: ConfigCaja, m: MedidasCaja): Omit<Pieza, 'x' | 'y'> {
-  // Cubre desde el frente hasta antes de la bandeja en R10; desde ahí queda abierta la canaleta.
+/**
+ * Dónde está el techo delantero a lo largo de la caja (x = 0 en el plano de los
+ * lentes). Empieza en la cara de atrás del panel de lentes, así deja libre la
+ * bisagra y el espacio donde baja la tapa. Termina antes del tope de la bandeja
+ * en R10; el celular empieza en ese tope, así que no lo toca.
+ */
+export function geometriaTecho(caja: ConfigCaja, m: MedidasCaja = MEDIDAS_POR_DEFECTO): { desde: number; hasta: number } {
   const dMin = Math.min(...caja.ranuras_mm);
-  const largo = m.margenDelantero + dMin - m.carton - m.holguraTrasera;
+  return { desde: m.carton / 2, hasta: dMin - m.carton - m.holguraTrasera };
+}
+
+function tapaSuperior(caja: ConfigCaja, m: MedidasCaja): Omit<Pieza, 'x' | 'y'> {
+  const { desde, hasta } = geometriaTecho(caja, m);
+  const largo = hasta - desde;
   const ancho = m.anchoInterior + 2 * m.carton;
   return {
     nombre: 'Techo delantero',
@@ -324,7 +334,8 @@ function tapaSuperior(caja: ConfigCaja, m: MedidasCaja): Omit<Pieza, 'x' | 'y'> 
     formas: [
       { tipo: 'rect', x: 0, y: 0, ancho: largo, alto: ancho, trazo: 'corte' },
       { tipo: 'texto', x: largo / 2, y: ancho / 2, texto: 'Techo delantero', tam: 5, ancla: 'middle' },
-      { tipo: 'texto', x: largo / 2, y: ancho / 2 + 7, texto: 'detrás queda abierta la canaleta', tam: 3, ancla: 'middle' },
+      { tipo: 'texto', x: largo / 2, y: ancho / 2 + 7, texto: 'empieza detrás del panel de lentes', tam: 3, ancla: 'middle' },
+      { tipo: 'texto', x: largo / 2, y: ancho / 2 + 11, texto: 'detrás queda abierta la canaleta', tam: 3, ancla: 'middle' },
     ],
   };
 }
