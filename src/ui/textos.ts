@@ -27,10 +27,10 @@ export const COMO_RESPONDE = [
 
 /** Explicación de la carta de abanico, antes de la primera vuelta. */
 export const COMO_ABANICO = [
-  'Ahora viene la carta de abanico: líneas como los rayos de un reloj.',
+  'Ahora viene la carta de abanico: rectas que salen del centro, con un número del 1 al 6 en cada punta. Cada recta tiene el mismo número en sus dos puntas.',
   'Pregúntale: «¿Alguna línea se ve más negra o más marcada que las otras?».',
   'Si todas se ven iguales, toca «Todas iguales». Es lo más común.',
-  'Si dice que sí, pídele el número de esa línea y toca el botón con ese número.',
+  'Si dice que sí, pídele el número de esa línea y toca el botón con ese número. Ejemplo: dice «3», tocas «3». Cada botón trae dibujada la línea que representa.',
 ];
 
 export function textoColocar(p: PasoColocar, primero = false): { titulo: string; lineas: string[] } {

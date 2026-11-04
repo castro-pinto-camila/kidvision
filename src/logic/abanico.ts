@@ -1,11 +1,21 @@
 /**
- * Carta de abanico: 12 rayos numerados como un reloj.
+ * Carta de abanico: 12 rayos que forman 6 líneas rectas, numeradas del 1 al 6.
+ * Cada línea lleva su número en los dos extremos (no es un reloj).
  * Ángulos en grados, antihorario desde la horizontal, sobre 180°.
  */
 import { exigir, type Contexto, type Flujo, type Lugar } from './pasos';
 
-/** Botones del docente: cada uno es una línea (dos números opuestos del reloj). */
-export const BOTONES_ABANICO = ['12–6', '1–7', '2–8', '3–9', '4–10', '5–11'] as const;
+/** Botones del docente: cada uno es una línea de la carta, con el número que lleva en sus dos extremos. */
+export const BOTONES_ABANICO = ['1', '2', '3', '4', '5', '6'] as const;
+
+/**
+ * Número que se dibuja en el extremo del rayo `hora` (1 a 12, como las horas del reloj).
+ * Los dos extremos de una línea (hora y hora + 6) llevan el mismo número, y ese número
+ * es el del botón que le corresponde: botón = número − 1.
+ */
+export function etiquetaRayo(hora: number): number {
+  return (hora % 6) + 1;
+}
 
 /** Giro de la segunda vuelta, al azar entre estos valores. */
 export const ROTACIONES_SEGUNDA_VUELTA = [60, 90, 120] as const;
@@ -21,7 +31,7 @@ function modulo180(a: number): number {
 
 /**
  * Ángulo físico de la línea del botón elegido, con la carta girada `rotacion`
- * grados. El botón 0 («12–6») sin giro es la vertical (90°); el 3 («3–9»), la horizontal (0°).
+ * grados. El botón 0 («1») sin giro es la vertical (90°); el 3 («4»), la horizontal (0°).
  */
 export function anguloFisico(boton: number, rotacion: number): number {
   return modulo180(90 - 30 * boton + rotacion);

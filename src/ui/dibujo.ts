@@ -3,6 +3,7 @@
  * decimales) y el navegador suaviza los bordes: no se redondea el trazo,
  * para no cambiar el tamaño de la «E».
  */
+import { etiquetaRayo } from '../logic/abanico';
 import { barrasApinamiento, centrosLetras, medidasLinea, type Punto, type Rect } from '../core/disposicion';
 import type { Direccion } from '../logic/orientaciones';
 
@@ -92,7 +93,7 @@ export function dibujarCirculo(g: CanvasRenderingContext2D, c: Punto, radio: num
 }
 
 /**
- * Carta de abanico: 12 rayos gruesos con los números del reloj, girada
+ * Carta de abanico: 12 rayos gruesos (6 líneas numeradas del 1 al 6, el mismo número en los dos extremos), girada
  * `rotacion` grados en sentido antihorario. Los bordes de cada rayo se
  * suavizan con trazos más anchos y más claros, para que los rayos diagonales
  * no se vean más grises que los verticales por el escalonado de los píxeles.
@@ -128,7 +129,7 @@ export function dibujarAbanico(
       g.lineTo(centro.x + dx * radio * 0.76, centro.y + dy * radio * 0.76);
       g.stroke();
     }
-    g.fillText(String(hora), centro.x + dx * radio * 0.9, centro.y + dy * radio * 0.9);
+    g.fillText(String(etiquetaRayo(hora)), centro.x + dx * radio * 0.9, centro.y + dy * radio * 0.9);
   }
   g.restore();
 }

@@ -9,7 +9,7 @@
 import { disponer, girarPantalla, ojoEnPantalla, type Disposicion } from '../core/disposicion';
 import { alturaOptotipoMm, alturaPxCss, type Pantalla } from '../core/optotipos';
 import type { Configuracion } from '../data/config';
-import { BOTONES_ABANICO } from '../logic/abanico';
+import { anguloFisico, BOTONES_ABANICO } from '../logic/abanico';
 import { PruebaVisual, type Paso, type ResultadoSesion } from '../logic/flujo';
 import { respuestasParaDecidir, type Respuesta, type Toque } from '../logic/linea';
 import type { Evento, Ojo, PasoAbanico, PasoColocar, PasoEspera, PasoLinea } from '../logic/pasos';
@@ -356,6 +356,19 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
     );
   }
 
+  /** Dibujito de una línea con la inclinación (grados, antihorario desde la horizontal) que tiene en la carta. */
+  function iconoLinea(angulo: number): SVGSVGElement {
+    const a = (angulo * Math.PI) / 180;
+    const x = (Math.cos(a) * 9).toFixed(2);
+    const y = (-Math.sin(a) * 9).toFixed(2);
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '-10 -10 20 20');
+    svg.setAttribute('class', 'linea-rayo');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.innerHTML = `<line x1="${-Number(x)}" y1="${-Number(y)}" x2="${x}" y2="${y}" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>`;
+    return svg;
+  }
+
   function dibujarAbanicoPaso(paso: PasoAbanico): void {
     const d = disposicion(paso.ojo);
     const g = fondo(d);
@@ -367,14 +380,19 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
     const grosor = Math.max(3 / pantalla.dpr, 0.8 * config.pxPorMm);
     dibujarAbanico(g, centro, radio, paso.rotacion, grosor);
     capa.replaceChildren(
-      franja(d, `${NOMBRE_OJO[paso.ojo]} · vuelta ${paso.vuelta} de 2 · ¿alguna línea más negra?`, [
+      franja(d, `${NOMBRE_OJO[paso.ojo]} · vuelta ${paso.vuelta} de 2 · toca el número de la línea más negra`, [
         h(
           'button',
           { class: 'boton principal destacado', onclick: () => responder({ tipo: 'abanico', eleccion: 'iguales' }) },
           'Todas iguales',
         ),
         ...BOTONES_ABANICO.map((nombre, i) =>
-          h('button', { class: 'boton', onclick: () => responder({ tipo: 'abanico', eleccion: i }) }, nombre),
+          h(
+            'button',
+            { class: 'boton rayo', 'aria-label': `Línea ${nombre}`, onclick: () => responder({ tipo: 'abanico', eleccion: i }) },
+            iconoLinea(anguloFisico(i, paso.rotacion)),
+            nombre,
+          ),
         ),
       ]),
     );

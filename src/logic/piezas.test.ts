@@ -3,7 +3,9 @@ import { nivelPorNombre } from '../core/optotipos';
 import {
   abanicoConsistente,
   anguloFisico,
+  BOTONES_ABANICO,
   diferenciaAngular,
+  etiquetaRayo,
   ROTACIONES_SEGUNDA_VUELTA,
 } from './abanico';
 import { hayRespuestasIguales } from './calidad';
@@ -100,9 +102,9 @@ describe('control de calidad: cinco respuestas iguales seguidas', () => {
 
 describe('carta de abanico', () => {
   it('convierte el botón a ángulo físico', () => {
-    expect(anguloFisico(0, 0)).toBe(90); // 12–6, vertical
-    expect(anguloFisico(3, 0)).toBe(0); // 3–9, horizontal
-    expect(anguloFisico(1, 0)).toBe(60); // 1–7
+    expect(anguloFisico(0, 0)).toBe(90); // línea «1», vertical
+    expect(anguloFisico(3, 0)).toBe(0); // línea «4», horizontal
+    expect(anguloFisico(1, 0)).toBe(60); // línea «2»
     expect(anguloFisico(3, 90)).toBe(90);
     expect(anguloFisico(0, 120)).toBe(30);
   });
@@ -157,5 +159,27 @@ describe('umbral y estenopeico', () => {
     expect(mejoraConEstenopeico(nivelPorNombre('6/24'), nivelPorNombre('6/18'))).toBe(true);
     expect(mejoraConEstenopeico(nivelPorNombre('6/24'), nivelPorNombre('6/24'))).toBe(false);
     expect(mejoraConEstenopeico(nivelPorNombre('6/24'), nivelPorNombre('6/36'))).toBe(false);
+  });
+});
+
+describe('números de la carta de abanico', () => {
+  const horas = Array.from({ length: 12 }, (_, i) => i + 1);
+
+  it('hay seis números (1 a 6) y cada línea lleva el mismo número en sus dos extremos', () => {
+    expect(new Set(horas.map(etiquetaRayo))).toEqual(new Set([1, 2, 3, 4, 5, 6]));
+    for (let h = 1; h <= 6; h++) expect(etiquetaRayo(h)).toBe(etiquetaRayo(h + 6));
+  });
+
+  it('los seis botones se llaman 1 a 6', () => {
+    expect([...BOTONES_ABANICO]).toEqual(['1', '2', '3', '4', '5', '6']);
+  });
+
+  it('el botón con el número de un rayo es la línea en la que está ese rayo, con cualquier giro', () => {
+    for (const giro of [0, 60, 90, 120]) {
+      for (const h of horas) {
+        const anguloRayo = (((90 - 30 * h + giro) % 180) + 180) % 180;
+        expect(anguloFisico(etiquetaRayo(h) - 1, giro)).toBe(anguloRayo);
+      }
+    }
   });
 });

@@ -1201,3 +1201,19 @@ td.no {
 .portada .boton {
   width: 100%;
 }
+
+/* Botones del abanico: número y dibujo de la línea */
+.franja .boton.rayo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.franja .boton.rayo .linea-rayo {
+  width: 1.3em;
+  height: 1.3em;
+  flex: none;
+}

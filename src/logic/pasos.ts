@@ -75,7 +75,7 @@ export type Evento =
   | { tipo: 'confirmar' }
   /** Las respuestas hasta que la línea quedó decidida (o las cinco). */
   | { tipo: 'linea'; toques: Toque[] }
-  /** Índice del botón (0 = «12–6», 1 = «1–7», …, 5 = «5–11») o «todas iguales». */
+  /** Índice del botón (0 = línea «1», …, 5 = línea «6») o «todas iguales». */
   | { tipo: 'abanico'; eleccion: number | 'iguales' };
 
 /** Lo que se guarda de cada línea mostrada, para revisar el piloto. */
