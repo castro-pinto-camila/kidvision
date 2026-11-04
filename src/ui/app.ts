@@ -26,7 +26,7 @@ import {
   type Estudiante,
 } from '../data/salon';
 import type { ResultadoSesion } from '../logic/flujo';
-import { estadoPreparacion, primerPendiente, type AccionPaso } from '../logic/preparacion';
+import { estadoPreparacion, primerPendiente, puedeEmpezar, type AccionPaso } from '../logic/preparacion';
 import { montarBienvenida } from './bienvenida';
 import { montarPortada } from './portada';
 import { montarCalibracion } from './calibracion';
@@ -101,6 +101,12 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
 
   // Se llama dentro del toque: el navegador lo exige para la pantalla completa.
   async function empezarPrueba(estudiante: Estudiante | null): Promise<void> {
+    // Se vuelve a comprobar la pantalla: el zoom o el tamaño de letra pudieron cambiar desde la calibración.
+    if (!puedeEmpezar(preparacion(), estudiante === null)) {
+      estado.avisoInicio = 'La pantalla cambió (zoom, tamaño de letra o pantalla) desde que calibraste. Vuelve a calibrar antes de empezar.';
+      ir('#/');
+      return;
+    }
     estado.practica = estudiante === null;
     estado.estudiante = estudiante;
     estado.avisos = await prepararPantalla();

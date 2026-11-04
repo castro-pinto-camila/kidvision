@@ -76,6 +76,14 @@ export function estadoPreparacion(config: Configuracion, dpr: number, huella?: H
   };
 }
 
+/**
+ * ¿Se puede empezar ahora? Se pregunta justo antes de cada evaluación, porque el
+ * zoom o la pantalla pudieron cambiar desde que se calibró. La práctica no pide colegio.
+ */
+export function puedeEmpezar(prep: Preparacion, practica: boolean): boolean {
+  return practica ? prep.listoParaPracticar : prep.listoParaEvaluar;
+}
+
 /** El primer paso que falta (para avisar y ofrecer su botón); null si ya se puede. */
 export function primerPendiente(prep: Preparacion, paraPracticar = false): Paso | null {
   const pasos = paraPracticar ? prep.pasos.filter((p) => p.id !== 'colegio') : prep.pasos;

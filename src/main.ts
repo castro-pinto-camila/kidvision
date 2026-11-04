@@ -1,5 +1,8 @@
 import './style.css';
 import { iniciarApp } from './ui/app';
+import { bloquearZoom } from './ui/sinZoom';
+
+bloquearZoom();
 
 void iniciarApp(document.querySelector<HTMLDivElement>('#app')!);
 
