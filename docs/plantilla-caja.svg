@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="395.3mm" height="869mm" viewBox="0 0 395.3 869">
-<rect x="0" y="0" width="395.3" height="869" fill="#fff"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="420mm" height="906mm" viewBox="0 0 420 906">
+<rect x="0" y="0" width="420" height="906" fill="#fff"/>
 <rect x="10" y="10" width="375.3" height="59" fill="none" stroke="#000" stroke-width="0.4"/>
 <rect x="18.5" y="10" width="3" height="59" fill="none" stroke="#999" stroke-width="0.25" stroke-dasharray="1 1.5"/>
 <text x="22" y="16" font-size="3" text-anchor="start" font-family="Arial, sans-serif">Plano de los lentes (x = 0)</text>
@@ -124,21 +124,83 @@
 <text x="142.8" y="543.5" font-size="4" text-anchor="middle" font-family="Arial, sans-serif">S1</text>
 <rect x="160" y="523" width="10.5" height="41" fill="none" stroke="#000" stroke-width="0.4"/>
 <text x="165.3" y="543.5" font-size="4" text-anchor="middle" font-family="Arial, sans-serif">S2</text>
-<rect x="55" y="764" width="176" height="24" fill="none" stroke="#000" stroke-width="0.3" stroke-dasharray="3 2"/>
-<text x="143" y="777.5" font-size="4" text-anchor="middle" font-family="Arial, sans-serif">Base de la bandeja</text>
-<rect x="55" y="719" width="176" height="45" fill="none" stroke="#000" stroke-width="0.4"/>
-<rect x="63" y="719" width="160" height="40" fill="none" stroke="#000" stroke-width="0.4"/>
-<text x="143" y="741.5" font-size="4" text-anchor="middle" font-family="Arial, sans-serif">TOPE: la pantalla se apoya aquí</text>
-<rect x="55" y="788" width="176" height="45" fill="none" stroke="#000" stroke-width="0.4"/>
-<text x="143" y="810.5" font-size="3.5" text-anchor="middle" font-family="Arial, sans-serif">Fondo (cuña o esponja detrás del celular)</text>
-<rect x="10" y="764" width="45" height="24" fill="none" stroke="#000" stroke-width="0.4"/>
-<polygon points="10,761 15,764 10,767" fill="none" stroke="#000" stroke-width="0.4"/>
-<text x="32.5" y="777.5" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">Izq.: muesca</text>
-<rect x="231" y="764" width="45" height="24" fill="none" stroke="#000" stroke-width="0.4"/>
-<circle cx="265" cy="776" r="2" fill="none" stroke="#000" stroke-width="0.4"/>
-<circle cx="249" cy="776" r="2" fill="none" stroke="#000" stroke-width="0.4"/>
-<text x="253.5" y="786" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">Der.: pasador</text>
-<text x="10" y="849" font-size="4.5" font-weight="bold" font-family="Arial, sans-serif">Imprimir sin ajustar a página (escala 100 %)</text>
-<line x1="10" y1="853" x2="110" y2="853" stroke="#000" stroke-width="0.4"/><line x1="10" y1="853" x2="10" y2="858" stroke="#000" stroke-width="0.3"/><text x="10" y="862" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">0</text><line x1="20" y1="853" x2="20" y2="856" stroke="#000" stroke-width="0.3"/><text x="20" y="862" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">1</text><line x1="30" y1="853" x2="30" y2="856" stroke="#000" stroke-width="0.3"/><text x="30" y="862" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">2</text><line x1="40" y1="853" x2="40" y2="856" stroke="#000" stroke-width="0.3"/><text x="40" y="862" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">3</text><line x1="50" y1="853" x2="50" y2="856" stroke="#000" stroke-width="0.3"/><text x="50" y="862" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">4</text><line x1="60" y1="853" x2="60" y2="858" stroke="#000" stroke-width="0.3"/><text x="60" y="862" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">5</text><line x1="70" y1="853" x2="70" y2="856" stroke="#000" stroke-width="0.3"/><text x="70" y="862" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">6</text><line x1="80" y1="853" x2="80" y2="856" stroke="#000" stroke-width="0.3"/><text x="80" y="862" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">7</text><line x1="90" y1="853" x2="90" y2="856" stroke="#000" stroke-width="0.3"/><text x="90" y="862" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">8</text><line x1="100" y1="853" x2="100" y2="856" stroke="#000" stroke-width="0.3"/><text x="100" y="862" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">9</text><line x1="110" y1="853" x2="110" y2="858" stroke="#000" stroke-width="0.3"/><text x="110" y="862" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">10</text><text x="114" y="857" font-size="3.2" font-family="Arial, sans-serif">Debe medir 10 cm exactos</text>
-<line x1="150" y1="855" x2="160" y2="855" fill="none" stroke="#000" stroke-width="0.4"/><text x="162" y="856" font-size="3" font-family="Arial, sans-serif">cortar</text><line x1="180" y1="855" x2="190" y2="855" fill="none" stroke="#000" stroke-width="0.3" stroke-dasharray="3 2"/><text x="192" y="856" font-size="3" font-family="Arial, sans-serif">doblar</text><line x1="210" y1="855" x2="220" y2="855" fill="none" stroke="#999" stroke-width="0.25" stroke-dasharray="1 1.5"/><text x="222" y="856" font-size="3" font-family="Arial, sans-serif">guía (no cortar)</text>
+<rect x="10" y="719" width="100" height="25" fill="#fde68a" stroke="#000" stroke-width="0.3"/>
+<rect x="10" y="719" width="400" height="25" fill="none" stroke="#000" stroke-width="0.4"/>
+<line x1="10" y1="719" x2="10" y2="726" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="10" y="730" font-size="3.5" text-anchor="middle" font-family="Arial, sans-serif">0</text>
+<line x1="20" y1="719" x2="20" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="20" y="727" font-size="3.5" text-anchor="middle" font-family="Arial, sans-serif">1</text>
+<line x1="30" y1="719" x2="30" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="30" y="727" font-size="3.5" text-anchor="middle" font-family="Arial, sans-serif">2</text>
+<line x1="40" y1="719" x2="40" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="40" y="727" font-size="3.5" text-anchor="middle" font-family="Arial, sans-serif">3</text>
+<line x1="50" y1="719" x2="50" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="50" y="727" font-size="3.5" text-anchor="middle" font-family="Arial, sans-serif">4</text>
+<line x1="60" y1="719" x2="60" y2="726" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="60" y="730" font-size="3.5" text-anchor="middle" font-family="Arial, sans-serif">5</text>
+<line x1="70" y1="719" x2="70" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="70" y="727" font-size="3.5" text-anchor="middle" font-family="Arial, sans-serif">6</text>
+<line x1="80" y1="719" x2="80" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="80" y="727" font-size="3.5" text-anchor="middle" font-family="Arial, sans-serif">7</text>
+<line x1="90" y1="719" x2="90" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="90" y="727" font-size="3.5" text-anchor="middle" font-family="Arial, sans-serif">8</text>
+<line x1="100" y1="719" x2="100" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="100" y="727" font-size="3.5" text-anchor="middle" font-family="Arial, sans-serif">9</text>
+<line x1="110" y1="719" x2="110" y2="726" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="110" y="730" font-size="3.5" text-anchor="middle" font-family="Arial, sans-serif">10</text>
+<line x1="120" y1="719" x2="120" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="130" y1="719" x2="130" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="140" y1="719" x2="140" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="150" y1="719" x2="150" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="160" y1="719" x2="160" y2="726" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="160" y="730" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">15</text>
+<line x1="170" y1="719" x2="170" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="180" y1="719" x2="180" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="190" y1="719" x2="190" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="200" y1="719" x2="200" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="210" y1="719" x2="210" y2="726" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="210" y="730" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">20</text>
+<line x1="220" y1="719" x2="220" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="230" y1="719" x2="230" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="240" y1="719" x2="240" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="250" y1="719" x2="250" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="260" y1="719" x2="260" y2="726" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="260" y="730" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">25</text>
+<line x1="270" y1="719" x2="270" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="280" y1="719" x2="280" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="290" y1="719" x2="290" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="300" y1="719" x2="300" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="310" y1="719" x2="310" y2="726" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="310" y="730" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">30</text>
+<line x1="320" y1="719" x2="320" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="330" y1="719" x2="330" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="340" y1="719" x2="340" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="350" y1="719" x2="350" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="360" y1="719" x2="360" y2="726" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="360" y="730" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">35</text>
+<line x1="370" y1="719" x2="370" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="380" y1="719" x2="380" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="390" y1="719" x2="390" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="400" y1="719" x2="400" y2="723" fill="none" stroke="#000" stroke-width="0.3"/>
+<line x1="410" y1="719" x2="410" y2="726" fill="none" stroke="#000" stroke-width="0.3"/>
+<text x="410" y="730" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">40</text>
+<text x="14" y="740" font-size="3" text-anchor="start" font-family="Arial, sans-serif">CALIBRAR: apoya el 0 en el borde izquierdo de la línea de la app y llega hasta el 10</text>
+<text x="118" y="740" font-size="3" text-anchor="start" font-family="Arial, sans-serif">Tira de 40 cm: prueba de cerca (de la mejilla al celular)</text>
+<rect x="55" y="801" width="176" height="24" fill="none" stroke="#000" stroke-width="0.3" stroke-dasharray="3 2"/>
+<text x="143" y="814.5" font-size="4" text-anchor="middle" font-family="Arial, sans-serif">Base de la bandeja</text>
+<rect x="55" y="756" width="176" height="45" fill="none" stroke="#000" stroke-width="0.4"/>
+<rect x="63" y="756" width="160" height="40" fill="none" stroke="#000" stroke-width="0.4"/>
+<text x="143" y="778.5" font-size="4" text-anchor="middle" font-family="Arial, sans-serif">TOPE: la pantalla se apoya aquí</text>
+<rect x="55" y="825" width="176" height="45" fill="none" stroke="#000" stroke-width="0.4"/>
+<text x="143" y="847.5" font-size="3.5" text-anchor="middle" font-family="Arial, sans-serif">Fondo (cuña o esponja detrás del celular)</text>
+<rect x="10" y="801" width="45" height="24" fill="none" stroke="#000" stroke-width="0.4"/>
+<polygon points="10,798 15,801 10,804" fill="none" stroke="#000" stroke-width="0.4"/>
+<text x="32.5" y="814.5" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">Izq.: muesca</text>
+<rect x="231" y="801" width="45" height="24" fill="none" stroke="#000" stroke-width="0.4"/>
+<circle cx="265" cy="813" r="2" fill="none" stroke="#000" stroke-width="0.4"/>
+<circle cx="249" cy="813" r="2" fill="none" stroke="#000" stroke-width="0.4"/>
+<text x="253.5" y="823" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">Der.: pasador</text>
+<text x="10" y="886" font-size="4.5" font-weight="bold" font-family="Arial, sans-serif">Imprimir sin ajustar a página (escala 100 %)</text>
+<line x1="10" y1="890" x2="110" y2="890" stroke="#000" stroke-width="0.4"/><line x1="10" y1="890" x2="10" y2="895" stroke="#000" stroke-width="0.3"/><text x="10" y="899" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">0</text><line x1="20" y1="890" x2="20" y2="893" stroke="#000" stroke-width="0.3"/><text x="20" y="899" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">1</text><line x1="30" y1="890" x2="30" y2="893" stroke="#000" stroke-width="0.3"/><text x="30" y="899" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">2</text><line x1="40" y1="890" x2="40" y2="893" stroke="#000" stroke-width="0.3"/><text x="40" y="899" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">3</text><line x1="50" y1="890" x2="50" y2="893" stroke="#000" stroke-width="0.3"/><text x="50" y="899" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">4</text><line x1="60" y1="890" x2="60" y2="895" stroke="#000" stroke-width="0.3"/><text x="60" y="899" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">5</text><line x1="70" y1="890" x2="70" y2="893" stroke="#000" stroke-width="0.3"/><text x="70" y="899" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">6</text><line x1="80" y1="890" x2="80" y2="893" stroke="#000" stroke-width="0.3"/><text x="80" y="899" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">7</text><line x1="90" y1="890" x2="90" y2="893" stroke="#000" stroke-width="0.3"/><text x="90" y="899" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">8</text><line x1="100" y1="890" x2="100" y2="893" stroke="#000" stroke-width="0.3"/><text x="100" y="899" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">9</text><line x1="110" y1="890" x2="110" y2="895" stroke="#000" stroke-width="0.3"/><text x="110" y="899" font-size="3" text-anchor="middle" font-family="Arial, sans-serif">10</text><text x="114" y="894" font-size="3.2" font-family="Arial, sans-serif">Debe medir 10 cm exactos</text>
+<line x1="150" y1="892" x2="160" y2="892" fill="none" stroke="#000" stroke-width="0.4"/><text x="162" y="893" font-size="3" font-family="Arial, sans-serif">cortar</text><line x1="180" y1="892" x2="190" y2="892" fill="none" stroke="#000" stroke-width="0.3" stroke-dasharray="3 2"/><text x="192" y="893" font-size="3" font-family="Arial, sans-serif">doblar</text><line x1="210" y1="892" x2="220" y2="892" fill="none" stroke="#999" stroke-width="0.25" stroke-dasharray="1 1.5"/><text x="222" y="893" font-size="3" font-family="Arial, sans-serif">guía (no cortar)</text>
 </svg>

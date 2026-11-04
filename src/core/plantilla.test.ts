@@ -8,7 +8,9 @@ import {
   medidasTapa,
   dimensiones,
   espacioCelular,
+  CALIBRACION_TIRA_MM,
   generarPlantilla,
+  LARGO_TIRA_MM,
   hojaArmadoHtml,
   hojasA4,
   marcasRegla,
@@ -107,6 +109,7 @@ describe('archivos para imprimir', () => {
       'Techo delantero',
       'Separador 1',
       'Separador 2',
+      'Tira de 40 cm',
       'Bandeja',
     ]);
   });
@@ -175,6 +178,7 @@ describe('hoja de armado', () => {
       'S1 y S2 (separadores)',
       'Panel trasero',
       'Techo delantero',
+      'Tira de 40 cm',
       'Bandeja',
     ]) {
       expect(armado).toContain(`<th>${nombre}</th>`);
@@ -259,5 +263,32 @@ describe('tapa +2.00 y techo delantero', () => {
   it('la pieza del techo en la plantilla mide lo mismo', () => {
     const pieza = generarPlantilla(caja).piezas.find((x) => x.nombre === 'Techo delantero')!;
     expect(pieza.ancho).toBeCloseTo(techo.hasta - techo.desde, 9);
+  });
+});
+
+describe('tira de 40 cm para calibrar y para la prueba de cerca', () => {
+  const p = generarPlantilla(CAJA_POR_DEFECTO);
+  const tira = p.piezas.find((x) => x.nombre === 'Tira de 40 cm')!;
+
+  it('mide 400 mm y trae una marca cada centímetro (de 0 a 40)', () => {
+    expect(tira.ancho).toBe(LARGO_TIRA_MM);
+    expect(LARGO_TIRA_MM).toBe(400);
+    const marcas = tira.formas.filter((f) => f.tipo === 'linea' && f.trazo === 'marca');
+    expect(marcas).toHaveLength(41);
+  });
+
+  it('los primeros 10 cm están resaltados, para calibrar', () => {
+    expect(CALIBRACION_TIRA_MM).toBe(100);
+    const resaltado = tira.formas.find((f) => f.tipo === 'rect' && f.relleno !== undefined);
+    expect(resaltado).toMatchObject({ x: 0, ancho: 100 });
+  });
+
+  it('la tira sale en la hoja grande y en las hojas A4 con el resaltado', () => {
+    expect(plantillaSvg(p)).toContain('#fde68a');
+    expect(plantillaHtml(p, 'Caja KidVision')).toContain('Tira de 40 cm');
+  });
+
+  it('la hoja de armado la explica', () => {
+    expect(hojaArmadoHtml(p)).toContain('<th>Tira de 40 cm</th>');
   });
 });

@@ -78,10 +78,11 @@ export const MEDIDAS_POR_DEFECTO: MedidasCaja = {
   pestanaLargo: 7,
 };
 
-export type Trazo = 'corte' | 'doblez' | 'guia';
+/** corte = se corta; doblez = se dobla; guia = ayuda gris que no se corta; marca = se imprime y no se corta (regla, números). */
+export type Trazo = 'corte' | 'doblez' | 'guia' | 'marca';
 
 export type Forma =
-  | { tipo: 'rect'; x: number; y: number; ancho: number; alto: number; trazo: Trazo }
+  | { tipo: 'rect'; x: number; y: number; ancho: number; alto: number; trazo: Trazo; relleno?: string }
   | { tipo: 'circulo'; x: number; y: number; r: number; trazo: Trazo }
   | { tipo: 'linea'; x1: number; y1: number; x2: number; y2: number; trazo: Trazo }
   | { tipo: 'poligono'; puntos: [number, number][]; trazo: Trazo }
@@ -413,6 +414,35 @@ function tapaSuperior(caja: ConfigCaja, m: MedidasCaja): Omit<Pieza, 'x' | 'y'> 
   };
 }
 
+/** Largo de la tira y de la parte resaltada que se usa para calibrar la pantalla. */
+export const LARGO_TIRA_MM = 400;
+export const CALIBRACION_TIRA_MM = 100;
+const ALTO_TIRA_MM = 25;
+
+/**
+ * Tira de 40 cm con marcas cada centímetro. Sirve para la prueba de cerca
+ * (de la mejilla al celular) y, con los primeros 10 cm resaltados, para calibrar la pantalla.
+ */
+function tira(): Omit<Pieza, 'x' | 'y'> {
+  const formas: Forma[] = [
+    { tipo: 'rect', x: 0, y: 0, ancho: CALIBRACION_TIRA_MM, alto: ALTO_TIRA_MM, trazo: 'marca', relleno: '#fde68a' },
+    { tipo: 'rect', x: 0, y: 0, ancho: LARGO_TIRA_MM, alto: ALTO_TIRA_MM, trazo: 'corte' },
+  ];
+  for (let cm = 0; cm <= 40; cm++) {
+    const x = cm * 10;
+    const largo = cm % 5 === 0 ? 7 : 4;
+    formas.push({ tipo: 'linea', x1: x, y1: 0, x2: x, y2: largo, trazo: 'marca' });
+    if (cm % 5 === 0 || cm <= 10) {
+      formas.push({ tipo: 'texto', x, y: largo + 4, texto: String(cm), tam: cm <= 10 ? 3.5 : 3, ancla: 'middle' });
+    }
+  }
+  formas.push(
+    { tipo: 'texto', x: 4, y: 21, texto: 'CALIBRAR: apoya el 0 en el borde izquierdo de la línea de la app y llega hasta el 10', tam: 3 },
+    { tipo: 'texto', x: 108, y: 21, texto: 'Tira de 40 cm: prueba de cerca (de la mejilla al celular)', tam: 3 },
+  );
+  return { nombre: 'Tira de 40 cm', ancho: LARGO_TIRA_MM, alto: ALTO_TIRA_MM, formas };
+}
+
 function panelTrasero(m: MedidasCaja): Omit<Pieza, 'x' | 'y'> {
   return {
     nombre: 'Panel trasero',
@@ -509,6 +539,7 @@ export function generarPlantilla(caja: ConfigCaja, m: MedidasCaja = MEDIDAS_POR_
     [panelLentes('Panel de lentes (+3.00)', caja, m), tapaLentes(caja, m)],
     [apoyoCara(caja, m), panelTrasero(m)],
     [tapaSuperior(caja, m), separador(caja, m, 1), separador(caja, m, 2)],
+    [tira()],
     [bandeja(m)],
   ];
   const piezas: Pieza[] = [];
@@ -540,6 +571,7 @@ const ESTILO: Record<Trazo, string> = {
   corte: 'fill="none" stroke="#000" stroke-width="0.4"',
   doblez: 'fill="none" stroke="#000" stroke-width="0.3" stroke-dasharray="3 2"',
   guia: 'fill="none" stroke="#999" stroke-width="0.25" stroke-dasharray="1 1.5"',
+  marca: 'fill="none" stroke="#000" stroke-width="0.3"',
 };
 
 function escapar(t: string): string {
@@ -550,7 +582,7 @@ function formaSvg(f: Forma, dx: number, dy: number): string {
   const n = (v: number) => r1(v).toString();
   switch (f.tipo) {
     case 'rect':
-      return `<rect x="${n(f.x + dx)}" y="${n(f.y + dy)}" width="${n(f.ancho)}" height="${n(f.alto)}" ${ESTILO[f.trazo]}/>`;
+      return `<rect x="${n(f.x + dx)}" y="${n(f.y + dy)}" width="${n(f.ancho)}" height="${n(f.alto)}" ${f.relleno ? ESTILO[f.trazo].replace('fill="none"', `fill="${f.relleno}"`) : ESTILO[f.trazo]}/>`;
     case 'circulo':
       return `<circle cx="${n(f.x + dx)}" cy="${n(f.y + dy)}" r="${n(f.r)}" ${ESTILO[f.trazo]}/>`;
     case 'linea':
@@ -682,6 +714,10 @@ function piezasArmado(p: Plantilla): [string, string][] {
       `Dos tacos de ${sep} mm entre el panel de lentes y el apoyo para la cara, uno en cada extremo. Fijan esos ${coma(p.e_mm)} mm: si faltan o se aplastan, el ojo queda a otra distancia. Son más bajos que el panel (${coma(altoSeparador(p.medidas))} mm): los salientes de la tapa pasan por encima.`,
     ],
     ['Panel trasero', 'Cierra la caja por detrás de la bandeja.'],
+    [
+      'Tira de 40 cm',
+      'Va aparte de la caja. Se pega sobre cartón rígido. Sirve para la prueba de cerca (de la mejilla al celular) y, con sus primeros 10 cm resaltados, para calibrar la pantalla.',
+    ],
     ['Techo delantero', 'Empieza detrás del panel de lentes, para dejar libres la bisagra y el hueco de la tapa. Detrás queda abierta la canaleta, por donde sobresale el celular.'],
     [
       'Bandeja',
@@ -706,6 +742,7 @@ function pasosArmado(p: Plantilla): string[] {
     `<strong>Tapa +2.00.</strong> Refuerza los dos salientes de arriba con cinta (el cartón de 3 mm se dobla). Dobla la pestaña de abajo hacia el ojo. Pega la bisagra arriba del panel de lentes, del lado del niño, y coloca los lentes de +2.00. La tapa se mueve así: se levanta con la pestaña (se alcanza por la muesca de la nariz) y, al soltarla, baja sola delante de los lentes de la caja. <em>Cómo comprobar que asienta bien:</em> bájala; sus dos salientes deben quedar apoyados sobre S1 y S2, la tapa pegada al panel de lentes y sin inclinación, y los dos agujeros frente a los lentes de la caja. Debe subir y bajar sin rozar el apoyo ni el techo. Si queda inclinada, revisa que S1 y S2 midan ${coma(altoSeparador(m))} mm y que ningún pegamento sobresalga.`,
     '<strong>Mete la bandeja</strong> por la canaleta, con el tope hacia los lentes. Pon el celular sin funda, con la pantalla contra el tope y la esponja detrás y a los costados.',
     '<strong>Usa el pasador.</strong> Cuando la app diga «Pon el pasador en R4», desliza la bandeja hasta que su agujero quede frente al agujero R4 de la pared derecha y atraviesa los dos con el pasador. La bandeja tiene dos agujeros: usa el de la misma fila que el número (pares arriba, impares abajo). <em>Alternativa:</em> alinea la muesca de la bandeja con la marca R4 de la regla y sujétala con un clip.',
+    '<strong>Tira de 40 cm.</strong> Recórtala y pégala sobre un cartón rígido del mismo tamaño. No va dentro de la caja: se usa para la prueba de cerca y para calibrar la pantalla (sus primeros 10 cm están resaltados).',
     `<strong>Comprueba las medidas.</strong> Con el pasador en R0, del plano de los lentes al tope debe haber ${coma(p.ranuras_mm[0])} mm; en R${nUltima}, ${coma(p.ranuras_mm[nUltima])} mm. Si no coincide, corrige esas distancias en la app: Configuración → Ajustes de la caja.`,
   ];
 }
@@ -778,7 +815,7 @@ export function plantillaHtml(p: Plantilla, titulo: string): string {
   .portada { padding: 16mm; }
   .hoja { width: 297mm; height: 210mm; page-break-after: always; break-after: page; }
   .hoja svg { display: block; }
-  .armado { box-sizing: border-box; padding: 9mm 11mm; font-size: 9pt; line-height: 1.28; }
+  .armado { box-sizing: border-box; padding: 9mm 11mm; font-size: 8.5pt; line-height: 1.25; }
   .armado h1 { font-size: 15pt; margin: 0 0 3mm; }
   .armado h2 { font-size: 10.5pt; margin: 0 0 2mm; }
   .armado .columnas { display: grid; grid-template-columns: 1fr 1.3fr; gap: 7mm; }
