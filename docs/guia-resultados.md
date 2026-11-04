@@ -40,11 +40,11 @@ Pasar una línea = 4 aciertos de 5 (3 de 5 al medir el umbral).
 2. Ojo derecho, línea 6/60 en R0, prueba práctica (no cuenta): las «E» apuntan ↑ ← → ← ↑; tocas ↑ ← → ← ↑; aciertos 5 de 5.
 3. Ojo derecho, línea 6/9 en R0, prueba de lejos: las «E» apuntan ← → ↑ → ←; tocas ← → ↑ → ←; aciertos 5 de 5 → **pasa** (hacen falta 4).
 4. Ojo izquierdo, línea 6/9 en R0, prueba de lejos: las «E» apuntan ← → ↓ → ↓; tocas ← → ↓ → ↓; aciertos 5 de 5 → **pasa** (hacen falta 4).
-5. **Pon el pasador en R0** y baja la tapa +2.00 y confirma.
+5. **Baja la tapa +2.00** y confirma.
 6. **Espera 60 s** con los dos ojos mirando el círculo azul, y confirma.
 7. Ojo derecho, línea 6/9 en R0, prueba con los lentes de +2.00: las «E» apuntan ↓ ← → ↓ ←; tocas ↑ → ← ↑ →; aciertos 0 de 5 → **no pasa** (hacen falta 4).
 8. Ojo izquierdo, línea 6/9 en R0, prueba con los lentes de +2.00: las «E» apuntan → ↓ ↑ ← ↓; tocas ← ↑ ↓ → ↑; aciertos 0 de 5 → **no pasa** (hacen falta 4).
-9. **Pon el pasador en R0** (sube la tapa +2.00) y confirma.
+9. **Sube la tapa +2.00** y confirma.
 10. Abanico, ojo derecho, vuelta 1 (carta sin girar): el niño ve todas iguales → tocas «Todas iguales».
 11. Abanico, ojo derecho, vuelta 2 (carta girada 90°): el niño ve todas iguales → tocas «Todas iguales».
 12. Abanico, ojo izquierdo, vuelta 1 (carta sin girar): el niño ve todas iguales → tocas «Todas iguales».
@@ -185,10 +185,10 @@ Pasar una línea = 4 aciertos de 5 (3 de 5 al medir el umbral).
 5. Ojo derecho, línea 6/36 en R0, prueba para ver cuánto lee: las «E» apuntan ← ↓ → ↓ ←; tocas → ↑ ← ↑ →; aciertos 0 de 5 → **no pasa** (hacen falta 3).
 6. Ojo derecho, línea 6/24 en R0, prueba de control: las «E» apuntan → ↓ ↑ ← ↓; tocas ← ↑ ↓ → ↑; aciertos 0 de 5 → **no pasa** (hacen falta 4).
 7. Ojo izquierdo, línea 6/9 en R0, prueba de lejos: las «E» apuntan → ↑ ← ↑ ↓; tocas → ↑ ← ↑ ↓; aciertos 5 de 5 → **pasa** (hacen falta 4).
-8. **Pon el pasador en R0** y baja la tapa +2.00 y confirma.
+8. **Baja la tapa +2.00** y confirma.
 9. **Espera 60 s** con los dos ojos mirando el círculo azul, y confirma.
 10. Ojo izquierdo, línea 6/9 en R0, prueba con los lentes de +2.00: las «E» apuntan → ↑ → ↓ ←; tocas ← ↓ ← ↑ →; aciertos 0 de 5 → **no pasa** (hacen falta 4).
-11. **Pon el pasador en R1** (sube la tapa +2.00) y confirma.
+11. **Sube la tapa +2.00, pon el pasador en R1** y confirma.
 12. Ojo derecho, línea 6/12 en R1, prueba buscando el punto remoto: las «E» apuntan ↑ ↓ ← ↑ ↓; tocas ↓ ↑ → ↓ ↑; aciertos 0 de 5 → **no pasa** (hacen falta 4).
 13. **Pon el pasador en R2** y confirma.
 14. Ojo derecho, línea 6/12 en R2, prueba buscando el punto remoto: las «E» apuntan → ↑ ↓ ← ↑; tocas ← ↓ ↑ → ↓; aciertos 0 de 5 → **no pasa** (hacen falta 4).
@@ -231,11 +231,11 @@ Pasar una línea = 4 aciertos de 5 (3 de 5 al medir el umbral).
 2. Ojo derecho, línea 6/60 en R0, prueba práctica (no cuenta): las «E» apuntan ↑ ← → ← ↑; tocas ↑ ← → ← ↑; aciertos 5 de 5.
 3. Ojo derecho, línea 6/9 en R0, prueba de lejos: las «E» apuntan ← → ↑ → ←; tocas ← → ↑ → ←; aciertos 5 de 5 → **pasa** (hacen falta 4).
 4. Ojo izquierdo, línea 6/9 en R0, prueba de lejos: las «E» apuntan ← → ↓ → ↓; tocas ← → ↓ → ↓; aciertos 5 de 5 → **pasa** (hacen falta 4).
-5. **Pon el pasador en R0** y baja la tapa +2.00 y confirma.
+5. **Baja la tapa +2.00** y confirma.
 6. **Espera 60 s** con los dos ojos mirando el círculo azul, y confirma.
 7. Ojo derecho, línea 6/9 en R0, prueba con los lentes de +2.00: las «E» apuntan ↓ ← → ↓ ←; tocas ↓ ← → ↓ ←; aciertos 5 de 5 → **pasa** (hacen falta 4).
 8. Ojo izquierdo, línea 6/9 en R0, prueba con los lentes de +2.00: las «E» apuntan → ↓ ↑ ← ↓; tocas → ↓ ↑ ← ↓; aciertos 5 de 5 → **pasa** (hacen falta 4).
-9. **Pon el pasador en R0** (sube la tapa +2.00) y confirma.
+9. **Sube la tapa +2.00** y confirma.
 10. Abanico, ojo derecho, vuelta 1 (carta sin girar): el niño ve todas iguales → tocas «Todas iguales».
 11. Abanico, ojo derecho, vuelta 2 (carta girada 90°): el niño ve todas iguales → tocas «Todas iguales».
 12. Abanico, ojo izquierdo, vuelta 1 (carta sin girar): el niño ve todas iguales → tocas «Todas iguales».
@@ -267,11 +267,11 @@ Pasar una línea = 4 aciertos de 5 (3 de 5 al medir el umbral).
 2. Ojo derecho, línea 6/60 en R0, prueba práctica (no cuenta): las «E» apuntan ↑ ← → ← ↑; tocas ↑ ← → ← ↑; aciertos 5 de 5.
 3. Ojo derecho, línea 6/9 en R0, prueba de lejos: las «E» apuntan ← → ↑ → ←; tocas ← → ↑ → ←; aciertos 5 de 5 → **pasa** (hacen falta 4).
 4. Ojo izquierdo, línea 6/9 en R0, prueba de lejos: las «E» apuntan ← → ↓ → ↓; tocas ← → ↓ → ↓; aciertos 5 de 5 → **pasa** (hacen falta 4).
-5. **Pon el pasador en R0** y baja la tapa +2.00 y confirma.
+5. **Baja la tapa +2.00** y confirma.
 6. **Espera 60 s** con los dos ojos mirando el círculo azul, y confirma.
 7. Ojo derecho, línea 6/9 en R0, prueba con los lentes de +2.00: las «E» apuntan ↓ ← → ↓ ←; tocas ↑ → ← ↑ →; aciertos 0 de 5 → **no pasa** (hacen falta 4).
 8. Ojo izquierdo, línea 6/9 en R0, prueba con los lentes de +2.00: las «E» apuntan → ↓ ↑ ← ↓; tocas ← ↑ ↓ → ↑; aciertos 0 de 5 → **no pasa** (hacen falta 4).
-9. **Pon el pasador en R0** (sube la tapa +2.00) y confirma.
+9. **Sube la tapa +2.00** y confirma.
 10. Abanico, ojo derecho, vuelta 1 (carta sin girar): el niño ve todas iguales → tocas «Todas iguales».
 11. Abanico, ojo derecho, vuelta 2 (carta girada 90°): el niño ve todas iguales → tocas «Todas iguales».
 12. Abanico, ojo izquierdo, vuelta 1 (carta sin girar): el niño ve todas iguales → tocas «Todas iguales».
@@ -350,11 +350,11 @@ Pasar una línea = 4 aciertos de 5 (3 de 5 al medir el umbral).
 2. Ojo derecho, línea 6/60 en R0, prueba práctica (no cuenta): las «E» apuntan ↑ ← → ← ↑; tocas ↑ ← → ← ↑; aciertos 5 de 5.
 3. Ojo derecho, línea 6/9 en R0, prueba de lejos: las «E» apuntan ← → ↑ → ←; tocas ← → ↑ → ←; aciertos 5 de 5 → **pasa** (hacen falta 4).
 4. Ojo izquierdo, línea 6/9 en R0, prueba de lejos: las «E» apuntan ← → ↓ → ↓; tocas ← → ↓ → ↓; aciertos 5 de 5 → **pasa** (hacen falta 4).
-5. **Pon el pasador en R0** y baja la tapa +2.00 y confirma.
+5. **Baja la tapa +2.00** y confirma.
 6. **Espera 60 s** con los dos ojos mirando el círculo azul, y confirma.
 7. Ojo derecho, línea 6/9 en R0, prueba con los lentes de +2.00: las «E» apuntan ↓ ← → ↓ ←; tocas ↑ → ← ↑ →; aciertos 0 de 5 → **no pasa** (hacen falta 4).
 8. Ojo izquierdo, línea 6/9 en R0, prueba con los lentes de +2.00: las «E» apuntan → ↓ ↑ ← ↓; tocas ← ↑ ↓ → ↑; aciertos 0 de 5 → **no pasa** (hacen falta 4).
-9. **Pon el pasador en R0** (sube la tapa +2.00) y confirma.
+9. **Sube la tapa +2.00** y confirma.
 10. Abanico, ojo derecho, vuelta 1 (carta sin girar): el niño dice «1» → tocas «1».
 11. Abanico, ojo derecho, vuelta 2 (carta girada 90°): el niño dice «4» → tocas «4».
 12. Abanico, ojo izquierdo, vuelta 1 (carta sin girar): el niño dice «1» → tocas «1».
@@ -469,14 +469,14 @@ Pasar una línea = 4 aciertos de 5 (3 de 5 al medir el umbral).
 38. **Pon el pasador en R10** y confirma.
 39. Ojo derecho, línea 6/24 en R10, prueba buscando el punto remoto: las «E» apuntan → ↑ → ↑ ←; tocas ← ↓ ← ↓ →; aciertos 0 de 5 → **no pasa** (hacen falta 4).
 40. Ojo izquierdo, línea 6/24 en R10, prueba buscando el punto remoto: las «E» apuntan ↑ ↓ → ← ↑; tocas ↓ ↑ ← → ↓; aciertos 0 de 5 → **no pasa** (hacen falta 4).
-41. **Pon el pasador en R0** y pon el estenopeico y confirma.
+41. **Pon el pasador en R0, pon el estenopeico** y confirma.
 42. Ojo derecho, línea 6/60 en R0, prueba con el estenopeico: las «E» apuntan → ↓ → ↓ ↑; tocas → ↓ → ↓ ↑; aciertos 5 de 5 → **pasa** (hacen falta 3).
 43. Ojo derecho, línea 6/36 en R0, prueba con el estenopeico: las «E» apuntan ← ↑ ↓ ↑ ←; tocas → ↓ ↑ ↓ →; aciertos 0 de 5 → **no pasa** (hacen falta 3).
 44. Ojo derecho, línea 6/24 en R0, prueba de control: las «E» apuntan ↓ → ↑ ← ↑; tocas ↑ ← ↓ → ↓; aciertos 0 de 5 → **no pasa** (hacen falta 4).
 45. Ojo izquierdo, línea 6/60 en R0, prueba con el estenopeico: las «E» apuntan ↓ ↑ ← → ↓; tocas ↓ ↑ ← → ↓; aciertos 5 de 5 → **pasa** (hacen falta 3).
 46. Ojo izquierdo, línea 6/36 en R0, prueba con el estenopeico: las «E» apuntan → ↑ ↓ ← ↑; tocas ← ↓ ↑ → ↓; aciertos 0 de 5 → **no pasa** (hacen falta 3).
 47. Ojo izquierdo, línea 6/24 en R0, prueba de control: las «E» apuntan → ← → ↓ ←; tocas ← → ← ↑ →; aciertos 0 de 5 → **no pasa** (hacen falta 4).
-48. **Pon el pasador en R0** (quita el estenopeico) y confirma.
+48. **Quita el estenopeico** y confirma.
 49. Abanico, ojo derecho, vuelta 1 (carta sin girar): el niño ve todas iguales → tocas «Todas iguales».
 50. Abanico, ojo derecho, vuelta 2 (carta girada 90°): el niño ve todas iguales → tocas «Todas iguales».
 51. Abanico, ojo izquierdo, vuelta 1 (carta sin girar): el niño ve todas iguales → tocas «Todas iguales».
@@ -544,7 +544,7 @@ Pasar una línea = 4 aciertos de 5 (3 de 5 al medir el umbral).
 38. **Pon el pasador en R10** y confirma.
 39. Ojo derecho, línea 6/24 en R10, prueba buscando el punto remoto: las «E» apuntan → ↑ → ↑ ←; tocas ← ↓ ← ↓ →; aciertos 0 de 5 → **no pasa** (hacen falta 4).
 40. Ojo izquierdo, línea 6/24 en R10, prueba buscando el punto remoto: las «E» apuntan ↑ ↓ → ← ↑; tocas ↓ ↑ ← → ↓; aciertos 0 de 5 → **no pasa** (hacen falta 4).
-41. **Pon el pasador en R0** y pon el estenopeico y confirma.
+41. **Pon el pasador en R0, pon el estenopeico** y confirma.
 42. Ojo derecho, línea 6/60 en R0, prueba con el estenopeico: las «E» apuntan → ↓ → ↓ ↑; tocas → ↓ → ↓ ↑; aciertos 5 de 5 → **pasa** (hacen falta 3).
 43. Ojo derecho, línea 6/36 en R0, prueba con el estenopeico: las «E» apuntan ← ↑ ↓ ↑ ←; tocas ← ↑ ↓ ↑ ←; aciertos 5 de 5 → **pasa** (hacen falta 3).
 44. Ojo derecho, línea 6/24 en R0, prueba con el estenopeico: las «E» apuntan ↓ → ↑ ← ↑; tocas ↓ → ↑ ← ↑; aciertos 5 de 5 → **pasa** (hacen falta 3).
@@ -557,7 +557,7 @@ Pasar una línea = 4 aciertos de 5 (3 de 5 al medir el umbral).
 51. Ojo izquierdo, línea 6/18 en R0, prueba con el estenopeico: las «E» apuntan ↑ ↓ ← ↑ →; tocas ↑ ↓ ← ↑ →; aciertos 5 de 5 → **pasa** (hacen falta 3).
 52. Ojo izquierdo, línea 6/12 en R0, prueba con el estenopeico: las «E» apuntan ← ↑ → ↑ ↓; tocas ← ↑ → ↑ ↓; aciertos 5 de 5 → **pasa** (hacen falta 3).
 53. Ojo izquierdo, línea 6/9 en R0, prueba con el estenopeico: las «E» apuntan ↑ ← ↓ → ↑; tocas ↓ → ↑ ← ↓; aciertos 0 de 5 → **no pasa** (hacen falta 3).
-54. **Pon el pasador en R0** (quita el estenopeico) y confirma.
+54. **Quita el estenopeico** y confirma.
 55. Abanico, ojo derecho, vuelta 1 (carta sin girar): el niño ve todas iguales → tocas «Todas iguales».
 56. Abanico, ojo derecho, vuelta 2 (carta girada 120°): el niño ve todas iguales → tocas «Todas iguales».
 57. Abanico, ojo izquierdo, vuelta 1 (carta sin girar): el niño ve todas iguales → tocas «Todas iguales».
@@ -625,14 +625,14 @@ Pasar una línea = 4 aciertos de 5 (3 de 5 al medir el umbral).
 38. **Pon el pasador en R10** y confirma.
 39. Ojo derecho, línea 6/24 en R10, prueba buscando el punto remoto: las «E» apuntan → ↑ → ↑ ←; tocas ← ↓ ← ↓ →; aciertos 0 de 5 → **no pasa** (hacen falta 4).
 40. Ojo izquierdo, línea 6/24 en R10, prueba buscando el punto remoto: las «E» apuntan ↑ ↓ → ← ↑; tocas ↓ ↑ ← → ↓; aciertos 0 de 5 → **no pasa** (hacen falta 4).
-41. **Pon el pasador en R0** y pon el estenopeico y confirma.
+41. **Pon el pasador en R0, pon el estenopeico** y confirma.
 42. Ojo derecho, línea 6/60 en R0, prueba con el estenopeico: las «E» apuntan → ↓ → ↓ ↑; tocas → ↓ → ↓ ↑; aciertos 5 de 5 → **pasa** (hacen falta 3).
 43. Ojo derecho, línea 6/36 en R0, prueba con el estenopeico: las «E» apuntan ← ↑ ↓ ↑ ←; tocas → ↓ ↑ ↓ →; aciertos 0 de 5 → **no pasa** (hacen falta 3).
 44. Ojo derecho, línea 6/24 en R0, prueba de control: las «E» apuntan ↓ → ↑ ← ↑; tocas ↑ ← ↓ → ↓; aciertos 0 de 5 → **no pasa** (hacen falta 4).
 45. Ojo izquierdo, línea 6/60 en R0, prueba con el estenopeico: las «E» apuntan ↓ ↑ ← → ↓; tocas ↓ ↑ ← → ↓; aciertos 5 de 5 → **pasa** (hacen falta 3).
 46. Ojo izquierdo, línea 6/36 en R0, prueba con el estenopeico: las «E» apuntan → ↑ ↓ ← ↑; tocas ← ↓ ↑ → ↓; aciertos 0 de 5 → **no pasa** (hacen falta 3).
 47. Ojo izquierdo, línea 6/24 en R0, prueba de control: las «E» apuntan → ← → ↓ ←; tocas ← → ← ↑ →; aciertos 0 de 5 → **no pasa** (hacen falta 4).
-48. **Pon el pasador en R0** (quita el estenopeico) y confirma.
+48. **Quita el estenopeico** y confirma.
 49. Abanico, ojo derecho, vuelta 1 (carta sin girar): el niño ve todas iguales → tocas «Todas iguales».
 50. Abanico, ojo derecho, vuelta 2 (carta girada 90°): el niño ve todas iguales → tocas «Todas iguales».
 51. Abanico, ojo izquierdo, vuelta 1 (carta sin girar): el niño ve todas iguales → tocas «Todas iguales».
@@ -698,12 +698,12 @@ Pasar una línea = 4 aciertos de 5 (3 de 5 al medir el umbral).
 36. **Pon el pasador en R10** y confirma.
 37. Ojo derecho, línea 6/24 en R10, prueba buscando el punto remoto: las «E» apuntan → ← ↑ ← ↑; tocas ↑ ↑ ↑ ↑ ↑; aciertos 2 de 5 → **no pasa** (hacen falta 4).
 38. Ojo izquierdo, línea 6/24 en R10, prueba buscando el punto remoto: las «E» apuntan ← ↓ → ↓ →; tocas ↑ ↑ ↑ ↑ ↑; aciertos 0 de 5 → **no pasa** (hacen falta 4).
-39. **Pon el pasador en R0** y pon el estenopeico y confirma.
+39. **Pon el pasador en R0, pon el estenopeico** y confirma.
 40. Ojo derecho, línea 6/60 en R0, prueba con el estenopeico: las «E» apuntan → ↑ → ↑ ←; tocas ↑ ↑ ↑ ↑ ↑; aciertos 2 de 5 → **no pasa** (hacen falta 3).
 41. Ojo derecho, línea 6/36 en R0, prueba de control: las «E» apuntan ↑ ↓ → ← ↑; tocas ↑ ↑ ↑ ↑ ↑; aciertos 2 de 5 → **no pasa** (hacen falta 4).
 42. Ojo izquierdo, línea 6/60 en R0, prueba con el estenopeico: las «E» apuntan ↓ → ↓ → ↑; tocas ↑ ↑ ↑ ↑ ↑; aciertos 1 de 5 → **no pasa** (hacen falta 3).
 43. Ojo izquierdo, línea 6/36 en R0, prueba de control: las «E» apuntan ← ↑ ↓ ↑ ←; tocas ↑ ↑ ↑ ↑ ↑; aciertos 2 de 5 → **no pasa** (hacen falta 4).
-44. **Pon el pasador en R0** (quita el estenopeico) y confirma.
+44. **Quita el estenopeico** y confirma.
 45. Abanico, ojo derecho, vuelta 1 (carta sin girar): el niño ve todas iguales → tocas «Todas iguales».
 46. Abanico, ojo derecho, vuelta 2 (carta girada 120°): el niño ve todas iguales → tocas «Todas iguales».
 47. Abanico, ojo izquierdo, vuelta 1 (carta sin girar): el niño ve todas iguales → tocas «Todas iguales».

@@ -50,14 +50,28 @@ export function textoColocar(p: PasoColocar, primero = false): { titulo: string;
   if (primero) {
     lineas.push('Pon el celular sin funda en la bandeja, con la pantalla apoyada contra el tope y la esponja detrás.');
   }
-  lineas.push(`Pon el pasador en ${p.lugar}: desliza la bandeja hasta el agujero ${p.lugar} y atraviésalo con el pasador.`);
+  if (p.moverPasador) {
+    lineas.push(`Pon el pasador en ${p.lugar}: desliza la bandeja hasta el agujero ${p.lugar} y atraviésalo con el pasador.`);
+  }
   if (p.accesorio === 'clip') lineas.push('Baja la tapa +2.00 de la caja.');
   if (p.accesorio === 'estenopeico') {
     lineas.push('Pon el estenopeico (el oclusor con agujeritos) delante de los lentes de la caja.');
   }
   if (primero) lineas.push(...COMO_RESPONDE);
   if (p.nota === 'abanico') lineas.push(...COMO_ABANICO);
-  return { titulo: `Pon el pasador en ${p.lugar}`, lineas };
+  // El título dice solo lo que hay que hacer: el pasador, únicamente si cambia de ranura.
+  const titulo = p.moverPasador
+    ? `Pon el pasador en ${p.lugar}`
+    : p.accesorio === 'clip'
+      ? 'Baja la tapa +2.00'
+      : p.accesorio === 'estenopeico'
+        ? 'Pon el estenopeico'
+        : p.quitar === 'clip'
+          ? 'Sube la tapa +2.00'
+          : p.quitar === 'estenopeico'
+            ? 'Quita el estenopeico'
+            : 'Ahora, la carta de abanico';
+  return { titulo, lineas };
 }
 
 export const TEXTO_SEMAFORO: Record<Semaforo, string> = {

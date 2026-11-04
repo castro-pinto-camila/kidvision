@@ -263,9 +263,13 @@ function describirPaso(paso: Paso, evento: Evento | null): string {
       if (paso.lugar === 'cerca') {
         return `**Prueba de cerca, ${OJO[paso.ojo!]}:** saca el celular de la caja, tira de 40 cm desde la mejilla, tapa el otro ojo.`;
       }
-      const con = paso.accesorio === 'clip' ? ' y baja la tapa +2.00' : paso.accesorio === 'estenopeico' ? ' y pon el estenopeico' : '';
-      const sin = paso.quitar === 'clip' ? ' (sube la tapa +2.00)' : paso.quitar === 'estenopeico' ? ' (quita el estenopeico)' : '';
-      return `**Pon el pasador en ${paso.lugar.toUpperCase()}**${con}${sin} y confirma.`;
+      const acciones = [
+        paso.quitar === 'clip' ? 'sube la tapa +2.00' : paso.quitar === 'estenopeico' ? 'quita el estenopeico' : '',
+        paso.moverPasador ? `pon el pasador en ${paso.lugar.toUpperCase()}` : '',
+        paso.accesorio === 'clip' ? 'baja la tapa +2.00' : paso.accesorio === 'estenopeico' ? 'pon el estenopeico' : '',
+      ].filter(Boolean);
+      const texto = acciones.length > 0 ? acciones.join(', ') : 'lee la explicación de la carta de abanico';
+      return `**${texto[0].toUpperCase()}${texto.slice(1)}** y confirma.`;
     }
     case 'espera':
       return `**Espera ${paso.segundos} s** con los dos ojos mirando el círculo azul, y confirma.`;

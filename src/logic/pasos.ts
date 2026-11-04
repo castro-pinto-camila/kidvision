@@ -38,6 +38,8 @@ export interface PasoColocar {
   accesorio: Accesorio;
   /** Accesorio que hay que quitar antes, si lo hay. */
   quitar: Accesorio;
+  /** true si hay que mover el pasador a otra ranura; false si el celular ya está ahí y solo cambia la tapa o el estenopeico. */
+  moverPasador: boolean;
   /** Lo que viene después, cuando hay que explicarlo antes (la carta de abanico). */
   nota: 'abanico' | null;
 }
@@ -135,8 +137,9 @@ export function* ir(
 ): Flujo<void> {
   const mismoOjo = lugar.id !== 'cerca' || posicion.ojo === ojo;
   if (!nota && posicion.lugar === lugar.id && posicion.accesorio === accesorio && mismoOjo) return;
+  const moverPasador = posicion.lugar !== lugar.id;
   const quitar = posicion.accesorio !== null && posicion.accesorio !== accesorio ? posicion.accesorio : null;
-  exigir(yield { tipo: 'colocar', ojo, lugar: lugar.id, accesorio, quitar, nota }, 'confirmar');
+  exigir(yield { tipo: 'colocar', ojo, lugar: lugar.id, accesorio, quitar, moverPasador, nota }, 'confirmar');
   posicion.ojo = ojo;
   posicion.lugar = lugar.id;
   posicion.accesorio = accesorio;
