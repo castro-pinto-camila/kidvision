@@ -230,8 +230,8 @@ describe('tapa +2.00 y techo delantero', () => {
   const d = dimensiones(caja);
   const techo = geometriaTecho(caja);
   // Zona de la bisagra y del hueco de la tapa, en x desde el plano de los lentes (x = 0):
-  // del apoyo (x = -e + cartón) hasta la cara de atrás del panel de lentes (x = +cartón/2).
-  const hueco = { desde: -caja.e_mm + M.carton, hasta: M.carton / 2 };
+  // del apoyo (x = -e + cartón) hasta la cara del panel de lentes que mira al niño (x = -cartón/2).
+  const hueco = { desde: -caja.e_mm + M.carton, hasta: -M.carton / 2 };
 
   it('la tapa cabe entre S1 y S2', () => {
     expect(anchoTapa()).toBe(172);
@@ -240,12 +240,13 @@ describe('tapa +2.00 y techo delantero', () => {
   });
 
   it('el hueco de la tapa mide lo que dicen S1 y S2 y deja lugar a la tapa de cartón', () => {
-    expect(hueco.hasta - hueco.desde).toBeCloseTo(d.separador + M.carton / 2, 9);
+    expect(hueco.hasta - hueco.desde).toBeCloseTo(d.separador, 9);
     expect(d.separador).toBeGreaterThan(2 * M.carton);
   });
 
   it('el techo no cubre la bisagra ni el hueco de la tapa', () => {
-    expect(techo.desde).toBeGreaterThanOrEqual(hueco.hasta);
+    expect(techo.desde).toBeGreaterThanOrEqual(M.carton / 2); // detrás del panel de lentes
+    expect(techo.desde).toBeGreaterThan(hueco.hasta);
   });
 
   it('el techo llega hasta justo antes de R10 y el celular en R10 no lo toca', () => {
