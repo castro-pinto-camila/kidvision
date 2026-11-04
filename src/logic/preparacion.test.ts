@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { configuracionPorDefecto, type Configuracion } from '../data/config';
-import { estadoPreparacion, primerPendiente, puedeEmpezar } from './preparacion';
+import { esPrimeraVez, estadoPreparacion, primerPendiente, puedeEmpezar } from './preparacion';
 
 function config(cambios: Partial<Configuracion> = {}): Configuracion {
   return { ...configuracionPorDefecto(), ...cambios };
@@ -113,5 +113,13 @@ describe('colegio y salón', () => {
     const vieja = { ...base, colegio: 'IE 1234' } as Parameters<typeof estadoPreparacion>[0];
     delete (vieja as { salon?: string }).salon;
     expect(estadoPreparacion(vieja, 3).pasos[0].listo).toBe(false);
+  });
+});
+
+describe('primera vez', () => {
+  it('sin colegio guardado es la primera vez; con colegio, ya no', () => {
+    expect(esPrimeraVez({ colegio: '' })).toBe(true);
+    expect(esPrimeraVez({ colegio: '   ' })).toBe(true);
+    expect(esPrimeraVez({ colegio: 'IE 1234' })).toBe(false);
   });
 });

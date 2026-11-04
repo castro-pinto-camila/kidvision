@@ -15,6 +15,8 @@ export interface ContextoBienvenida {
   /** Vuelve a dibujar la pantalla con el estado nuevo. */
   refrescar: () => void;
   seguir: () => void;
+  /** Flecha de regresar: a la portada la primera vez, a Mi salón después. */
+  volver: () => void;
 }
 
 export function montarBienvenida(raiz: HTMLElement, ctx: ContextoBienvenida): () => void {
@@ -69,7 +71,7 @@ export function montarBienvenida(raiz: HTMLElement, ctx: ContextoBienvenida): ()
     h(
       'main',
       { class: 'pagina' },
-      h('header', { class: 'cabecera' }, h('span', { class: 'logo' }, icono('ojo')), h('div', { class: 'titulos' }, h('h1', {}, 'Bienvenida'), h('p', { class: 'lema' }, 'Dos pasos antes de empezar'))),
+      h('header', { class: 'cabecera' }, h('button', { class: 'boton secundario', 'aria-label': 'Volver', onclick: ctx.volver }, icono('atras')), h('span', { class: 'logo' }, icono('ojo')), h('div', { class: 'titulos' }, h('h1', {}, 'Bienvenida'), h('p', { class: 'lema' }, 'Dos pasos antes de empezar'))),
       h('h2', {}, '1. El colegio y el salón'),
       fila(colegio.listo, colegio.texto),
       formulario,

@@ -26,7 +26,7 @@ import {
   type Estudiante,
 } from '../data/salon';
 import type { ResultadoSesion } from '../logic/flujo';
-import { estadoPreparacion, primerPendiente, puedeEmpezar, type AccionPaso } from '../logic/preparacion';
+import { esPrimeraVez, estadoPreparacion, primerPendiente, puedeEmpezar, type AccionPaso } from '../logic/preparacion';
 import { versionPorEvaluaciones, type VersionLineas } from '../logic/secuencias';
 import { montarBienvenida } from './bienvenida';
 import { montarPortada } from './portada';
@@ -165,7 +165,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
 
     if (ruta === '#/inicio') {
       // Con el colegio ya escrito, la portada se abrió a propósito desde Configuración: se puede volver.
-      const yaConfigurado = estado.config.colegio.trim() !== '';
+      const yaConfigurado = !esPrimeraVez(estado.config);
       desmontar = montarPortada(raiz, {
         comenzar: () => ir(yaConfigurado ? '#/' : '#/bienvenida'),
         volver: yaConfigurado ? () => ir('#/config') : undefined,
@@ -179,6 +179,8 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
         calibrar: () => hacer('calibrar', '#/bienvenida'),
         refrescar: mostrar,
         seguir: () => ir('#/'),
+        // La primera vez se vuelve a la portada; si ya hay colegio, a Mi salón.
+        volver: () => ir(esPrimeraVez(estado.config) ? '#/inicio' : '#/'),
       });
     } else if (ruta === '#/config') {
       desmontar = montarConfiguracion(raiz, estado.config, {
@@ -269,7 +271,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
         (codigo) => ir(`#/nino/${encodeURIComponent(codigo)}`),
         () => ir('#/'),
       );
-    } else if (!estado.config.colegio.trim() && ruta === '#/') {
+    } else if (esPrimeraVez(estado.config) && ruta === '#/') {
       // Primera vez: antes de Mi salón se pide el colegio y se calibra.
       ir('#/inicio');
     } else {

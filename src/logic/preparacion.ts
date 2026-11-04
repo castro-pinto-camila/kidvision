@@ -84,6 +84,11 @@ export function estadoPreparacion(config: Configuracion, dpr: number, huella?: H
   };
 }
 
+/** Primera vez: todavía no hay colegio guardado, así que se empieza por la portada y la bienvenida. */
+export function esPrimeraVez(config: Pick<Configuracion, 'colegio'>): boolean {
+  return config.colegio.trim() === '';
+}
+
 /**
  * ¿Se puede empezar ahora? Se pregunta justo antes de cada evaluación, porque el
  * zoom o la pantalla pudieron cambiar desde que se calibró. La práctica no pide colegio.
