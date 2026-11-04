@@ -1217,3 +1217,58 @@ td.no {
   height: 1.3em;
   flex: none;
 }
+
+/* Calibración en un paso: elegir referencia y arrastrar el punto azul */
+.selector-referencia {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 4px 0 10px;
+}
+
+.selector-referencia .boton {
+  min-height: 48px;
+  padding: 6px 4px;
+  font-size: 0.9rem;
+  line-height: 1.15;
+}
+
+.referencia {
+  position: relative;
+  margin: 18px 0 30px;
+  touch-action: none;
+}
+
+.referencia .tarjeta,
+.referencia .regla {
+  margin: 0;
+}
+
+.referencia .tarjeta {
+  width: 100%;
+  height: 100%;
+}
+
+.regla.kit {
+  background-color: #fef3c7;
+}
+
+.asa {
+  position: absolute;
+  right: -22px;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
+  border-radius: 50%;
+  background: var(--azul);
+  border: 4px solid #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+  touch-action: none;
+  cursor: ew-resize;
+}
+
+.fila-botones .nota {
+  flex: 1;
+  text-align: center;
+}

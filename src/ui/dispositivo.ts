@@ -4,6 +4,8 @@
  * y se le muestra un aviso al docente.
  */
 
+import type { HuellaPantalla } from '../data/config';
+
 let candado: WakeLockSentinel | null = null;
 let activo = false;
 
@@ -91,4 +93,19 @@ export async function liberarPantalla(): Promise<void> {
       /* el usuario ya salió */
     }
   }
+}
+
+/** Cómo es la pantalla ahora: se guarda al calibrar y se compara antes de cada evaluación. */
+export function huellaActual(): HuellaPantalla {
+  return {
+    ancho: screen.width,
+    alto: screen.height,
+    dpr: window.devicePixelRatio || 1,
+    zoom: window.visualViewport?.scale ?? 1,
+  };
+}
+
+/** true si la app se abrió desde el ícono de la pantalla de inicio (su almacenamiento es aparte del navegador). */
+export function esAppInstalada(): boolean {
+  return window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
 }

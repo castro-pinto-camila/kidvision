@@ -32,7 +32,7 @@ import { montarPortada } from './portada';
 import { montarCalibracion } from './calibracion';
 import { montarConfiguracion } from './configuracion';
 import { montarConstancia } from './constancia';
-import { liberarPantalla, prepararPantalla } from './dispositivo';
+import { huellaActual, liberarPantalla, prepararPantalla } from './dispositivo';
 import { h } from './dom';
 import { montarPreparar } from './preparar';
 import { montarPrueba } from './prueba';
@@ -90,7 +90,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
     if (estado.db) await guardarConfiguracion(estado.db, c);
   }
 
-  const preparacion = () => estadoPreparacion(estado.config, window.devicePixelRatio || 1);
+  const preparacion = () => estadoPreparacion(estado.config, window.devicePixelRatio || 1, huellaActual());
 
   /** Lo que hace el botón de cada paso pendiente; después de calibrar se vuelve a `volverA`. */
   function hacer(accion: AccionPaso, volverA: string): void {
