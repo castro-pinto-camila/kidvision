@@ -19,6 +19,8 @@ export interface Lugar extends Geometria {
 export const LUGAR_CERCA: Lugar = { id: 'cerca', ...GEOMETRIA_CERCA };
 
 export type Prueba =
+  /** Línea de práctica al empezar: no cuenta para nada. */
+  | 'practica'
   | 'lejos'
   | 'umbral'
   | 'control'
@@ -36,6 +38,8 @@ export interface PasoColocar {
   accesorio: Accesorio;
   /** Accesorio que hay que quitar antes, si lo hay. */
   quitar: Accesorio;
+  /** Lo que viene después, cuando hay que explicarlo antes (la carta de abanico). */
+  nota: 'abanico' | null;
 }
 
 /** Temporizador (60 s con el clip, los dos ojos a la vez). El docente confirma cuando termina. */
@@ -52,7 +56,7 @@ export interface PasoLinea {
   lugar: Lugar;
   nivel: Nivel;
   orientaciones: Direccion[];
-  /** Aciertos para aprobar la línea (4, o 3 en el umbral). La línea se corta al quedar decidida. */
+  /** Aciertos para aprobar la línea (4, o 3 en el umbral). La línea se corta solo si ya falló. */
   necesarios: number;
 }
 
@@ -84,7 +88,7 @@ export interface RegistroLinea {
   aciertos: number;
   /** Cuántas «E» respondió el niño (de 1 a 5). */
   respondidas: number;
-  /** true si la línea se cortó antes de la quinta «E» porque ya estaba decidida. */
+  /** true si la línea se cortó antes de la quinta «E» porque ya había fallado. */
   cortada: boolean;
 }
 
@@ -119,13 +123,20 @@ export function exigir<T extends Evento['tipo']>(
 /**
  * Pide colocar el celular solo si cambia el lugar o el accesorio. Fuera de la
  * caja (cerca) también al cambiar de ojo, porque hay que mover el oclusor;
- * dentro de la caja el cambio de ojo lo hace la pantalla.
+ * dentro de la caja el cambio de ojo lo hace la pantalla. Con `nota` lo pide
+ * siempre, para que el docente lea la explicación de lo que sigue.
  */
-export function* ir(posicion: Posicion, lugar: Lugar, accesorio: Accesorio, ojo: Ojo | null): Flujo<void> {
+export function* ir(
+  posicion: Posicion,
+  lugar: Lugar,
+  accesorio: Accesorio,
+  ojo: Ojo | null,
+  nota: 'abanico' | null = null,
+): Flujo<void> {
   const mismoOjo = lugar.id !== 'cerca' || posicion.ojo === ojo;
-  if (posicion.lugar === lugar.id && posicion.accesorio === accesorio && mismoOjo) return;
+  if (!nota && posicion.lugar === lugar.id && posicion.accesorio === accesorio && mismoOjo) return;
   const quitar = posicion.accesorio !== null && posicion.accesorio !== accesorio ? posicion.accesorio : null;
-  exigir(yield { tipo: 'colocar', ojo, lugar: lugar.id, accesorio, quitar }, 'confirmar');
+  exigir(yield { tipo: 'colocar', ojo, lugar: lugar.id, accesorio, quitar, nota }, 'confirmar');
   posicion.ojo = ojo;
   posicion.lugar = lugar.id;
   posicion.accesorio = accesorio;

@@ -13,7 +13,7 @@ import { BOTONES_ABANICO } from '../logic/abanico';
 import { PruebaVisual, type Paso, type ResultadoSesion } from '../logic/flujo';
 import { respuestasParaDecidir, type Respuesta, type Toque } from '../logic/linea';
 import type { Evento, Ojo, PasoAbanico, PasoColocar, PasoEspera, PasoLinea } from '../logic/pasos';
-import { dibujarAbanico, dibujarLetra, dibujarLinea, pintar, prepararLienzo } from './dibujo';
+import { dibujarAbanico, dibujarCirculo, dibujarLetra, dibujarLinea, pintar, prepararLienzo } from './dibujo';
 import { liberarPantalla } from './dispositivo';
 import { h } from './dom';
 import { icono } from './iconos';
@@ -22,6 +22,8 @@ import { NOMBRE_OJO, NOMBRE_PRUEBA, textoColocar } from './textos';
 export interface OpcionesPantallaPrueba {
   config: Configuracion & { pxPorMm: number };
   avisos: string[];
+  /** Modo práctica (sin caja): aviso en todas las pantallas; el resultado no vale. */
+  practica: boolean;
   /** Guarda lo que se corrigió en la comprobación con la «D». */
   guardarOrientacion: (invertida: boolean, intercambiadas: boolean) => void;
   alTerminar: (resultado: ResultadoSesion) => void;
@@ -35,6 +37,10 @@ const FLECHAS: [Respuesta, number, string][] = [
   ['abajo', 90, 'Abajo'],
   ['derecha', 0, 'Derecha'],
 ];
+
+/** Cuánto dura el aviso «Siguiente línea» entre una línea y la otra. */
+const MS_TRANSICION = 600;
+const AZUL_FIGURA = '#2563eb';
 
 /** Monta la prueba en `raiz`. Devuelve la función para desmontarla. */
 export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () => void {
@@ -50,25 +56,49 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
   let invertida = config.pantallaInvertida;
   let intercambiadas = config.mitadesIntercambiadas;
   let verificado = false;
+  let primerPaso = true;
   let avisos = op.avisos;
   let toques: Toque[] = [];
   let ultimoToque = performance.now();
   let reloj: number | undefined;
+  let animacion: number | undefined;
+  let transicion: number | undefined;
   let segundosRestantes = 0;
   let esperaIniciada: PasoEspera | null = null;
+
+  const marcaPractica = op.practica ? 'PRÁCTICA · ' : '';
 
   function responder(evento: Evento): void {
     const paso: Paso = prueba.responder(evento);
     toques = [];
-    ultimoToque = performance.now();
     avisos = [];
+    primerPaso = false;
     detenerReloj();
     if (paso.tipo === 'fin') {
       void liberarPantalla();
       op.alTerminar(paso.resultado);
-    } else {
-      dibujar();
+      return;
     }
+    if (evento.tipo === 'linea') {
+      mostrarTransicion();
+      return;
+    }
+    ultimoToque = performance.now();
+    dibujar();
+  }
+
+  /** Entre una línea y la siguiente: pantalla en blanco y «✓ Siguiente línea» en la franja. */
+  function mostrarTransicion(): void {
+    const d = disposicion(null);
+    fondo(d);
+    capa.replaceChildren(
+      franja(d, '', [h('span', { class: 'siguiente' }, icono('check'), 'Siguiente línea')]),
+    );
+    transicion = window.setTimeout(() => {
+      transicion = undefined;
+      ultimoToque = performance.now();
+      dibujar();
+    }, MS_TRANSICION);
   }
 
   function salir(): void {
@@ -79,7 +109,9 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
 
   function detenerReloj(): void {
     if (reloj !== undefined) clearInterval(reloj);
+    if (animacion !== undefined) cancelAnimationFrame(animacion);
     reloj = undefined;
+    animacion = undefined;
   }
 
   /** Medidas del dibujo (siempre horizontal); de paso, gira el contenedor. */
@@ -111,10 +143,10 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
     return h(
       'div',
       {
-        class: `franja ${vertical ? 'vertical' : ''}`,
+        class: `franja ${vertical ? 'vertical' : ''} ${op.practica ? 'en-practica' : ''}`,
         style: `left:${f.x}px;top:${f.y}px;width:${f.ancho}px;height:${f.alto}px`,
       },
-      h('span', { class: 'estado' }, estado),
+      (estado || op.practica) && h('span', { class: 'estado' }, marcaPractica + estado),
       ...botones,
     );
   }
@@ -122,12 +154,14 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
   function dibujarColocar(paso: PasoColocar): void {
     const v = vista();
     prepararLienzo(lienzo, v.ancho, v.alto);
-    const { titulo, lineas } = textoColocar(paso);
+    const { titulo, lineas } = textoColocar(paso, primerPaso);
     const enCaja = paso.lugar !== 'cerca';
     capa.replaceChildren(
       h(
         'div',
         { class: 'panel' },
+        op.practica &&
+          h('p', { class: 'banda-practica' }, 'Modo práctica (sin caja): el resultado no vale y no se guarda.'),
         enCaja && h('p', { class: 'arriba-indicador' }, '↑ Este lado hacia arriba ↑'),
         avisos.length > 0 && h('ul', { class: 'avisos' }, ...avisos.map((a) => h('li', {}, a))),
         h('h2', {}, titulo),
@@ -188,25 +222,54 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
     );
   }
 
+  /**
+   * El minuto con la tapa +2.00: un círculo azul grande y sin detalles se
+   * mueve despacio frente a cada lente, para que el niño tenga algo que mirar.
+   */
+  function animarEspera(): void {
+    const d = disposicion(null);
+    const centros = (['OD', 'OI'] as const).map((o) => disposicion(o).centro);
+    const radio = 6 * config.pxPorMm;
+    const recorrido = 4 * config.pxPorMm;
+    const t = performance.now() / 1000;
+    const g = fondo(d);
+    for (const c of centros) {
+      dibujarCirculo(
+        g,
+        { x: c.x + recorrido * Math.cos(t * 0.8), y: c.y + recorrido * Math.sin(t * 0.8) },
+        radio,
+        AZUL_FIGURA,
+      );
+    }
+    animacion = requestAnimationFrame(animarEspera);
+  }
+
   function dibujarEspera(paso: PasoEspera): void {
     const d = disposicion(null);
-    fondo(d);
     if (esperaIniciada !== paso) {
       esperaIniciada = paso;
       segundosRestantes = paso.segundos;
       reloj = window.setInterval(() => {
         segundosRestantes--;
         if (segundosRestantes <= 0) {
-          detenerReloj();
+          clearInterval(reloj);
+          reloj = undefined;
           navigator.vibrate?.(300);
         }
-        dibujar();
+        dibujarEspera(paso);
       }, 1000);
+      animarEspera();
     }
     const listo = segundosRestantes <= 0;
+    const avance = 100 * (1 - segundosRestantes / paso.segundos);
     capa.replaceChildren(
-      franja(d, 'Lentes +2.00 · los dos ojos', [
-        h('span', { class: 'cuenta' }, listo ? 'Listo' : `${segundosRestantes} s`),
+      franja(d, 'Tapa +2.00 · los dos ojos', [
+        h(
+          'div',
+          { class: 'progreso', role: 'progressbar', 'aria-valuenow': Math.round(avance) },
+          h('div', { class: 'progreso-barra', style: `width:${avance}%` }),
+          h('span', { class: 'progreso-texto' }, listo ? 'Listo' : `${segundosRestantes} s`),
+        ),
         h(
           'button',
           { class: 'boton principal', disabled: !listo, onclick: () => responder({ tipo: 'confirmar' }) },
@@ -220,12 +283,12 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
     const ahora = performance.now();
     toques.push({ respuesta, ms: Math.round(ahora - ultimoToque) });
     ultimoToque = ahora;
-    // La línea se corta en cuanto queda decidida: el resultado es el mismo.
+    // La línea se corta solo si ya falló; si puede pasar, se piden las cinco.
     const paso = prueba.paso;
-    const decidida =
+    const termina =
       paso.tipo === 'linea' &&
       respuestasParaDecidir(paso.orientaciones, toques.map((t) => t.respuesta), paso.necesarios) !== null;
-    if (decidida) responder({ tipo: 'linea', toques });
+    if (termina) responder({ tipo: 'linea', toques });
     else dibujar();
   }
 
@@ -266,24 +329,25 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
     const radio =
       0.95 *
       Math.min(centro.x - zona.x, zona.x + zona.ancho - centro.x, centro.y - zona.y, zona.y + zona.alto - centro.y);
-    // Grosor: al menos 3 píxeles físicos (y al menos 0,4 mm).
-    const grosor = Math.max(3 / pantalla.dpr, 0.4 * config.pxPorMm);
+    // Rayos gruesos: al menos 3 píxeles físicos y al menos 0,8 mm.
+    const grosor = Math.max(3 / pantalla.dpr, 0.8 * config.pxPorMm);
     dibujarAbanico(g, centro, radio, paso.rotacion, grosor);
     capa.replaceChildren(
-      franja(d, `${NOMBRE_OJO[paso.ojo]} · abanico, vuelta ${paso.vuelta} de 2`, [
-        ...BOTONES_ABANICO.map((nombre, i) =>
-          h('button', { class: 'boton', onclick: () => responder({ tipo: 'abanico', eleccion: i }) }, nombre),
-        ),
+      franja(d, `${NOMBRE_OJO[paso.ojo]} · vuelta ${paso.vuelta} de 2 · ¿alguna línea más negra?`, [
         h(
           'button',
-          { class: 'boton', onclick: () => responder({ tipo: 'abanico', eleccion: 'iguales' }) },
+          { class: 'boton principal destacado', onclick: () => responder({ tipo: 'abanico', eleccion: 'iguales' }) },
           'Todas iguales',
+        ),
+        ...BOTONES_ABANICO.map((nombre, i) =>
+          h('button', { class: 'boton', onclick: () => responder({ tipo: 'abanico', eleccion: i }) }, nombre),
         ),
       ]),
     );
   }
 
   function dibujar(): void {
+    if (transicion !== undefined) return;
     const paso = prueba.paso;
     if (!verificado && paso.tipo !== 'colocar' && paso.tipo !== 'fin') return dibujarVerificacion();
     switch (paso.tipo) {
@@ -305,6 +369,7 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
 
   return () => {
     detenerReloj();
+    clearTimeout(transicion);
     window.removeEventListener('resize', dibujar);
   };
 }

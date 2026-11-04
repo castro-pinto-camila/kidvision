@@ -10,6 +10,8 @@ import { icono } from './iconos';
 
 export interface AccionesInicio {
   empezar: () => void;
+  /** Modo práctica, sin caja: para que el docente aprenda. */
+  practicar: () => void;
   configurar: () => void;
   calibrar: () => void;
 }
@@ -41,6 +43,8 @@ export function montarInicio(raiz: HTMLElement, config: Configuracion, acciones:
       estado === 'vigente'
         ? h('button', { class: 'boton principal grande', disabled: !apto, onclick: acciones.empezar }, 'Empezar prueba')
         : h('button', { class: 'boton principal grande', onclick: acciones.calibrar }, icono('regla'), 'Calibrar pantalla'),
+      estado === 'vigente' &&
+        h('button', { class: 'boton', disabled: !apto, onclick: acciones.practicar }, 'Modo práctica (sin caja)'),
       h('button', { class: 'boton', onclick: acciones.configurar }, icono('ajustes'), 'Configuración'),
     ),
   );

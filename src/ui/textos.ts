@@ -10,36 +10,52 @@ export const NOMBRE_OJO: Record<Ojo, string> = { OD: 'ojo derecho', OI: 'ojo izq
 export const OTRO_OJO: Record<Ojo, string> = { OD: 'ojo izquierdo', OI: 'ojo derecho' };
 
 export const NOMBRE_PRUEBA: Record<Prueba, string> = {
+  practica: 'Práctica (no cuenta)',
   lejos: 'Lejos',
   umbral: 'Agudeza',
   control: 'Control',
-  clip: 'Clip +2.00',
+  clip: 'Tapa +2.00',
   remoto: 'Punto remoto',
   estenopeico: 'Estenopeico',
   cerca: 'Cerca',
 };
 
-export function textoColocar(p: PasoColocar): { titulo: string; lineas: string[] } {
+/** Cómo responde el niño: lo lee el docente antes de la primera línea. */
+export const COMO_RESPONDE = [
+  'Siéntate al lado del niño, no enfrente: enfrente verías su mano al revés.',
+  'Pregúntale: «¿Hacia dónde apuntan las patitas de la E?». Él señala con la mano y tú tocas esa flecha.',
+  'La primera línea es de práctica: no cuenta.',
+];
+
+/** Explicación de la carta de abanico, antes de la primera vuelta. */
+export const COMO_ABANICO = [
+  'Ahora viene la carta de abanico: líneas como los rayos de un reloj.',
+  'Pregúntale: «¿Alguna línea se ve más negra o más marcada que las otras?».',
+  'Si todas se ven iguales, toca «Todas iguales». Es lo más común.',
+  'Si dice que sí, pídele el número de esa línea y toca el botón con ese número.',
+];
+
+export function textoColocar(p: PasoColocar, primero = false): { titulo: string; lineas: string[] } {
   if (p.lugar === 'cerca' && p.ojo) {
     return {
       titulo: `Prueba de cerca: ${NOMBRE_OJO[p.ojo]}`,
       lineas: [
         'Saca el celular de la caja.',
-        `Sostenlo a 40 cm del ${NOMBRE_OJO[p.ojo]}: mide con el cordón.`,
+        `Apoya un extremo de la tira de cartón de 40 cm en la mejilla del niño, bajo el ${NOMBRE_OJO[p.ojo]}, y sostén el celular en el otro extremo.`,
         `Tapa el ${OTRO_OJO[p.ojo]} con el oclusor.`,
       ],
     };
   }
   const lineas: string[] = [];
-  if (p.quitar === 'clip') lineas.push('Retira los lentes de +2.00.');
+  if (p.quitar === 'clip') lineas.push('Sube la tapa +2.00 de la caja.');
   if (p.quitar === 'estenopeico') lineas.push('Quita el estenopeico.');
   lineas.push(`Coloca el celular en la ranura ${p.lugar}.`);
-  if (p.accesorio === 'clip') {
-    lineas.push('Sostén los lentes de lectura de +2.00 delante de la caja, cubriendo los dos ojos.');
-  }
+  if (p.accesorio === 'clip') lineas.push('Baja la tapa +2.00 de la caja.');
   if (p.accesorio === 'estenopeico') {
     lineas.push('Pon el estenopeico (el oclusor con agujeritos) delante de los lentes de la caja.');
   }
+  if (primero) lineas.push(...COMO_RESPONDE);
+  if (p.nota === 'abanico') lineas.push(...COMO_ABANICO);
   return { titulo: `Ranura ${p.lugar}`, lineas };
 }
 

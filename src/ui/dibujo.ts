@@ -81,9 +81,21 @@ export function dibujarLinea(
   }
 }
 
+/** Círculo lleno: la figura que mira el niño durante el minuto con los lentes de +2.00. */
+export function dibujarCirculo(g: CanvasRenderingContext2D, c: Punto, radio: number, color: string): void {
+  g.save();
+  g.fillStyle = color;
+  g.beginPath();
+  g.arc(c.x, c.y, radio, 0, 2 * Math.PI);
+  g.fill();
+  g.restore();
+}
+
 /**
- * Carta de abanico: 12 rayos con los números del reloj, girada `rotacion`
- * grados en sentido antihorario.
+ * Carta de abanico: 12 rayos gruesos con los números del reloj, girada
+ * `rotacion` grados en sentido antihorario. Los bordes de cada rayo se
+ * suavizan con trazos más anchos y más claros, para que los rayos diagonales
+ * no se vean más grises que los verticales por el escalonado de los píxeles.
  */
 export function dibujarAbanico(
   g: CanvasRenderingContext2D,
@@ -93,21 +105,29 @@ export function dibujarAbanico(
   grosor: number,
 ): void {
   g.save();
-  g.strokeStyle = NEGRO;
   g.fillStyle = NEGRO;
-  g.lineWidth = grosor;
   g.lineCap = 'butt';
   g.textAlign = 'center';
   g.textBaseline = 'middle';
   g.font = `bold ${Math.round(radio * 0.13)}px system-ui, sans-serif`;
+  const borde = grosor * 0.35;
+  const pasadas: [number, number][] = [
+    [grosor + 2 * borde, 0.25],
+    [grosor + borde, 0.5],
+    [grosor, 1],
+  ];
   for (let hora = 1; hora <= 12; hora++) {
     const a = ((90 - 30 * hora + rotacion) * Math.PI) / 180;
     const dx = Math.cos(a);
     const dy = -Math.sin(a);
-    g.beginPath();
-    g.moveTo(centro.x + dx * radio * 0.12, centro.y + dy * radio * 0.12);
-    g.lineTo(centro.x + dx * radio * 0.78, centro.y + dy * radio * 0.78);
-    g.stroke();
+    for (const [ancho, opacidad] of pasadas) {
+      g.strokeStyle = `rgba(0, 0, 0, ${opacidad})`;
+      g.lineWidth = ancho;
+      g.beginPath();
+      g.moveTo(centro.x + dx * radio * 0.12, centro.y + dy * radio * 0.12);
+      g.lineTo(centro.x + dx * radio * 0.76, centro.y + dy * radio * 0.76);
+      g.stroke();
+    }
     g.fillText(String(hora), centro.x + dx * radio * 0.9, centro.y + dy * radio * 0.9);
   }
   g.restore();

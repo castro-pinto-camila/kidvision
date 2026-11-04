@@ -27,6 +27,12 @@ export interface Hallazgos {
 
 export interface Clasificacion {
   categorias: Categoria[];
+  /**
+   * Abanico consistente pero agudeza buena de lejos y de cerca. Se guarda como
+   * «posible astigmatismo (por validar)» y no cambia el semáforo: la pantalla
+   * puede hacer ver más negras las líneas verticales y horizontales.
+   */
+  posibleAstigmatismo: boolean;
   semaforo: Semaforo;
 }
 
@@ -34,13 +40,17 @@ export function clasificar(h: Hallazgos): Clasificacion {
   const fallaLejos = !h.pasaLejos;
   const sinPuntoRemoto = h.puntoRemoto === null;
 
+  const fallaAgudeza = fallaLejos || !h.pasaCerca;
+
   const miopia = fallaLejos && !sinPuntoRemoto;
   const hipermetropia = (h.pasaLejos && h.pasaConMas2 === true) || (h.pasaLejos && !h.pasaCerca);
-  const astigmatismo = h.abanicoConsistente;
+  // El abanico solo cuenta para la categoría cuando la agudeza falla.
+  const astigmatismo = h.abanicoConsistente && fallaAgudeza;
+  const posibleAstigmatismo = h.abanicoConsistente && !fallaAgudeza;
   const otraCausa = fallaLejos && sinPuntoRemoto && h.mejoraEstenopeico === false;
   const indeterminado =
     fallaLejos && sinPuntoRemoto && h.mejoraEstenopeico === true && !hipermetropia && !astigmatismo;
-  const normal = h.pasaLejos && h.pasaConMas2 === false && h.pasaCerca && !h.abanicoConsistente;
+  const normal = h.pasaLejos && h.pasaConMas2 === false && h.pasaCerca;
 
   const banderas: [Categoria, boolean][] = [
     ['miopia', miopia],
@@ -52,6 +62,7 @@ export function clasificar(h: Hallazgos): Clasificacion {
   ];
   return {
     categorias: banderas.filter(([, si]) => si).map(([c]) => c),
+    posibleAstigmatismo,
     semaforo: h.dudoso ? 'AMARILLO' : normal ? 'VERDE' : 'ROJO',
   };
 }

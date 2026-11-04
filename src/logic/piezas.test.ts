@@ -39,8 +39,9 @@ describe('orientaciones', () => {
 describe('corte de línea: cuántas respuestas hacen falta para decidir', () => {
   const m: Direccion[] = ['arriba', 'derecha', 'abajo', 'izquierda', 'arriba'];
 
-  it('pide 4: pasa al cuarto acierto', () => {
-    expect(respuestasParaDecidir(m, ['arriba', 'derecha', 'abajo', 'izquierda'], 4)).toBe(4);
+  it('pide 4: si puede pasar, se piden las cinco (no se corta al cuarto acierto)', () => {
+    expect(respuestasParaDecidir(m, ['arriba', 'derecha', 'abajo', 'izquierda'], 4)).toBeNull();
+    expect(respuestasParaDecidir(m, ['arriba', 'derecha', 'abajo', 'izquierda', 'arriba'], 4)).toBe(5);
   });
 
   it('pide 4: falla con el segundo error', () => {
@@ -48,9 +49,14 @@ describe('corte de línea: cuántas respuestas hacen falta para decidir', () => 
     expect(respuestasParaDecidir(m, ['nose', 'nose'], 4)).toBe(2);
   });
 
-  it('pide 3 (umbral): pasa al tercer acierto y falla con el tercer error', () => {
-    expect(respuestasParaDecidir(m, ['arriba', 'derecha', 'abajo'], 3)).toBe(3);
+  it('pide 3 (umbral): falla con el tercer error; si puede pasar, se piden las cinco', () => {
+    expect(respuestasParaDecidir(m, ['arriba', 'derecha', 'abajo'], 3)).toBeNull();
     expect(respuestasParaDecidir(m, ['nose', 'nose', 'abajo', 'nose'], 3)).toBe(4);
+  });
+
+  it('pide 0 (práctica): nunca se corta', () => {
+    expect(respuestasParaDecidir(m, ['nose', 'nose', 'nose', 'nose'], 0)).toBeNull();
+    expect(respuestasParaDecidir(m, ['nose', 'nose', 'nose', 'nose', 'nose'], 0)).toBe(5);
   });
 
   it('todavía no decidida', () => {

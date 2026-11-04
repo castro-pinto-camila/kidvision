@@ -33,19 +33,32 @@ function tarjetaOjo(nombre: string, o: ResultadoOjo, corte: string): HTMLElement
       h('strong', {}, 'Categoría: '),
       o.categorias.length ? o.categorias.map((c) => TEXTO_CATEGORIA[c]).join(', ') : 'sin categoría',
     ),
+    o.posibleAstigmatismo &&
+      h(
+        'p',
+        { class: 'nota' },
+        'Posible astigmatismo (por validar): eligió la misma línea del abanico, pero ve bien de lejos y de cerca. No cambia el semáforo.',
+      ),
     o.dudoso &&
       h('div', { class: 'dudoso' }, h('strong', {}, 'Resultado dudoso'), ...o.motivosDudoso.map((m) => h('p', {}, TEXTO_MOTIVO[m]))),
   );
 }
 
-export function montarResultado(raiz: HTMLElement, r: ResultadoSesion, volver: () => void): () => void {
+export function montarResultado(
+  raiz: HTMLElement,
+  r: ResultadoSesion,
+  practica: boolean,
+  volver: () => void,
+): () => void {
   const minutos = Math.floor(r.duracionSeg / 60);
   const segundos = r.duracionSeg % 60;
   raiz.replaceChildren(
     h(
       'main',
       { class: 'pagina' },
-      h('h1', {}, 'Resultado'),
+      practica &&
+        h('p', { class: 'banda-practica' }, 'Modo práctica (sin caja): este resultado no vale y no se guarda.'),
+      h('h1', {}, practica ? 'Resultado de práctica' : 'Resultado'),
       h(
         'div',
         { class: `semaforo ${r.semaforo.toLowerCase()}` },
@@ -55,7 +68,7 @@ export function montarResultado(raiz: HTMLElement, r: ResultadoSesion, volver: (
       tarjetaOjo('Ojo derecho', r.ojos.OD, r.umbralCorte),
       tarjetaOjo('Ojo izquierdo', r.ojos.OI, r.umbralCorte),
       h('p', { class: 'nota' }, `Duración: ${minutos} min ${segundos} s. Estimación de tamizaje, no es una receta.`),
-      h('p', { class: 'nota' }, 'Resultado provisional: todavía no se guarda (sesión 4).'),
+      !practica && h('p', { class: 'nota' }, 'Resultado provisional: todavía no se guarda (sesión 4).'),
       h('button', { class: 'boton principal', onclick: volver }, 'Volver al inicio'),
     ),
   );

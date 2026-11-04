@@ -26,22 +26,21 @@ export function contarAciertos(mostradas: Direccion[], respuestas: Respuesta[]):
 }
 
 /**
- * Cuántas respuestas hacen falta para que la línea quede decidida: pasa al
- * llegar a `necesarios` aciertos y falla cuando ya no puede llegar. null si con
- * estas respuestas todavía no se decide. Cortar ahí no cambia el resultado.
+ * Cuántas respuestas hacen falta para terminar la línea. Se corta solo cuando
+ * ya falló (no puede llegar a `necesarios` aciertos); si todavía puede pasar,
+ * se piden las cinco. null si con estas respuestas todavía no termina.
+ * Cortar no cambia el resultado.
  */
 export function respuestasParaDecidir(
   mostradas: Direccion[],
   respuestas: Respuesta[],
   necesarios: number,
 ): number | null {
-  let aciertos = 0;
   let errores = 0;
   const n = Math.min(mostradas.length, respuestas.length);
   for (let i = 0; i < n; i++) {
-    if (respuestas[i] === mostradas[i]) aciertos++;
-    else errores++;
-    if (aciertos >= necesarios || errores > mostradas.length - necesarios) return i + 1;
+    if (respuestas[i] !== mostradas[i]) errores++;
+    if (errores > mostradas.length - necesarios) return i + 1;
   }
-  return null;
+  return n === mostradas.length ? n : null;
 }

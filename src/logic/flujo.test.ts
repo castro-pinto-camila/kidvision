@@ -58,6 +58,7 @@ describe('niño con visión normal', () => {
   it('en cada lugar se prueban los dos ojos; una sola espera con los lentes de +2.00; cerca al final', () => {
     expect(pasos.map(resumen)).toEqual([
       'colocar R0',
+      'OD practica R0 6/60',
       'OD lejos R0 6/9',
       'OI lejos R0 6/9',
       'colocar R0 + clip',
@@ -99,12 +100,12 @@ describe('niño con visión normal', () => {
     expect(resultado.indicacion).toBe('no-derivar');
   });
 
-  it('guarda cada línea con sus respuestas, tiempos y si se cortó', () => {
+  it('guarda cada línea con sus respuestas, tiempos y si se cortó (la práctica no cuenta)', () => {
     const registro = resultado.ojos.OD.registro;
     expect(registro.map((l) => l.prueba)).toEqual(['lejos', 'clip', 'cerca']);
-    // Lejos: con 4 aciertos ya pasa, la quinta «E» no se pregunta.
-    expect(registro[0]).toMatchObject({ aciertos: 4, respondidas: 4, cortada: true });
-    expect(registro[0].toques).toHaveLength(4);
+    // Lejos: puede pasar, así que se piden las cinco «E».
+    expect(registro[0]).toMatchObject({ aciertos: 5, respondidas: 5, cortada: false });
+    expect(registro[0].toques).toHaveLength(5);
     expect(registro[0].toques[0].ms).toBe(1200);
     expect(registro[0].mostradas).toHaveLength(5);
     // Clip: se nubla; con 2 errores ya no puede llegar a 4.
@@ -128,6 +129,7 @@ describe('miopía', () => {
     ];
     expect(pasos.map(resumen)).toEqual([
       'colocar R0',
+      'OD practica R0 6/60',
       ...umbral('OD'),
       ...umbral('OI'),
       'colocar R1',
@@ -292,14 +294,31 @@ describe('otras categorías', () => {
     expect(resultado.ojos.OI.puntoRemoto).toBe('R3');
   });
 
-  it('astigmatismo: elige la misma línea física en las dos vueltas', () => {
+  it('abanico consistente pero buena agudeza: posible astigmatismo (por validar), sigue VERDE', () => {
     const { resultado } = correr(ambos({ refraccion: 0, ejeAstigmatismo: 30 }));
     expect(resultado.ojos.OD).toMatchObject({
       abanico: [30, 30],
       abanicoConsistente: true,
-      categorias: ['astigmatismo'],
-      semaforo: 'ROJO',
+      posibleAstigmatismo: true,
+      categorias: ['normal'],
+      semaforo: 'VERDE',
     });
+  });
+
+  it('abanico consistente y falla de lejos: astigmatismo en la categoría', () => {
+    const { resultado } = correr(
+      ambos({ refraccion: 0, puedeVerNitido: false, borrosa: 36, conEstenopeico: 18, ejeAstigmatismo: 30 }),
+    );
+    expect(resultado.ojos.OD.categorias).toContain('astigmatismo');
+    expect(resultado.ojos.OD.posibleAstigmatismo).toBe(false);
+    expect(resultado.ojos.OD.semaforo).toBe('ROJO');
+  });
+
+  it('antes del primer abanico siempre hay una pantalla con la explicación', () => {
+    const { pasos } = correr(ambos({ refraccion: -4.8, borrosa: 60 }));
+    const i = pasos.findIndex((p) => p.tipo === 'abanico');
+    const antes = pasos[i - 1];
+    expect(antes).toMatchObject({ tipo: 'colocar', lugar: 'R10', nota: 'abanico' });
   });
 
   it('el niño que repite siempre el mismo número NO sale con astigmatismo', () => {
@@ -382,13 +401,35 @@ describe('corte de línea', () => {
   function hastaLaPrimeraLinea() {
     const prueba = new PruebaVisual({ caja: CAJA_POR_DEFECTO, pantalla: PANTALLA, azar: azarConSemilla(3) });
     prueba.responder({ tipo: 'confirmar' });
+    const practica = prueba.paso;
+    if (practica.tipo !== 'linea') throw new Error('se esperaba la práctica');
+    prueba.responder({ tipo: 'linea', toques: toquesPara(practica, true) });
     const paso = prueba.paso;
     if (paso.tipo !== 'linea') throw new Error('se esperaba una línea');
     return { prueba, paso };
   }
 
   it('la línea de lejos pide 4 aciertos', () => {
-    expect(hastaLaPrimeraLinea().paso.necesarios).toBe(4);
+    const { paso } = hastaLaPrimeraLinea();
+    expect(paso.prueba).toBe('lejos');
+    expect(paso.necesarios).toBe(4);
+  });
+
+  it('la práctica es una línea 6/60 que nunca se corta y no se registra', () => {
+    const prueba = new PruebaVisual({ caja: CAJA_POR_DEFECTO, pantalla: PANTALLA });
+    prueba.responder({ tipo: 'confirmar' });
+    const paso = prueba.paso;
+    if (paso.tipo !== 'linea') throw new Error('se esperaba la práctica');
+    expect(paso).toMatchObject({ prueba: 'practica', necesarios: 0 });
+    expect(paso.nivel.nombre).toBe('6/60');
+    const cuatro = toquesPara(paso, false).slice(0, 4);
+    expect(() => prueba.responder({ tipo: 'linea', toques: cuatro })).toThrow(/no está decidida/);
+  });
+
+  it('con 4 aciertos la línea no se corta: se pide la quinta', () => {
+    const { prueba, paso } = hastaLaPrimeraLinea();
+    const cuatro = toquesPara(paso, true).slice(0, 4);
+    expect(() => prueba.responder({ tipo: 'linea', toques: cuatro })).toThrow(/no está decidida/);
   });
 
   it('con dos errores la línea ya está decidida y se acepta', () => {

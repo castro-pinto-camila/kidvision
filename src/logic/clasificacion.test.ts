@@ -22,11 +22,11 @@ const FALLA_LEJOS: Hallazgos = { ...NORMAL, pasaLejos: false, pasaConMas2: null 
 
 describe('clasificación por ojo', () => {
   it('normal: pasa lejos, se nubla con +2, pasa cerca, abanico sin diferencias → VERDE', () => {
-    expect(clasificar(NORMAL)).toEqual({ categorias: ['normal'], semaforo: 'VERDE' });
+    expect(clasificar(NORMAL)).toEqual({ categorias: ['normal'], posibleAstigmatismo: false, semaforo: 'VERDE' });
   });
 
   it('miopía: falla lejos y hay punto remoto', () => {
-    expect(clasificar({ ...FALLA_LEJOS, puntoRemoto: 'R4' })).toEqual({
+    expect(clasificar({ ...FALLA_LEJOS, puntoRemoto: 'R4' })).toMatchObject({
       categorias: ['miopia'],
       semaforo: 'ROJO',
     });
@@ -40,9 +40,26 @@ describe('clasificación por ojo', () => {
     expect(clasificar({ ...NORMAL, pasaCerca: false }).categorias).toEqual(['hipermetropia']);
   });
 
-  it('astigmatismo: abanico consistente', () => {
+  it('abanico consistente con buena agudeza: posible astigmatismo, sigue VERDE', () => {
     expect(clasificar({ ...NORMAL, abanicoConsistente: true })).toEqual({
-      categorias: ['astigmatismo'],
+      categorias: ['normal'],
+      posibleAstigmatismo: true,
+      semaforo: 'VERDE',
+    });
+  });
+
+  it('astigmatismo cuenta para la categoría cuando falla la agudeza de lejos', () => {
+    expect(clasificar({ ...FALLA_LEJOS, mejoraEstenopeico: false, abanicoConsistente: true })).toMatchObject({
+      categorias: ['astigmatismo', 'otraCausa'],
+      posibleAstigmatismo: false,
+      semaforo: 'ROJO',
+    });
+  });
+
+  it('astigmatismo cuenta para la categoría cuando falla la agudeza de cerca', () => {
+    expect(clasificar({ ...NORMAL, pasaCerca: false, abanicoConsistente: true })).toMatchObject({
+      categorias: ['hipermetropia', 'astigmatismo'],
+      posibleAstigmatismo: false,
       semaforo: 'ROJO',
     });
   });
@@ -72,7 +89,7 @@ describe('clasificación por ojo', () => {
   });
 
   it('estenopeico no hecho (null) no cuenta como «no mejora»', () => {
-    expect(clasificar({ ...FALLA_LEJOS, mejoraEstenopeico: null, dudoso: true })).toEqual({
+    expect(clasificar({ ...FALLA_LEJOS, mejoraEstenopeico: null, dudoso: true })).toMatchObject({
       categorias: [],
       semaforo: 'AMARILLO',
     });

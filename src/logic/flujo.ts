@@ -50,6 +50,9 @@ import { medirUmbral, mejoraConEstenopeico, nombreAgudeza, type ResultadoUmbral 
 /** Nivel de la prueba de cerca (siempre 6/9) y nivel mínimo para que el celular sea apto. */
 export const NIVEL_CERCA = '6/9';
 
+/** Nivel de la línea de práctica: el más grande. */
+export const NIVEL_PRACTICA = '6/60';
+
 export const SEGUNDOS_CLIP = 60;
 
 export interface OpcionesPrueba {
@@ -79,6 +82,8 @@ export interface ResultadoOjo {
   dudoso: boolean;
   motivosDudoso: MotivoDudoso[];
   categorias: Categoria[];
+  /** Abanico consistente con buena agudeza: se informa «por validar» y no cambia el semáforo. */
+  posibleAstigmatismo: boolean;
   semaforo: Semaforo;
   /** Cada línea mostrada, con las respuestas, sus tiempos y si se cortó. */
   registro: RegistroLinea[];
@@ -144,7 +149,7 @@ function cerrarOjo(d: DatosOjo): ResultadoOjo {
 
   const consistente = abanicoConsistente(d.abanico[0], d.abanico[1]);
   const dudoso = motivos.size > 0;
-  const { categorias, semaforo } = clasificar({
+  const { categorias, posibleAstigmatismo, semaforo } = clasificar({
     pasaLejos: d.pasaLejos,
     puntoRemoto: d.puntoRemoto?.id ?? null,
     pasaConMas2: d.pasaConMas2,
@@ -169,6 +174,7 @@ function cerrarOjo(d: DatosOjo): ResultadoOjo {
     dudoso,
     motivosDudoso: [...motivos],
     categorias,
+    posibleAstigmatismo,
     semaforo,
     registro: d.ctx.registro,
   };
@@ -182,8 +188,12 @@ function* evaluarSesion(s: Sesion, ahora: () => number): Flujo<ResultadoSesion> 
   const oi = nuevoOjo('OI', s);
   const ojos = [od, oi];
 
-  // 1. Agudeza lejana en R0: ojo derecho y luego izquierdo. Si falla, el umbral.
+  // 0. Línea de práctica grande, para que el niño entienda el juego. No cuenta.
   yield* ir(s.posicion, R0, null, null);
+  const practica: Contexto = { ojo: 'OD', pantalla: s.pantalla, azar: s.azar, ultima: null, registro: [] };
+  yield* mostrarLinea(practica, 'practica', R0, nivelPorNombre(NIVEL_PRACTICA), 0);
+
+  // 1. Agudeza lejana en R0: ojo derecho y luego izquierdo. Si falla, el umbral.
   for (const d of ojos) {
     d.pasaLejos = (yield* mostrarLinea(d.ctx, 'lejos', R0, corte, ACIERTOS_PARA_PASAR)) >= ACIERTOS_PARA_PASAR;
     if (!d.pasaLejos) {
@@ -233,14 +243,15 @@ function* evaluarSesion(s: Sesion, ahora: () => number): Flujo<ResultadoSesion> 
   }
 
   // 5. Carta de abanico en R0 o en la ranura del punto remoto. Primero el ojo
-  // cuya ranura es donde ya está el celular.
+  // cuya ranura es donde ya está el celular. Antes del primero, siempre una
+  // pantalla con la explicación para el docente.
   const lugarAbanico = (d: DatosOjo) => d.puntoRemoto ?? R0;
   const ordenAbanico = [...ojos].sort(
     (a, b) =>
       Number(lugarAbanico(b).id === s.posicion.lugar) - Number(lugarAbanico(a).id === s.posicion.lugar),
   );
-  for (const d of ordenAbanico) {
-    yield* ir(s.posicion, lugarAbanico(d), null, null);
+  for (const [i, d] of ordenAbanico.entries()) {
+    yield* ir(s.posicion, lugarAbanico(d), null, null, i === 0 ? 'abanico' : null);
     d.abanico = yield* hacerAbanico(d.ctx, lugarAbanico(d));
   }
 

@@ -16,6 +16,8 @@ interface Estado {
   config: Configuracion;
   avisos: string[];
   enPrueba: boolean;
+  /** Modo práctica (sin caja): el resultado no vale y nunca se guarda. */
+  practica: boolean;
   resultado: ResultadoSesion | null;
   avisoInicio?: string;
   /** A dónde volver al terminar la calibración. */
@@ -28,6 +30,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
     config: configuracionPorDefecto(),
     avisos: [],
     enPrueba: false,
+    practica: false,
     resultado: null,
     volverDeCalibrar: '#/',
   };
@@ -74,6 +77,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
         desmontar = montarPrueba(raiz, {
           config: { ...estado.config, pxPorMm: estado.config.pxPorMm },
           avisos: estado.avisos,
+          practica: estado.practica,
           guardarOrientacion: (invertida, intercambiadas) => {
             if (
               invertida === estado.config.pantallaInvertida &&
@@ -100,7 +104,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
         ir('#/');
       }
     } else if (ruta === '#/resultado' && estado.resultado) {
-      desmontar = montarResultado(raiz, estado.resultado, () => ir('#/'));
+      desmontar = montarResultado(raiz, estado.resultado, estado.practica, () => ir('#/'));
     } else {
       const aviso = estado.avisoInicio;
       estado.avisoInicio = undefined;
@@ -108,8 +112,15 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
         raiz,
         estado.config,
         {
+          // Se llaman dentro del toque: el navegador lo exige para la pantalla completa.
           empezar: async () => {
-            // Se llama dentro del toque: el navegador lo exige para la pantalla completa.
+            estado.practica = false;
+            estado.avisos = await prepararPantalla();
+            estado.enPrueba = true;
+            ir('#/prueba');
+          },
+          practicar: async () => {
+            estado.practica = true;
             estado.avisos = await prepararPantalla();
             estado.enPrueba = true;
             ir('#/prueba');

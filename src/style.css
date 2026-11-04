@@ -707,3 +707,67 @@ td.no {
   min-width: 3em;
   text-align: center;
 }
+
+/* ---------- Cambios tras la prueba en el celular ---------- */
+
+.franja .siguiente {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--verde-texto);
+}
+
+.franja .boton.destacado {
+  flex: 2.2;
+  font-size: 1.05rem;
+}
+
+.progreso {
+  position: relative;
+  flex: 3;
+  align-self: center;
+  height: 70%;
+  min-height: 32px;
+  border-radius: 999px;
+  background: var(--superficie);
+  overflow: hidden;
+}
+
+.progreso-barra {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--azul-claro);
+  transition: width 1s linear;
+}
+
+.progreso-texto {
+  position: relative;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.banda-practica {
+  background: #7c3aed;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  border-radius: var(--radio);
+  padding: 8px 12px;
+}
+
+.franja.en-practica {
+  background: #ede9fe;
+}
+
+.franja.en-practica .estado {
+  color: #5b21b6;
+  font-weight: 700;
+}
