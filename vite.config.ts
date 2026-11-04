@@ -1,5 +1,6 @@
 /// <reference types="vitest/config" />
 import basicSsl from '@vitejs/plugin-basic-ssl';
+import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
@@ -46,7 +47,20 @@ function serviceWorker(): Plugin {
   };
 }
 
+/** Identificador corto del último commit, para mostrar qué versión de la app tiene cada celular. */
+function commitActual(): string {
+  try {
+    return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+  } catch {
+    return 'sin-git';
+  }
+}
+
 export default defineConfig(({ mode }) => ({
+  define: {
+    __COMMIT__: JSON.stringify(commitActual()),
+    __FECHA_COMPILACION__: JSON.stringify(new Date().toISOString()),
+  },
   // Rutas relativas para que la app funcione en GitHub Pages (sesión 5).
   base: './',
   plugins: [

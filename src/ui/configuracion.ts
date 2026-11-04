@@ -15,6 +15,7 @@ import {
   type Pantalla,
 } from '../core/optotipos';
 import { estadoCalibracion, type Configuracion } from '../data/config';
+import { VERSION_APP } from '../version';
 import { h } from './dom';
 import { icono } from './iconos';
 import { textoDioptrias } from './textos';
@@ -420,6 +421,7 @@ export function montarConfiguracion(
       ajustes,
       datos,
       h('button', { class: 'boton', onclick: acciones.acercaDe }, 'Acerca de KidVision'),
+      h('p', { class: 'nota' }, VERSION_APP),
       aviso,
     ),
   );
