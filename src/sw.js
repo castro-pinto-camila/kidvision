@@ -5,6 +5,8 @@
  */
 const CACHE = 'kidvision-__VERSION__';
 const ARCHIVOS = __ARCHIVOS__;
+// Algunos servidores mandan «Vary: Origin»; sin esto el archivo guardado no se encuentra y la app queda en blanco sin internet.
+const OPCIONES_MATCH = { ignoreVary: true };
 
 self.addEventListener('install', (evento) => {
   evento.waitUntil(
@@ -32,8 +34,8 @@ self.addEventListener('fetch', (evento) => {
   const pedido = evento.request;
   if (pedido.method !== 'GET' || new URL(pedido.url).origin !== self.location.origin) return;
   if (pedido.mode === 'navigate') {
-    evento.respondWith(caches.match('./index.html').then((r) => r || fetch(pedido)));
+    evento.respondWith(caches.match('./index.html', OPCIONES_MATCH).then((r) => r || fetch(pedido)));
     return;
   }
-  evento.respondWith(caches.match(pedido).then((r) => r || fetch(pedido)));
+  evento.respondWith(caches.match(pedido, OPCIONES_MATCH).then((r) => r || fetch(pedido)));
 });
