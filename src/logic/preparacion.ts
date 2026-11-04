@@ -44,30 +44,28 @@ export function estadoPreparacion(config: Configuracion, dpr: number): Preparaci
           accion: 'colegio',
         };
 
+  const textoCalibracion = {
+    'sin-calibrar': 'Falta calibrar la pantalla con tu DNI.',
+    vigente: 'Pantalla calibrada.',
+    'cambio-zoom': 'Cambió el zoom o el tamaño de letra del celular: vuelve a calibrar la pantalla.',
+  }[calibracion];
+
+  // Calibrada pero con una medida con la que no se puede dibujar la línea 6/9: casi siempre es un error al calibrar.
+  // Se muestra como un solo paso pendiente, para no decir «calibrada ✓» y «no sirve» a la vez.
+  const calibracionErrada = calibrada && !apto;
   const pasoCalibracion: Paso = {
     id: 'calibracion',
-    listo: calibrada,
-    texto: {
-      'sin-calibrar': 'Falta calibrar la pantalla con tu DNI.',
-      vigente: 'Pantalla calibrada.',
-      'cambio-zoom': 'Cambió el zoom o el tamaño de letra del celular: vuelve a calibrar la pantalla.',
-    }[calibracion],
-    boton: calibrada ? null : calibracion === 'sin-calibrar' ? 'Calibrar pantalla' : 'Volver a calibrar',
-    accion: calibrada ? null : 'calibrar',
+    listo: calibrada && apto,
+    texto: calibracionErrada
+      ? 'La calibración no parece correcta: con esa medida la pantalla no alcanza a dibujar la línea 6/9. Casi siempre es un error al calibrar: vuelve a calibrar con cuidado. Si sigue igual, usa otro celular.'
+      : textoCalibracion,
+    boton: calibrada && apto ? null : calibracion === 'sin-calibrar' ? 'Calibrar pantalla' : 'Volver a calibrar',
+    accion: calibrada && apto ? null : 'calibrar',
   };
 
-  const pasoCelular: Paso = !calibrada
-    ? { id: 'celular', listo: false, texto: 'Se comprueba el celular al terminar de calibrar.', boton: null, accion: null }
-    : apto
-      ? { id: 'celular', listo: true, texto: 'Tu celular sirve para la prueba.', boton: null, accion: null }
-      : {
-          id: 'celular',
-          listo: false,
-          texto:
-            'La pantalla no alcanza a dibujar la línea 6/9. Casi siempre es un error al calibrar: vuelve a calibrar con cuidado. Si sigue igual, usa otro celular.',
-          boton: 'Volver a calibrar',
-          accion: 'calibrar',
-        };
+  const pasoCelular: Paso = pasoCalibracion.listo
+    ? { id: 'celular', listo: true, texto: 'Tu celular sirve para la prueba.', boton: null, accion: null }
+    : { id: 'celular', listo: false, texto: 'Se comprueba el celular al terminar de calibrar bien.', boton: null, accion: null };
 
   const pasos = [pasoColegio, pasoCalibracion, pasoCelular];
   return {

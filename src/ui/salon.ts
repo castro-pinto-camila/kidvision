@@ -179,8 +179,8 @@ export function montarSalon(raiz: HTMLElement, ctx: ContextoSalon): () => void {
         ...ctx.preparacion.pasos.map((p) =>
           h(
             'div',
-            { class: `fila-estado ${p.listo ? 'ok' : p.id === 'celular' && p.boton ? 'mal' : 'pendiente'}` },
-            h('span', { class: 'icono' }, p.listo ? icono('check') : p.id === 'celular' && p.boton ? '✕' : '!'),
+            { class: `fila-estado ${p.listo ? 'ok' : 'pendiente'}` },
+            h('span', { class: 'icono' }, p.listo ? icono('check') : '!'),
             h('span', { class: 'texto' }, p.texto),
             p.boton && p.accion
               ? h('button', { class: p === primero ? 'boton principal' : 'boton', onclick: () => ctx.resolver(p.accion!) }, p.boton)

@@ -62,7 +62,6 @@ export function montarBienvenida(raiz: HTMLElement, ctx: ContextoBienvenida): ()
       fila(calibracion.listo, calibracion.texto),
       !calibracion.listo && h('button', { class: 'boton principal', onclick: ctx.calibrar }, icono('regla'), calibracion.boton ?? 'Calibrar pantalla'),
       calibracion.listo && fila(celular.listo, celular.texto),
-      !celular.listo && calibracion.listo && h('button', { class: 'boton principal', onclick: ctx.calibrar }, icono('regla'), celular.boton ?? 'Volver a calibrar'),
       h('button', { class: 'boton principal grande', disabled: !ctx.preparacion.listoParaEvaluar, onclick: ctx.seguir }, 'Entrar a Mi salón'),
       !ctx.preparacion.listoParaEvaluar && h('p', { class: 'nota' }, 'Se activa cuando los dos pasos estén listos.'),
     ),

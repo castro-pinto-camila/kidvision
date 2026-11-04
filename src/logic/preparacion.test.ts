@@ -44,12 +44,15 @@ describe('qué falta para evaluar', () => {
     expect(p.listoParaEvaluar).toBe(false);
   });
 
-  it('una calibración errada que deja la pantalla sin poder dibujar 6/9 ofrece volver a calibrar', () => {
+  it('una calibración errada se muestra como un solo paso pendiente, sin decir «calibrada»', () => {
     const p = estadoPreparacion(config({ colegio: 'IE', pxPorMm: 1, dprCalibracion: 1 }), 1);
-    expect(p.pasos[1].listo).toBe(true);
+    expect(p.pasos[1].listo).toBe(false);
+    expect(p.pasos[1].texto).not.toContain('Pantalla calibrada');
+    expect(p.pasos[1].texto).toContain('error al calibrar');
+    expect(p.pasos[1].accion).toBe('calibrar');
     expect(p.pasos[2].listo).toBe(false);
-    expect(p.pasos[2].accion).toBe('calibrar');
-    expect(p.pasos[2].texto).toContain('error al calibrar');
-    expect(primerPendiente(p)?.id).toBe('celular');
+    expect(p.pasos[2].boton).toBeNull();
+    expect(p.listoParaPracticar).toBe(false);
+    expect(primerPendiente(p)?.id).toBe('calibracion');
   });
 });
