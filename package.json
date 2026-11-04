@@ -7,6 +7,7 @@
     "dev": "vite",
     "dev:celular": "vite --host --mode celular",
     "plantilla": "node scripts/plantilla.ts",
+    "iconos": "node scripts/iconos.ts",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
