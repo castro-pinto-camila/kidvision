@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
+  aPantallaFisica,
   barrasApinamiento,
   cabe,
   centrosLetras,
   disponer,
+  girarPantalla,
   medidasLinea,
+  ojoEnPantalla,
   type Franja,
 } from './disposicion';
 
@@ -78,5 +81,53 @@ describe('¿cabe la línea en la mitad del ojo?', () => {
     // Centro a 35 mm del borde superior; la franja llega a 15 mm → caben 40 mm de alto.
     expect(cabe({ ancho: 10 * PX, alto: 40 * PX }, d.centro, d.zona)).toBe(true);
     expect(cabe({ ancho: 10 * PX, alto: 41 * PX }, d.centro, d.zona)).toBe(false);
+  });
+});
+
+describe('dibujo siempre horizontal', () => {
+  const vertical = { ancho: 400, alto: 800 };
+  const horizontal = { ancho: 800, alto: 400 };
+
+  it('celular horizontal: no se gira', () => {
+    expect(girarPantalla(horizontal, false)).toMatchObject({ ancho: 800, alto: 400, giro: 0, transform: 'none' });
+  });
+
+  it('celular vertical: el dibujo se gira 90° y sigue siendo horizontal', () => {
+    const g = girarPantalla(vertical, false);
+    expect(g).toMatchObject({ ancho: 800, alto: 400, giro: 90 });
+    expect(g.transform).toBe('translate(400px, 0px) rotate(90deg)');
+  });
+
+  it('invertir suma 180°', () => {
+    expect(girarPantalla(horizontal, true).giro).toBe(180);
+    expect(girarPantalla(vertical, true).giro).toBe(270);
+  });
+
+  it.each([0, 90, 180, 270] as const)('con giro %i° el dibujo entero cae dentro de la pantalla', (giro) => {
+    const vista = giro === 0 || giro === 180 ? horizontal : vertical;
+    const { ancho, alto } = girarPantalla(vista, giro >= 180);
+    for (const p of [
+      { x: 0, y: 0 },
+      { x: ancho, y: 0 },
+      { x: 0, y: alto },
+      { x: ancho, y: alto },
+    ]) {
+      const f = aPantallaFisica(p, giro, vista);
+      expect(f.x).toBeGreaterThanOrEqual(0);
+      expect(f.x).toBeLessThanOrEqual(vista.ancho);
+      expect(f.y).toBeGreaterThanOrEqual(0);
+      expect(f.y).toBeLessThanOrEqual(vista.alto);
+    }
+  });
+
+  it('invertir 180° intercambia las mitades: la derecha del dibujo queda a la izquierda', () => {
+    const p = aPantallaFisica({ x: 700, y: 200 }, 180, horizontal);
+    expect(p.x).toBe(100);
+  });
+
+  it('intercambiar mitades cambia el ojo de cada mitad', () => {
+    expect(ojoEnPantalla('OD', false)).toBe('OD');
+    expect(ojoEnPantalla('OD', true)).toBe('OI');
+    expect(ojoEnPantalla('OI', true)).toBe('OD');
   });
 });

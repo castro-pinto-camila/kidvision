@@ -47,6 +47,17 @@ export function dibujarE(g: CanvasRenderingContext2D, c: Punto, h: number, dir: 
   g.restore();
 }
 
+/** Una letra grande (para la comprobación con la «D»). */
+export function dibujarLetra(g: CanvasRenderingContext2D, letra: string, c: Punto, alto: number): void {
+  g.save();
+  g.fillStyle = NEGRO;
+  g.font = `bold ${alto * 1.35}px system-ui, sans-serif`;
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText(letra, c.x, c.y);
+  g.restore();
+}
+
 /**
  * Línea de cinco «E» con barras de apiñamiento. Debajo de la letra `actual`
  * va una marca para que el niño sepa cuál leer.

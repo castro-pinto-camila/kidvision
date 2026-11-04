@@ -61,6 +61,15 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
         desmontar = montarPrueba(raiz, {
           config: { ...estado.config, pxPorMm: estado.config.pxPorMm },
           avisos: estado.avisos,
+          guardarOrientacion: (invertida, intercambiadas) => {
+            if (
+              invertida === estado.config.pantallaInvertida &&
+              intercambiadas === estado.config.mitadesIntercambiadas
+            ) {
+              return;
+            }
+            void guardar({ ...estado.config, pantallaInvertida: invertida, mitadesIntercambiadas: intercambiadas });
+          },
           alTerminar: (r) => {
             estado.enPrueba = false;
             estado.resultado = r;

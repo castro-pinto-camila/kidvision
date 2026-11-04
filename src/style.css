@@ -269,9 +269,19 @@ td.no {
 
 .prueba {
   position: fixed;
-  inset: 0;
+  left: 0;
+  top: 0;
   overflow: hidden;
   background: #fff;
+  /* Si el celular está vertical, se gira desde la esquina (ver girarPantalla). */
+  transform-origin: 0 0;
+}
+
+.arriba-indicador {
+  text-align: center;
+  font-weight: 700;
+  color: var(--azul);
+  margin: 0 0 8px;
 }
 
 .lienzo {

@@ -11,6 +11,9 @@ export interface Configuracion {
   caja: ConfigCaja;
   umbralCorte: '6/9' | '6/12';
   franja: Franja;
+  /** Resultado de la comprobación con la «D»: dibujo girado 180° y/o mitades cambiadas. */
+  pantallaInvertida: boolean;
+  mitadesIntercambiadas: boolean;
 }
 
 const CLAVE = 'actual';
@@ -21,6 +24,8 @@ export function configuracionPorDefecto(): Configuracion {
     caja: { ...CAJA_POR_DEFECTO, ranuras_mm: [...CAJA_POR_DEFECTO.ranuras_mm] },
     umbralCorte: '6/9',
     franja: { lado: 'arriba', ancho_mm: 15 },
+    pantallaInvertida: false,
+    mitadesIntercambiadas: false,
   };
 }
 

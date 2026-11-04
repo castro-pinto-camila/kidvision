@@ -150,3 +150,53 @@ export function cabe(medidas: { ancho: number; alto: number }, centro: Punto, zo
     centro.y + medidas.alto / 2 <= zona.y + zona.alto + eps
   );
 }
+
+export type Giro = 0 | 90 | 180 | 270;
+
+export interface GiroPantalla {
+  /** Medidas del dibujo, siempre horizontal (ancho ≥ alto). */
+  ancho: number;
+  alto: number;
+  giro: Giro;
+  /** Transformación CSS para un contenedor de ancho × alto ubicado arriba a la izquierda. */
+  transform: string;
+}
+
+/**
+ * La prueba se dibuja siempre horizontal. Si el celular está vertical (por
+ * ejemplo, porque no se pudo bloquear el giro), el dibujo se gira 90°.
+ * `invertir` lo gira 180° más, por si el celular quedó de cabeza en la caja.
+ */
+export function girarPantalla(vista: Vista, invertir: boolean): GiroPantalla {
+  const vertical = vista.alto > vista.ancho;
+  const giro = (((vertical ? 90 : 0) + (invertir ? 180 : 0)) % 360) as Giro;
+  const ancho = vertical ? vista.alto : vista.ancho;
+  const alto = vertical ? vista.ancho : vista.alto;
+  const transform: Record<Giro, string> = {
+    0: 'none',
+    90: `translate(${vista.ancho}px, 0px) rotate(90deg)`,
+    180: `translate(${vista.ancho}px, ${vista.alto}px) rotate(180deg)`,
+    270: `translate(0px, ${vista.alto}px) rotate(270deg)`,
+  };
+  return { ancho, alto, giro, transform: transform[giro] };
+}
+
+/** Dónde cae en la pantalla física un punto del dibujo (la misma cuenta que hace el CSS). */
+export function aPantallaFisica(p: Punto, giro: Giro, vista: Vista): Punto {
+  switch (giro) {
+    case 0:
+      return p;
+    case 90:
+      return { x: vista.ancho - p.y, y: p.x };
+    case 180:
+      return { x: vista.ancho - p.x, y: vista.alto - p.y };
+    case 270:
+      return { x: p.y, y: vista.alto - p.x };
+  }
+}
+
+/** Qué mitad de pantalla le toca a cada ojo, por si la caja quedó al revés. */
+export function ojoEnPantalla(ojo: 'OD' | 'OI', intercambiar: boolean): 'OD' | 'OI' {
+  if (!intercambiar) return ojo;
+  return ojo === 'OD' ? 'OI' : 'OD';
+}

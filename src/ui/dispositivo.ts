@@ -54,7 +54,9 @@ export async function prepararPantalla(): Promise<string[]> {
     if (!orientacion?.lock) throw new Error();
     await conLimite(orientacion.lock('landscape'));
   } catch {
-    avisos.push('Pon el celular en horizontal y desactiva la rotación automática de la pantalla.');
+    avisos.push(
+      'Este navegador no deja fijar el celular en horizontal. La app gira su dibujo sola: mete el celular con el lado de la flecha hacia arriba.',
+    );
   }
 
   if (!(await pedirPantallaEncendida())) {
