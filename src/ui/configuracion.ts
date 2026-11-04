@@ -28,6 +28,8 @@ function leerNumero(texto: string): number {
 export interface AccionesConfiguracion {
   guardar: (c: Configuracion) => Promise<void>;
   calibrar: () => void;
+  /** Abre la portada («Acerca de KidVision»). */
+  acercaDe: () => void;
   /** Borra estudiantes y evaluaciones (la calibración y la caja se conservan). */
   borrarSalon: () => Promise<void>;
   volver: () => void;
@@ -395,6 +397,7 @@ export function montarConfiguracion(
       colegio,
       ajustes,
       datos,
+      h('button', { class: 'boton', onclick: acciones.acercaDe }, 'Acerca de KidVision'),
       aviso,
     ),
   );

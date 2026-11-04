@@ -6,6 +6,7 @@
  *   #/resultado        Resultado de la prueba recién hecha
  *   #/constancia/<id>  Constancia de una evaluación guardada
  *   #/resumen          Resumen del salón
+ *   #/inicio          Portada (primera vez)
  *   #/bienvenida      Primera vez: colegio y calibración
  *   #/config, #/calibrar
  */
@@ -27,6 +28,7 @@ import {
 import type { ResultadoSesion } from '../logic/flujo';
 import { estadoPreparacion, primerPendiente, type AccionPaso } from '../logic/preparacion';
 import { montarBienvenida } from './bienvenida';
+import { montarPortada } from './portada';
 import { montarCalibracion } from './calibracion';
 import { montarConfiguracion } from './configuracion';
 import { montarConstancia } from './constancia';
@@ -150,7 +152,14 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
       void liberarPantalla();
     }
 
-    if (ruta === '#/bienvenida') {
+    if (ruta === '#/inicio') {
+      // Con el colegio ya escrito, la portada se abrió a propósito desde Configuración: se puede volver.
+      const yaConfigurado = estado.config.colegio.trim() !== '';
+      desmontar = montarPortada(raiz, {
+        comenzar: () => ir(yaConfigurado ? '#/' : '#/bienvenida'),
+        volver: yaConfigurado ? () => ir('#/config') : undefined,
+      });
+    } else if (ruta === '#/bienvenida') {
       desmontar = montarBienvenida(raiz, {
         colegioActual: estado.config.colegio,
         preparacion: preparacion(),
@@ -170,6 +179,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
           if (estado.db) await borrarSalon(estado.db);
         },
         volver: () => ir('#/'),
+        acercaDe: () => ir('#/inicio'),
       });
     } else if (ruta === '#/calibrar') {
       desmontar = montarCalibracion(raiz, estado.config, guardar, () => ir(estado.volverDeCalibrar));
@@ -246,7 +256,7 @@ export async function iniciarApp(raiz: HTMLElement): Promise<void> {
       );
     } else if (!estado.config.colegio.trim() && ruta === '#/') {
       // Primera vez: antes de Mi salón se pide el colegio y se calibra.
-      ir('#/bienvenida');
+      ir('#/inicio');
     } else {
       const aviso = estado.avisoInicio;
       estado.avisoInicio = undefined;

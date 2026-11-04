@@ -6,9 +6,11 @@ Antes de empezar: celular con la batería cargada, sin funda, brillo al máximo 
 
 ## 1. Instalar y abrir
 - [ ] Abre el enlace de la app en Chrome (Android) o Safari (iPhone).
-- [ ] La primera vez aparece la **Bienvenida**: escribes el colegio, calibras la pantalla y el botón «Entrar a Mi salón» se activa solo al terminar los dos pasos.
+- [ ] La primera vez aparece la **portada** de KidVision con el botón «Comenzar». Después, la **Bienvenida**: escribes el colegio, calibras la pantalla y el botón «Entrar a Mi salón» se activa solo al terminar los dos pasos.
 - [ ] Si algo falta, «Mi salón» muestra «Antes de evaluar» con ✓ o ✗ y un botón en cada paso pendiente.
 - [ ] Cuando todo está listo, dice «Listo para evaluar».
+- [ ] Si calibras mal a propósito, sale un solo aviso («La calibración no parece correcta…») con «Volver a calibrar», sin decir a la vez «Pantalla calibrada».
+- [ ] En Configuración, «Acerca de KidVision» abre la portada otra vez.
 - [ ] Se puede instalar (Chrome: menú ⋮ → «Instalar app» o «Agregar a la pantalla de inicio»). Tiene su ícono.
 - [ ] Al abrirla desde el ícono, se ve a pantalla completa.
 
