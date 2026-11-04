@@ -25,14 +25,15 @@ export function* medirUmbral(
   let agudeza: Nivel | null = null;
   const hastaCorte = NIVELES.slice(0, NIVELES.indexOf(corte) + 1);
   for (const nivel of hastaCorte) {
-    if ((yield* mostrarLinea(ctx, prueba, lugar, nivel)) >= ACIERTOS_UMBRAL) {
+    if ((yield* mostrarLinea(ctx, prueba, lugar, nivel, ACIERTOS_UMBRAL)) >= ACIERTOS_UMBRAL) {
       agudeza = nivel;
       continue;
     }
     const menor = NIVELES[NIVELES.indexOf(nivel) + 1];
     let aciertaMenor = false;
     if (menor && esDibujable(menor, lugar, ctx.pantalla)) {
-      aciertaMenor = (yield* mostrarLinea(ctx, 'control', lugar, menor)) >= ACIERTOS_PARA_PASAR;
+      aciertaMenor =
+        (yield* mostrarLinea(ctx, 'control', lugar, menor, ACIERTOS_PARA_PASAR)) >= ACIERTOS_PARA_PASAR;
     }
     return { agudeza, aciertaMenor };
   }

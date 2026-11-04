@@ -19,10 +19,8 @@ export const NOMBRE_PRUEBA: Record<Prueba, string> = {
   cerca: 'Cerca',
 };
 
-const mayuscula = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
 export function textoColocar(p: PasoColocar): { titulo: string; lineas: string[] } {
-  if (p.lugar === 'cerca') {
+  if (p.lugar === 'cerca' && p.ojo) {
     return {
       titulo: `Prueba de cerca: ${NOMBRE_OJO[p.ojo]}`,
       lineas: [
@@ -33,14 +31,16 @@ export function textoColocar(p: PasoColocar): { titulo: string; lineas: string[]
     };
   }
   const lineas: string[] = [];
-  if (p.quitar === 'clip') lineas.push('Quita el clip de +2.00 D.');
+  if (p.quitar === 'clip') lineas.push('Retira los lentes de +2.00.');
   if (p.quitar === 'estenopeico') lineas.push('Quita el estenopeico.');
   lineas.push(`Coloca el celular en la ranura ${p.lugar}.`);
-  if (p.accesorio === 'clip') lineas.push('Pon el clip de +2.00 D delante del lente.');
-  if (p.accesorio === 'estenopeico') {
-    lineas.push('Pon el estenopeico (el oclusor con agujeritos) delante del lente.');
+  if (p.accesorio === 'clip') {
+    lineas.push('Sostén los lentes de lectura de +2.00 delante de la caja, cubriendo los dos ojos.');
   }
-  return { titulo: `${mayuscula(NOMBRE_OJO[p.ojo])} · ranura ${p.lugar}`, lineas };
+  if (p.accesorio === 'estenopeico') {
+    lineas.push('Pon el estenopeico (el oclusor con agujeritos) delante de los lentes de la caja.');
+  }
+  return { titulo: `Ranura ${p.lugar}`, lineas };
 }
 
 export const TEXTO_SEMAFORO: Record<Semaforo, string> = {

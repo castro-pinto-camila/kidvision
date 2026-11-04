@@ -5,7 +5,7 @@
  */
 import type { Geometria } from '../core/caja';
 import { GEOMETRIA_CERCA, type Nivel, type Pantalla } from '../core/optotipos';
-import { contarAciertos, LETRAS_POR_LINEA, type Toque } from './linea';
+import { contarAciertos, LETRAS_POR_LINEA, respuestasParaDecidir, type Toque } from './linea';
 import { generarOrientaciones, type Azar, type Direccion } from './orientaciones';
 
 export type Ojo = 'OD' | 'OI';
@@ -30,17 +30,17 @@ export type Prueba =
 /** «Coloca el celular en …» y espera a que el docente confirme. */
 export interface PasoColocar {
   tipo: 'colocar';
-  ojo: Ojo;
+  /** Solo en la prueba de cerca, que es de un ojo a la vez; dentro de la caja, null (los dos ojos). */
+  ojo: Ojo | null;
   lugar: string;
   accesorio: Accesorio;
   /** Accesorio que hay que quitar antes, si lo hay. */
   quitar: Accesorio;
 }
 
-/** Temporizador (60 s con el clip). El docente confirma cuando termina. */
+/** Temporizador (60 s con el clip, los dos ojos a la vez). El docente confirma cuando termina. */
 export interface PasoEspera {
   tipo: 'espera';
-  ojo: Ojo;
   segundos: number;
 }
 
@@ -52,6 +52,8 @@ export interface PasoLinea {
   lugar: Lugar;
   nivel: Nivel;
   orientaciones: Direccion[];
+  /** Aciertos para aprobar la línea (4, o 3 en el umbral). La línea se corta al quedar decidida. */
+  necesarios: number;
 }
 
 /** Una vuelta de la carta de abanico. `rotacion` en grados, antihorario. */
@@ -67,6 +69,7 @@ export type PasoPendiente = PasoColocar | PasoEspera | PasoLinea | PasoAbanico;
 
 export type Evento =
   | { tipo: 'confirmar' }
+  /** Las respuestas hasta que la línea quedó decidida (o las cinco). */
   | { tipo: 'linea'; toques: Toque[] }
   /** Índice del botón (0 = «12–6», 1 = «1–7», …, 5 = «5–11») o «todas iguales». */
   | { tipo: 'abanico'; eleccion: number | 'iguales' };
@@ -79,20 +82,24 @@ export interface RegistroLinea {
   mostradas: Direccion[];
   toques: Toque[];
   aciertos: number;
+  /** Cuántas «E» respondió el niño (de 1 a 5). */
+  respondidas: number;
+  /** true si la línea se cortó antes de la quinta «E» porque ya estaba decidida. */
+  cortada: boolean;
 }
 
+/** Dónde está el celular ahora. Se comparte entre los dos ojos. */
 export interface Posicion {
   ojo: Ojo | null;
   lugar: string | null;
   accesorio: Accesorio;
 }
 
-/** Estado de un ojo mientras se evalúa. `posicion` se comparte entre los dos ojos. */
+/** Estado de un ojo mientras se evalúa. */
 export interface Contexto {
   ojo: Ojo;
   pantalla: Pantalla;
   azar: Azar;
-  posicion: Posicion;
   ultima: Direccion | null;
   registro: RegistroLinea[];
 }
@@ -109,28 +116,55 @@ export function exigir<T extends Evento['tipo']>(
   return evento as Extract<Evento, { tipo: T }>;
 }
 
-/** Pide colocar el celular solo si cambia el ojo, el lugar o el accesorio. */
-export function* ir(ctx: Contexto, lugar: Lugar, accesorio: Accesorio = null): Flujo<void> {
-  const p = ctx.posicion;
-  if (p.ojo === ctx.ojo && p.lugar === lugar.id && p.accesorio === accesorio) return;
-  const quitar = p.accesorio !== null && p.accesorio !== accesorio ? p.accesorio : null;
-  exigir(yield { tipo: 'colocar', ojo: ctx.ojo, lugar: lugar.id, accesorio, quitar }, 'confirmar');
-  ctx.posicion = { ojo: ctx.ojo, lugar: lugar.id, accesorio };
+/**
+ * Pide colocar el celular solo si cambia el lugar o el accesorio. Fuera de la
+ * caja (cerca) también al cambiar de ojo, porque hay que mover el oclusor;
+ * dentro de la caja el cambio de ojo lo hace la pantalla.
+ */
+export function* ir(posicion: Posicion, lugar: Lugar, accesorio: Accesorio, ojo: Ojo | null): Flujo<void> {
+  const mismoOjo = lugar.id !== 'cerca' || posicion.ojo === ojo;
+  if (posicion.lugar === lugar.id && posicion.accesorio === accesorio && mismoOjo) return;
+  const quitar = posicion.accesorio !== null && posicion.accesorio !== accesorio ? posicion.accesorio : null;
+  exigir(yield { tipo: 'colocar', ojo, lugar: lugar.id, accesorio, quitar }, 'confirmar');
+  posicion.ojo = ojo;
+  posicion.lugar = lugar.id;
+  posicion.accesorio = accesorio;
 }
 
-export function* esperar(ctx: Contexto, segundos: number): Flujo<void> {
-  exigir(yield { tipo: 'espera', ojo: ctx.ojo, segundos }, 'confirmar');
+export function* esperar(segundos: number): Flujo<void> {
+  exigir(yield { tipo: 'espera', segundos }, 'confirmar');
 }
 
-/** Muestra una línea de cinco «E», la registra y devuelve los aciertos. */
-export function* mostrarLinea(ctx: Contexto, prueba: Prueba, lugar: Lugar, nivel: Nivel): Flujo<number> {
+/**
+ * Muestra una línea de cinco «E», la registra y devuelve los aciertos. Las
+ * respuestas que llegan después de que la línea quedó decidida se descartan.
+ */
+export function* mostrarLinea(
+  ctx: Contexto,
+  prueba: Prueba,
+  lugar: Lugar,
+  nivel: Nivel,
+  necesarios: number,
+): Flujo<number> {
   const orientaciones = generarOrientaciones(LETRAS_POR_LINEA, ctx.azar, ctx.ultima);
   ctx.ultima = orientaciones[orientaciones.length - 1];
-  const { toques } = exigir(
-    yield { tipo: 'linea', ojo: ctx.ojo, prueba, lugar, nivel, orientaciones },
+  const evento = exigir(
+    yield { tipo: 'linea', ojo: ctx.ojo, prueba, lugar, nivel, orientaciones, necesarios },
     'linea',
   );
-  const aciertos = contarAciertos(orientaciones, toques.map((t) => t.respuesta));
-  ctx.registro.push({ prueba, lugar: lugar.id, nivel: nivel.nombre, mostradas: orientaciones, toques, aciertos });
+  const respuestas = evento.toques.map((t) => t.respuesta);
+  const respondidas = respuestasParaDecidir(orientaciones, respuestas, necesarios) ?? respuestas.length;
+  const toques = evento.toques.slice(0, respondidas);
+  const aciertos = contarAciertos(orientaciones.slice(0, respondidas), respuestas.slice(0, respondidas));
+  ctx.registro.push({
+    prueba,
+    lugar: lugar.id,
+    nivel: nivel.nombre,
+    mostradas: orientaciones,
+    toques,
+    aciertos,
+    respondidas,
+    cortada: respondidas < LETRAS_POR_LINEA,
+  });
   return aciertos;
 }

@@ -7,7 +7,7 @@ import {
   ROTACIONES_SEGUNDA_VUELTA,
 } from './abanico';
 import { hayRespuestasIguales } from './calidad';
-import { contarAciertos, type Respuesta } from './linea';
+import { contarAciertos, respuestasParaDecidir, type Respuesta } from './linea';
 import { DIRECCIONES, generarOrientaciones, type Direccion } from './orientaciones';
 import { azarConSemilla } from './ninoSimulado';
 import { indiceAgudeza, mejoraConEstenopeico, nombreAgudeza } from './umbral';
@@ -33,6 +33,34 @@ describe('orientaciones', () => {
     expect(generarOrientaciones(5, azarConSemilla(3))).toEqual(
       generarOrientaciones(5, azarConSemilla(3)),
     );
+  });
+});
+
+describe('corte de línea: cuántas respuestas hacen falta para decidir', () => {
+  const m: Direccion[] = ['arriba', 'derecha', 'abajo', 'izquierda', 'arriba'];
+
+  it('pide 4: pasa al cuarto acierto', () => {
+    expect(respuestasParaDecidir(m, ['arriba', 'derecha', 'abajo', 'izquierda'], 4)).toBe(4);
+  });
+
+  it('pide 4: falla con el segundo error', () => {
+    expect(respuestasParaDecidir(m, ['nose', 'derecha', 'nose'], 4)).toBe(3);
+    expect(respuestasParaDecidir(m, ['nose', 'nose'], 4)).toBe(2);
+  });
+
+  it('pide 3 (umbral): pasa al tercer acierto y falla con el tercer error', () => {
+    expect(respuestasParaDecidir(m, ['arriba', 'derecha', 'abajo'], 3)).toBe(3);
+    expect(respuestasParaDecidir(m, ['nose', 'nose', 'abajo', 'nose'], 3)).toBe(4);
+  });
+
+  it('todavía no decidida', () => {
+    expect(respuestasParaDecidir(m, ['arriba', 'nose'], 4)).toBeNull();
+    expect(respuestasParaDecidir(m, [], 4)).toBeNull();
+  });
+
+  it('con 3 aciertos y 1 error (pide 4) se decide en la quinta', () => {
+    expect(respuestasParaDecidir(m, ['arriba', 'nose', 'abajo', 'izquierda'], 4)).toBeNull();
+    expect(respuestasParaDecidir(m, ['arriba', 'nose', 'abajo', 'izquierda', 'arriba'], 4)).toBe(5);
   });
 });
 

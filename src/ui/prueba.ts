@@ -7,7 +7,7 @@ import { alturaOptotipoMm, alturaPxCss, type Pantalla } from '../core/optotipos'
 import type { Configuracion } from '../data/config';
 import { BOTONES_ABANICO } from '../logic/abanico';
 import { PruebaVisual, type Paso, type ResultadoSesion } from '../logic/flujo';
-import type { Respuesta, Toque } from '../logic/linea';
+import { respuestasParaDecidir, type Respuesta, type Toque } from '../logic/linea';
 import type { Evento, PasoAbanico, PasoColocar, PasoEspera, PasoLinea } from '../logic/pasos';
 import { dibujarAbanico, dibujarLinea, pintar, prepararLienzo } from './dibujo';
 import { liberarPantalla } from './dispositivo';
@@ -75,8 +75,9 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
   }
 
   function disposicion(paso: PasoLinea | PasoAbanico | PasoEspera): Disposicion {
-    const enCaja = paso.tipo === 'espera' || paso.lugar.id !== 'cerca';
-    return disponer(vista(), config.pxPorMm, enCaja ? paso.ojo : null, config.caja.lenteDesdeCentro_mm, config.franja);
+    // Con los lentes de +2.00 los dos ojos miran a la vez; de cerca, la pantalla completa.
+    const ojo = paso.tipo === 'espera' || paso.lugar.id === 'cerca' ? null : paso.ojo;
+    return disponer(vista(), config.pxPorMm, ojo, config.caja.lenteDesdeCentro_mm, config.franja);
   }
 
   /** Fondo: blanco, con la mitad del otro ojo en negro. */
@@ -142,7 +143,7 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
     }
     const listo = segundosRestantes <= 0;
     capa.replaceChildren(
-      franja(d, `${NOMBRE_OJO[paso.ojo]} · clip +2.00`, [
+      franja(d, 'Lentes +2.00 · los dos ojos', [
         h('span', { class: 'cuenta' }, listo ? '¡Listo!' : `${segundosRestantes} s`),
         h(
           'button',
@@ -161,7 +162,12 @@ export function montarPrueba(raiz: HTMLElement, op: OpcionesPantallaPrueba): () 
     const ahora = performance.now();
     toques.push({ respuesta, ms: Math.round(ahora - ultimoToque) });
     ultimoToque = ahora;
-    if (toques.length === 5) responder({ tipo: 'linea', toques });
+    // La línea se corta en cuanto queda decidida: el resultado es el mismo.
+    const paso = prueba.paso;
+    const decidida =
+      paso.tipo === 'linea' &&
+      respuestasParaDecidir(paso.orientaciones, toques.map((t) => t.respuesta), paso.necesarios) !== null;
+    if (decidida) responder({ tipo: 'linea', toques });
     else dibujar();
   }
 

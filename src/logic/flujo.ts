@@ -1,6 +1,10 @@
 /**
  * Flujo completo de la prueba como máquina de estados (SPEC.md, «Pruebas por ojo»).
  *
+ * Para mover el celular lo menos posible, el flujo va por lugares y no por
+ * ojos: en cada lugar se prueban los dos ojos (cambia la mitad negra de la
+ * pantalla) y recién después se mueve el celular.
+ *
  * Uso desde la interfaz:
  *   const prueba = new PruebaVisual({ caja, pantalla });
  *   dibujar(prueba.paso);
@@ -20,7 +24,12 @@ import {
   type Indicacion,
   type Semaforo,
 } from './clasificacion';
-import { ACIERTOS_PARA_PASAR, LETRAS_POR_LINEA, type Respuesta } from './linea';
+import {
+  ACIERTOS_PARA_PASAR,
+  LETRAS_POR_LINEA,
+  respuestasParaDecidir,
+  type Respuesta,
+} from './linea';
 import { DIRECCIONES, type Azar } from './orientaciones';
 import {
   esperar,
@@ -35,8 +44,8 @@ import {
   type Posicion,
   type RegistroLinea,
 } from './pasos';
-import { buscarPuntoRemoto, type EstadoPuntoRemoto } from './puntoRemoto';
-import { medirUmbral, mejoraConEstenopeico, nombreAgudeza } from './umbral';
+import { buscarPuntosRemotos, type EstadoPuntoRemoto } from './puntoRemoto';
+import { medirUmbral, mejoraConEstenopeico, nombreAgudeza, type ResultadoUmbral } from './umbral';
 
 /** Nivel de la prueba de cerca (siempre 6/9) y nivel mínimo para que el celular sea apto. */
 export const NIVEL_CERCA = '6/9';
@@ -71,7 +80,7 @@ export interface ResultadoOjo {
   motivosDudoso: MotivoDudoso[];
   categorias: Categoria[];
   semaforo: Semaforo;
-  /** Cada línea mostrada, con las respuestas y sus tiempos. */
+  /** Cada línea mostrada, con las respuestas, sus tiempos y si se cortó. */
   registro: RegistroLinea[];
 }
 
@@ -95,96 +104,42 @@ interface Sesion {
   posicion: Posicion;
 }
 
-/** Lo que se mide de un ojo dentro de la caja (pasos 1 a 5). */
-interface DatosCaja {
+/** Lo que se va midiendo de un ojo. */
+interface DatosOjo {
+  ctx: Contexto;
   pasaLejos: boolean;
-  umbral: string | null;
+  sinEstenopeico: ResultadoUmbral | null;
   pasaConMas2: boolean | null;
   puntoRemoto: Ranura | null;
   puntoRemotoEstado: EstadoPuntoRemoto | null;
   mejoraEstenopeico: boolean | null;
   umbralEstenopeico: string | null;
   abanico: [AnguloAbanico, AnguloAbanico];
+  pasaCerca: boolean;
   motivos: Set<MotivoDudoso>;
 }
 
-function nuevoContexto(ojo: Ojo, s: Sesion): Contexto {
-  return { ojo, pantalla: s.pantalla, azar: s.azar, posicion: s.posicion, ultima: null, registro: [] };
-}
-
-function* pruebasEnCaja(ctx: Contexto, s: Sesion): Flujo<DatosCaja> {
-  const R0 = s.ranuras[0];
-  const corte = nivelPorNombre(s.umbralCorte);
-  const motivos = new Set<MotivoDudoso>();
-
-  let umbral: string | null = null;
-  let pasaConMas2: boolean | null = null;
-  let puntoRemoto: Ranura | null = null;
-  let puntoRemotoEstado: EstadoPuntoRemoto | null = null;
-  let mejoraEstenopeico: boolean | null = null;
-  let umbralEstenopeico: string | null = null;
-
-  // 1. Agudeza lejana en R0.
-  yield* ir(ctx, R0);
-  const pasaLejos = (yield* mostrarLinea(ctx, 'lejos', R0, corte)) >= ACIERTOS_PARA_PASAR;
-
-  if (pasaLejos) {
-    // 2. Clip de +2.00 D.
-    yield* ir(ctx, R0, 'clip');
-    yield* esperar(ctx, SEGUNDOS_CLIP);
-    pasaConMas2 = (yield* mostrarLinea(ctx, 'clip', R0, corte)) >= ACIERTOS_PARA_PASAR;
-  } else {
-    const sin = yield* medirUmbral(ctx, R0, corte, 'umbral');
-    umbral = nombreAgudeza(sin.agudeza);
-    if (sin.aciertaMenor) motivos.add('falla-grande-acierta-menor');
-
-    // 3. Búsqueda del punto remoto.
-    const busqueda = yield* buscarPuntoRemoto(ctx, s.ranuras);
-    puntoRemoto = busqueda.ranura;
-    puntoRemotoEstado = busqueda.estado;
-    if (busqueda.estado === 'tentativo') motivos.add('punto-remoto-no-confirmado');
-    if (busqueda.estado === 'limite') motivos.add('limite-dispositivo');
-
-    // 4. Estenopeico, solo si no se encontró (y no por límite del dispositivo).
-    if (busqueda.estado === 'no-encontrado') {
-      yield* ir(ctx, R0, 'estenopeico');
-      const con = yield* medirUmbral(ctx, R0, corte, 'estenopeico');
-      if (con.aciertaMenor) motivos.add('falla-grande-acierta-menor');
-      umbralEstenopeico = nombreAgudeza(con.agudeza);
-      mejoraEstenopeico = mejoraConEstenopeico(sin.agudeza, con.agudeza);
-    }
-  }
-
-  // 5. Carta de abanico en R0 o en la ranura del punto remoto.
-  const lugarAbanico = puntoRemoto ?? R0;
-  yield* ir(ctx, lugarAbanico);
-  const abanico = yield* hacerAbanico(ctx, lugarAbanico);
-
+function nuevoOjo(ojo: Ojo, s: Sesion): DatosOjo {
   return {
-    pasaLejos,
-    umbral,
-    pasaConMas2,
-    puntoRemoto,
-    puntoRemotoEstado,
-    mejoraEstenopeico,
-    umbralEstenopeico,
-    abanico,
-    motivos,
+    ctx: { ojo, pantalla: s.pantalla, azar: s.azar, ultima: null, registro: [] },
+    pasaLejos: false,
+    sinEstenopeico: null,
+    pasaConMas2: null,
+    puntoRemoto: null,
+    puntoRemotoEstado: null,
+    mejoraEstenopeico: null,
+    umbralEstenopeico: null,
+    abanico: [null, null],
+    pasaCerca: false,
+    motivos: new Set(),
   };
 }
 
-/** 6. Agudeza cercana a 40 cm, fuera de la caja. */
-function* pruebaCerca(ctx: Contexto): Flujo<boolean> {
-  yield* ir(ctx, LUGAR_CERCA);
-  return (
-    (yield* mostrarLinea(ctx, 'cerca', LUGAR_CERCA, nivelPorNombre(NIVEL_CERCA))) >= ACIERTOS_PARA_PASAR
-  );
-}
-
 /** Control de calidad final y clasificación de un ojo. */
-function cerrarOjo(ctx: Contexto, d: DatosCaja, pasaCerca: boolean): ResultadoOjo {
+function cerrarOjo(d: DatosOjo): ResultadoOjo {
   const motivos = new Set(d.motivos);
-  const respuestas = ctx.registro.flatMap((l) => l.toques.map((t) => t.respuesta));
+  // Cinco respuestas iguales seguidas, contando entre líneas (aunque alguna se haya cortado).
+  const respuestas = d.ctx.registro.flatMap((l) => l.toques.map((t) => t.respuesta));
   if (hayRespuestasIguales(respuestas)) motivos.add('respuestas-iguales');
 
   const consistente = abanicoConsistente(d.abanico[0], d.abanico[1]);
@@ -195,13 +150,13 @@ function cerrarOjo(ctx: Contexto, d: DatosCaja, pasaCerca: boolean): ResultadoOj
     pasaConMas2: d.pasaConMas2,
     mejoraEstenopeico: d.mejoraEstenopeico,
     abanicoConsistente: consistente,
-    pasaCerca,
+    pasaCerca: d.pasaCerca,
     dudoso,
   });
 
   return {
     pasaLejos: d.pasaLejos,
-    umbral: d.umbral,
+    umbral: d.sinEstenopeico ? nombreAgudeza(d.sinEstenopeico.agudeza) : null,
     puntoRemoto: d.puntoRemoto?.id ?? null,
     puntoRemotoEstado: d.puntoRemotoEstado,
     miopiaEstimadaD: d.puntoRemoto ? d.puntoRemoto.Vojo : null,
@@ -210,28 +165,95 @@ function cerrarOjo(ctx: Contexto, d: DatosCaja, pasaCerca: boolean): ResultadoOj
     umbralEstenopeico: d.umbralEstenopeico,
     abanico: d.abanico,
     abanicoConsistente: consistente,
-    pasaCerca,
+    pasaCerca: d.pasaCerca,
     dudoso,
     motivosDudoso: [...motivos],
     categorias,
     semaforo,
-    registro: ctx.registro,
+    registro: d.ctx.registro,
   };
 }
 
 function* evaluarSesion(s: Sesion, ahora: () => number): Flujo<ResultadoSesion> {
   const inicio = ahora();
-  const od = nuevoContexto('OD', s);
-  const oi = nuevoContexto('OI', s);
-  // Dentro de la caja: ojo derecho y luego izquierdo.
-  const cajaOD = yield* pruebasEnCaja(od, s);
-  const cajaOI = yield* pruebasEnCaja(oi, s);
-  // Al final, la prueba de cerca de los dos ojos: el niño sale de la caja una sola vez.
-  const cercaOD = yield* pruebaCerca(od);
-  const cercaOI = yield* pruebaCerca(oi);
+  const R0 = s.ranuras[0];
+  const corte = nivelPorNombre(s.umbralCorte);
+  const od = nuevoOjo('OD', s);
+  const oi = nuevoOjo('OI', s);
+  const ojos = [od, oi];
 
-  const OD = cerrarOjo(od, cajaOD, cercaOD);
-  const OI = cerrarOjo(oi, cajaOI, cercaOI);
+  // 1. Agudeza lejana en R0: ojo derecho y luego izquierdo. Si falla, el umbral.
+  yield* ir(s.posicion, R0, null, null);
+  for (const d of ojos) {
+    d.pasaLejos = (yield* mostrarLinea(d.ctx, 'lejos', R0, corte, ACIERTOS_PARA_PASAR)) >= ACIERTOS_PARA_PASAR;
+    if (!d.pasaLejos) {
+      d.sinEstenopeico = yield* medirUmbral(d.ctx, R0, corte, 'umbral');
+      if (d.sinEstenopeico.aciertaMenor) d.motivos.add('falla-grande-acierta-menor');
+    }
+  }
+
+  // 2. Lentes de +2.00 D para los que pasaron: una sola espera para los dos ojos.
+  const pasan = ojos.filter((d) => d.pasaLejos);
+  if (pasan.length > 0) {
+    yield* ir(s.posicion, R0, 'clip', null);
+    yield* esperar(SEGUNDOS_CLIP);
+    for (const d of pasan) {
+      d.pasaConMas2 = (yield* mostrarLinea(d.ctx, 'clip', R0, corte, ACIERTOS_PARA_PASAR)) >= ACIERTOS_PARA_PASAR;
+    }
+  }
+
+  // 3. Punto remoto de los que fallaron, los dos ojos en cada ranura.
+  const fallan = ojos.filter((d) => !d.pasaLejos);
+  if (fallan.length > 0) {
+    const resultados = yield* buscarPuntosRemotos(
+      fallan.map((d) => d.ctx),
+      s.ranuras,
+      s.pantalla,
+      s.posicion,
+    );
+    for (const d of fallan) {
+      const r = resultados.get(d.ctx.ojo)!;
+      d.puntoRemoto = r.ranura;
+      d.puntoRemotoEstado = r.estado;
+      if (r.estado === 'tentativo') d.motivos.add('punto-remoto-no-confirmado');
+      if (r.estado === 'limite') d.motivos.add('limite-dispositivo');
+    }
+  }
+
+  // 4. Estenopeico, solo si no se encontró (y no por límite del dispositivo).
+  const sinPunto = fallan.filter((d) => d.puntoRemotoEstado === 'no-encontrado');
+  if (sinPunto.length > 0) {
+    yield* ir(s.posicion, R0, 'estenopeico', null);
+    for (const d of sinPunto) {
+      const con = yield* medirUmbral(d.ctx, R0, corte, 'estenopeico');
+      if (con.aciertaMenor) d.motivos.add('falla-grande-acierta-menor');
+      d.umbralEstenopeico = nombreAgudeza(con.agudeza);
+      d.mejoraEstenopeico = mejoraConEstenopeico(d.sinEstenopeico!.agudeza, con.agudeza);
+    }
+  }
+
+  // 5. Carta de abanico en R0 o en la ranura del punto remoto. Primero el ojo
+  // cuya ranura es donde ya está el celular.
+  const lugarAbanico = (d: DatosOjo) => d.puntoRemoto ?? R0;
+  const ordenAbanico = [...ojos].sort(
+    (a, b) =>
+      Number(lugarAbanico(b).id === s.posicion.lugar) - Number(lugarAbanico(a).id === s.posicion.lugar),
+  );
+  for (const d of ordenAbanico) {
+    yield* ir(s.posicion, lugarAbanico(d), null, null);
+    d.abanico = yield* hacerAbanico(d.ctx, lugarAbanico(d));
+  }
+
+  // 6. Agudeza cercana a 40 cm, fuera de la caja: el niño sale una sola vez.
+  for (const d of ojos) {
+    yield* ir(s.posicion, LUGAR_CERCA, null, d.ctx.ojo);
+    d.pasaCerca =
+      (yield* mostrarLinea(d.ctx, 'cerca', LUGAR_CERCA, nivelPorNombre(NIVEL_CERCA), ACIERTOS_PARA_PASAR)) >=
+      ACIERTOS_PARA_PASAR;
+  }
+
+  const OD = cerrarOjo(od);
+  const OI = cerrarOjo(oi);
   return {
     fecha: new Date(inicio).toISOString(),
     umbralCorte: s.umbralCorte,
@@ -246,17 +268,22 @@ const RESPUESTAS_VALIDAS: readonly Respuesta[] = [...DIRECCIONES, 'nose'];
 
 /** Revisa que el evento corresponda al paso actual, para no romper el flujo. */
 function validarEvento(paso: Paso, evento: Evento): void {
-  const esperado = paso.tipo === 'colocar' || paso.tipo === 'espera' ? 'confirmar' : paso.tipo;
   if (paso.tipo === 'fin') throw new Error('La prueba ya terminó');
+  const esperado = paso.tipo === 'colocar' || paso.tipo === 'espera' ? 'confirmar' : paso.tipo;
   if (evento.tipo !== esperado) {
     throw new Error(`Se esperaba un evento «${esperado}» y llegó «${evento.tipo}»`);
   }
-  if (evento.tipo === 'linea') {
-    if (evento.toques.length !== LETRAS_POR_LINEA) {
-      throw new Error(`Una línea necesita ${LETRAS_POR_LINEA} respuestas`);
+  if (evento.tipo === 'linea' && paso.tipo === 'linea') {
+    const n = evento.toques.length;
+    if (n < 1 || n > LETRAS_POR_LINEA) {
+      throw new Error(`Una línea necesita de 1 a ${LETRAS_POR_LINEA} respuestas`);
     }
     if (!evento.toques.every((t) => RESPUESTAS_VALIDAS.includes(t.respuesta))) {
       throw new Error('Respuesta no válida');
+    }
+    const respuestas = evento.toques.map((t) => t.respuesta);
+    if (respuestasParaDecidir(paso.orientaciones, respuestas, paso.necesarios) === null) {
+      throw new Error('Faltan respuestas: la línea todavía no está decidida');
     }
   }
   if (evento.tipo === 'abanico' && evento.eleccion !== 'iguales') {
